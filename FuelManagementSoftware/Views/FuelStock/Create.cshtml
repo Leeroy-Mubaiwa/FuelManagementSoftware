@@ -1,0 +1,70 @@
+@model FuelManagementSoftware.Models.FuelStock
+@{
+    ViewData["Title"] = "Create Fuel Stock";
+}
+
+<h5 class="mb-3">Create New Fuel Stock</h5>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="mb-3">
+                <label asp-for="FuelStationId" class="form-label"></label>
+                <select asp-for="FuelStationId" asp-items="ViewBag.FuelStationId" class="form-select form-select-sm">
+                    <option value="">-- Select Station --</option>
+                </select>
+                <span asp-validation-for="FuelStationId" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="FuelTypeId" class="form-label"></label>
+                <select asp-for="FuelTypeId" asp-items="ViewBag.FuelTypeId" class="form-select form-select-sm">
+                    <option value="">-- Select Fuel Type --</option>
+                </select>
+                <span asp-validation-for="FuelTypeId" class="text-danger"></span>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CurrentQuantity" class="form-label"></label>
+                    <input asp-for="CurrentQuantity" class="form-control form-control-sm" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="CurrentQuantity" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Capacity" class="form-label"></label>
+                    <input asp-for="Capacity" class="form-control form-control-sm" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="Capacity" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Unit" class="form-label"></label>
+                    <select asp-for="Unit" class="form-select form-select-sm">
+                        <option value="Litre">Litre</option>
+                        <option value="Gallon">Gallon</option>
+                    </select>
+                    <span asp-validation-for="Unit" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="LowStockThreshold" class="form-label"></label>
+                    <input asp-for="LowStockThreshold" class="form-control form-control-sm" type="number" step="0.01" min="0" />
+                    <span asp-validation-for="LowStockThreshold" class="text-danger"></span>
+                    <small class="form-text text-muted">Alert when stock falls below this</small>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-sm btn-primary">Create</button>
+                <a asp-action="Index" class="btn btn-sm btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

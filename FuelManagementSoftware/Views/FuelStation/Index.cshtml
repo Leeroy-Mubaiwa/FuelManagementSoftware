@@ -1,0 +1,60 @@
+@model IEnumerable<FuelManagementSoftware.Models.FuelStation>
+@{
+    ViewData["Title"] = "Fuel Stations";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Fuel Stations</h4>
+    <a asp-action="Create" class="btn btn-sm btn-primary">Create New</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Code</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td><small class="text-muted">@(item.Code ?? "-")</small></td>
+                    <td><small>@item.Address</small></td>
+                    <td><small>@(item.City ?? "-")</small></td>
+                    <td>
+                        @if (!item.IsOpen)
+                        {
+                            <span class="badge bg-danger">Closed</span>
+                        }
+                        else if (item.IsTankerOffloading)
+                        {
+                            <span class="badge bg-warning">Offloading</span>
+                        }
+                        else if (!item.IsActive)
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Open</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

@@ -1,0 +1,72 @@
+@model IEnumerable<FuelManagementSoftware.Models.BlockchainTransaction>
+@{
+    ViewData["Title"] = "Blockchain Transactions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Blockchain Transactions</h4>
+</div>
+
+<form method="get" class="card mb-3">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <label class="form-label small">Status</label>
+                <select name="status" asp-items="ViewBag.Statuses" class="form-select form-select-sm">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Start Date</label>
+                <input name="startDate" type="date" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">End Date</label>
+                <input name="endDate" type="date" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-sm btn-primary me-2">Filter</button>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Clear</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Hash</th>
+                <th>Fuel Transaction</th>
+                <th>Station</th>
+                <th>Card</th>
+                <th>Block #</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><small><code>@item.BlockchainHash.Substring(0, Math.Min(16, item.BlockchainHash.Length))...</code></small></td>
+                    <td><small>@item.FuelTransaction?.TransactionNumber</small></td>
+                    <td><small>@item.FuelTransaction?.FuelStation?.Name</small></td>
+                    <td><small>@(item.FuelTransaction?.PetroCard?.CardNumber ?? "-")</small></td>
+                    <td><small>@(item.BlockNumber?.ToString() ?? "-")</small></td>
+                    <td>
+                        <span class="badge @(item.Status == "Confirmed" ? "bg-success" : item.Status == "Failed" ? "bg-danger" : "bg-warning")">
+                            @item.Status
+                        </span>
+                    </td>
+                    <td><small>@item.CreatedAt.ToString("MM/dd/yyyy HH:mm")</small></td>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

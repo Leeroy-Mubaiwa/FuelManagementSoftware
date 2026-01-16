@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Fuel Dispensing";
+}
+
+<div class="container mt-4">
+    <h2>Fuel Dispensing</h2>
+    
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="SelectPump" method="get">
+                <div class="form-group mb-3">
+                    <label for="stationId" class="form-label">Select Fuel Station</label>
+                    <select name="stationId" id="stationId" class="form-select" required>
+                        <option value="">-- Select Station --</option>
+                        @if (ViewBag.Stations is SelectList stations)
+                        {
+                            @foreach (var station in stations)
+                            {
+                                <option value="@station.Value">@station.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Continue</button>
+            </form>
+        </div>
+    </div>
+</div>
+

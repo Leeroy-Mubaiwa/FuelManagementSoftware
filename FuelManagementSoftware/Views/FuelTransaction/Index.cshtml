@@ -1,0 +1,82 @@
+@model IEnumerable<FuelManagementSoftware.Models.FuelTransaction>
+@{
+    ViewData["Title"] = "Fuel Transactions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Fuel Transactions</h4>
+</div>
+
+<form method="get" class="card mb-3">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <label class="form-label small">Station</label>
+                <select name="stationId" asp-items="ViewBag.Stations" class="form-select form-select-sm">
+                    <option value="">All Stations</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Status</label>
+                <select name="status" asp-items="ViewBag.Statuses" class="form-select form-select-sm">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Start Date</label>
+                <input name="startDate" type="date" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">End Date</label>
+                <input name="endDate" type="date" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-sm btn-primary me-2">Filter</button>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Clear</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Transaction #</th>
+                <th>Date</th>
+                <th>Station</th>
+                <th>Pump</th>
+                <th>Fuel Type</th>
+                <th>Card</th>
+                <th>Quantity</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><small class="text-muted">@item.TransactionNumber</small></td>
+                    <td><small>@item.TransactionDate.ToString("MM/dd/yyyy HH:mm")</small></td>
+                    <td><small>@item.FuelStation?.Name</small></td>
+                    <td><small>@item.FuelPump?.PumpNumber</small></td>
+                    <td><small>@item.FuelType?.Name</small></td>
+                    <td><small>@(item.PetroCard?.CardNumber ?? "-")</small></td>
+                    <td>@item.Quantity.ToString("F2")L</td>
+                    <td>@item.TotalAmount.ToString("F2") @item.Currency</td>
+                    <td>
+                        <span class="badge @(item.TransactionStatus == "Completed" ? "bg-success" : item.TransactionStatus == "Cancelled" ? "bg-danger" : item.TransactionStatus == "Dispensing" ? "bg-warning" : "bg-secondary")">
+                            @item.TransactionStatus
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

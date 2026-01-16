@@ -1,0 +1,1 @@
+﻿Scaffold-DbContext name="FuelManagementSoftwareConnection" Microsoft.EntityFrameworkCore.SqlServer -context FuelManagementSoftwareDbContext -ContextDir Data  -outputdir Models -DataAnnotations -force 

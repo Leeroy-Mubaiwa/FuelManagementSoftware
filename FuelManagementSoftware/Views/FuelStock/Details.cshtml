@@ -1,0 +1,67 @@
+@model FuelManagementSoftware.Models.FuelStock
+@{
+    ViewData["Title"] = "Stock Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Fuel Stock Details</h4>
+    <div>
+        <a asp-action="AddStock" asp-route-id="@Model.Id" class="btn btn-sm btn-success">Add Stock</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">Edit</a>
+        <a asp-action="Index" asp-route-stationId="@Model.FuelStationId" class="btn btn-sm btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Stock Information</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Station:</dt>
+                    <dd class="col-sm-8">@Model.FuelStation?.Name</dd>
+                    <dt class="col-sm-4">Fuel Type:</dt>
+                    <dd class="col-sm-8">@Model.FuelType?.Name</dd>
+                    <dt class="col-sm-4">Current Quantity:</dt>
+                    <dd class="col-sm-8"><strong>@Model.CurrentQuantity.ToString("F2") @Model.Unit</strong></dd>
+                    <dt class="col-sm-4">Capacity:</dt>
+                    <dd class="col-sm-8">@Model.Capacity.ToString("F2") @Model.Unit</dd>
+                    <dt class="col-sm-4">Available:</dt>
+                    <dd class="col-sm-8">
+                        @{
+                            var percentage = Model.Capacity > 0 ? (Model.CurrentQuantity / Model.Capacity * 100) : 0;
+                        }
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar @(percentage < 20 ? "bg-danger" : percentage < 50 ? "bg-warning" : "bg-success")" 
+                                 role="progressbar" style="width: @percentage%">
+                                @percentage.ToString("F1")%
+                            </div>
+                        </div>
+                    </dd>
+                    <dt class="col-sm-4">Low Stock Threshold:</dt>
+                    <dd class="col-sm-8">@(Model.LowStockThreshold?.ToString("F2") ?? "Not set") @Model.Unit</dd>
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsLowStock)
+                        {
+                            <span class="badge bg-warning">Low Stock</span>
+                        }
+                        else if (Model.CurrentQuantity <= 0)
+                        {
+                            <span class="badge bg-danger">Out of Stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Available</span>
+                        }
+                    </dd>
+                    <dt class="col-sm-4">Last Updated:</dt>
+                    <dd class="col-sm-8"><small class="text-muted">@Model.LastUpdated.ToString("MM/dd/yyyy HH:mm")</small></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+

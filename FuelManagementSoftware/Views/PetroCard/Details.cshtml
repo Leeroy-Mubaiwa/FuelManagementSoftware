@@ -1,0 +1,132 @@
+@model FuelManagementSoftware.Models.PetroCard
+@{
+    ViewData["Title"] = "PetroCard Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">PetroCard Details</h4>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">Edit</a>
+        <a asp-action="Index" class="btn btn-sm btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Card Information</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Card Number:</dt>
+                    <dd class="col-sm-8">@Model.CardNumber</dd>
+                    <dt class="col-sm-4">NFC Tag:</dt>
+                    <dd class="col-sm-8"><code>@(Model.Rfidtag ?? "Not set")</code></dd>
+                    <dt class="col-sm-4">User:</dt>
+                    <dd class="col-sm-8">@Model.User?.UserName</dd>
+                    <dt class="col-sm-4">Balance:</dt>
+                    <dd class="col-sm-8"><strong>@Model.Balance.ToString("F2") @Model.Currency</strong></dd>
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsBlocked)
+                        {
+                            <span class="badge bg-danger">Blocked</span>
+                        }
+                        else if (!Model.IsActive)
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                    </dd>
+                    <dt class="col-sm-4">Expiry Date:</dt>
+                    <dd class="col-sm-8">@(Model.ExpiryDate?.ToString("MM/dd/yyyy") ?? "No expiry")</dd>
+                    <dt class="col-sm-4">Created:</dt>
+                    <dd class="col-sm-8"><small class="text-muted">@Model.CreatedAt.ToString("MM/dd/yyyy HH:mm")</small></dd>
+                    <dt class="col-sm-4">Last Used:</dt>
+                    <dd class="col-sm-8"><small class="text-muted">@(Model.LastUsedAt?.ToString("MM/dd/yyyy HH:mm") ?? "Never")</small></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Recent Card Transactions</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.CardTransactions.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var trans in Model.CardTransactions.Take(5))
+                                {
+                                    <tr>
+                                        <td><small>@trans.TransactionDate.ToString("MM/dd HH:mm")</small></td>
+                                        <td><small>@trans.TransactionType</small></td>
+                                        <td>@trans.Amount.ToString("F2")</td>
+                                        <td><small class="text-muted">@trans.BalanceAfter.ToString("F2")</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0"><small>No transactions</small></p>
+                }
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Recent Fuel Transactions</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.FuelTransactions.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Station</th>
+                                    <th>Quantity</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var trans in Model.FuelTransactions.Take(5))
+                                {
+                                    <tr>
+                                        <td><small>@trans.TransactionDate.ToString("MM/dd HH:mm")</small></td>
+                                        <td><small>@trans.FuelStation?.Name</small></td>
+                                        <td><small>@trans.Quantity.ToString("F2")L</small></td>
+                                        <td>@trans.TotalAmount.ToString("F2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0"><small>No fuel transactions</small></p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

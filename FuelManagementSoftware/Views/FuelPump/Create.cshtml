@@ -1,0 +1,62 @@
+@model FuelManagementSoftware.Models.FuelPump
+@{
+    ViewData["Title"] = "Create Fuel Pump";
+}
+
+<h5 class="mb-3">Create New Fuel Pump</h5>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="mb-3">
+                <label asp-for="FuelStationId" class="form-label"></label>
+                <select asp-for="FuelStationId" asp-items="ViewBag.FuelStationId" class="form-select form-select-sm">
+                    <option value="">-- Select Station --</option>
+                </select>
+                <span asp-validation-for="FuelStationId" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="PumpNumber" class="form-label"></label>
+                <input asp-for="PumpNumber" class="form-control form-control-sm" />
+                <span asp-validation-for="PumpNumber" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="FuelTypeId" class="form-label"></label>
+                <select asp-for="FuelTypeId" asp-items="ViewBag.FuelTypeId" class="form-select form-select-sm">
+                    <option value="">-- Select Fuel Type --</option>
+                </select>
+                <span asp-validation-for="FuelTypeId" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="LastMaintenanceDate" class="form-label"></label>
+                <input asp-for="LastMaintenanceDate" class="form-control form-control-sm" type="date" />
+                <span asp-validation-for="LastMaintenanceDate" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                <label asp-for="IsActive" class="form-check-label"></label>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input asp-for="IsOperational" class="form-check-input" type="checkbox" checked />
+                <label asp-for="IsOperational" class="form-check-label"></label>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-sm btn-primary">Create</button>
+                <a asp-action="Index" class="btn btn-sm btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

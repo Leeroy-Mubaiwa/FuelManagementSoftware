@@ -1,0 +1,154 @@
+@model FuelManagementSoftware.Models.FuelStation
+@{
+    ViewData["Title"] = "Station Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">@Model.Name</h4>
+    <div>
+        <form asp-action="ToggleStatus" asp-route-id="@Model.Id" method="post" class="d-inline">
+            <button type="submit" class="btn btn-sm @(Model.IsOpen ? "btn-warning" : "btn-success")">
+                @(Model.IsOpen ? "Close" : "Open") Station
+            </button>
+        </form>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">Edit</a>
+        <a asp-action="Index" class="btn btn-sm btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Station Information</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Name:</dt>
+                    <dd class="col-sm-8">@Model.Name</dd>
+                    <dt class="col-sm-4">Code:</dt>
+                    <dd class="col-sm-8">@(Model.Code ?? "-")</dd>
+                    <dt class="col-sm-4">Address:</dt>
+                    <dd class="col-sm-8">@Model.Address</dd>
+                    <dt class="col-sm-4">City:</dt>
+                    <dd class="col-sm-8">@(Model.City ?? "-")</dd>
+                    <dt class="col-sm-4">Phone:</dt>
+                    <dd class="col-sm-8">@(Model.Phone ?? "-")</dd>
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">@(Model.Email ?? "-")</dd>
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        @if (!Model.IsOpen)
+                        {
+                            <span class="badge bg-danger">Closed</span>
+                        }
+                        else if (Model.IsTankerOffloading)
+                        {
+                            <span class="badge bg-warning">Tanker Offloading</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Open</span>
+                        }
+                    </dd>
+                    @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                    {
+                        <dt class="col-sm-4">Location:</dt>
+                        <dd class="col-sm-8"><small class="text-muted">@Model.Latitude, @Model.Longitude</small></dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Fuel Pumps (@Model.FuelPumps.Count)</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.FuelPumps.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Pump</th>
+                                    <th>Fuel Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var pump in Model.FuelPumps.OrderBy(p => p.PumpNumber))
+                                {
+                                    <tr>
+                                        <td>@pump.PumpNumber</td>
+                                        <td><small>@pump.FuelType?.Name</small></td>
+                                        <td>
+                                            @if (pump.IsOperational && pump.IsActive)
+                                            {
+                                                <span class="badge bg-success">Operational</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Not Available</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0"><small>No pumps configured</small></p>
+                }
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Fuel Stock</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.FuelStocks.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Fuel Type</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var stock in Model.FuelStocks.OrderBy(s => s.FuelType.Name))
+                                {
+                                    <tr>
+                                        <td><small>@stock.FuelType?.Name</small></td>
+                                        <td>@stock.CurrentQuantity.ToString("F2") / @stock.Capacity.ToString("F2") @stock.Unit</td>
+                                        <td>
+                                            @if (stock.IsLowStock)
+                                            {
+                                                <span class="badge bg-warning">Low Stock</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Available</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0"><small>No stock information</small></p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

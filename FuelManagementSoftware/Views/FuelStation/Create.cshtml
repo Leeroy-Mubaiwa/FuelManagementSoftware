@@ -1,0 +1,183 @@
+@model FuelManagementSoftware.Models.FuelStation
+@{
+    ViewData["Title"] = "Create Fuel Station";
+}
+
+<h5 class="mb-3">Create New Fuel Station</h5>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control form-control-sm" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Code" class="form-label"></label>
+                    <input asp-for="Code" class="form-control form-control-sm" />
+                    <span asp-validation-for="Code" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="Address" class="form-label"></label>
+                <input asp-for="Address" class="form-control form-control-sm" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="City" class="form-label"></label>
+                    <input asp-for="City" class="form-control form-control-sm" />
+                    <span asp-validation-for="City" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Phone" class="form-label"></label>
+                    <input asp-for="Phone" class="form-control form-control-sm" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control form-control-sm" type="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Latitude" class="form-label"></label>
+                    <div class="input-group">
+                        <input asp-for="Latitude" id="latitude" class="form-control form-control-sm" type="number" step="any" placeholder="Enter latitude or use button" />
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnGetLocation">
+                            <small>Use Current Location</small>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Latitude" class="text-danger"></span>
+                    <small class="form-text text-muted">You can manually enter coordinates or use current location</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Longitude" class="form-label"></label>
+                    <input asp-for="Longitude" id="longitude" class="form-control form-control-sm" type="number" step="any" placeholder="Enter longitude" />
+                    <span asp-validation-for="Longitude" class="text-danger"></span>
+                    <small class="form-text text-muted">Required for routing and map display</small>
+                </div>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                <label asp-for="IsActive" class="form-check-label"></label>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input asp-for="IsOpen" class="form-check-input" type="checkbox" checked />
+                <label asp-for="IsOpen" class="form-check-label"></label>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-sm btn-primary">Create</button>
+                <a asp-action="Index" class="btn btn-sm btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var latInput = document.getElementById('latitude');
+            var lngInput = document.getElementById('longitude');
+            
+            // Try to get location automatically on page load (only if fields are empty)
+            if (navigator.geolocation && (!latInput.value || !lngInput.value)) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Only populate if fields are still empty (user hasn't typed anything)
+                        if (!latInput.value || !lngInput.value) {
+                            latInput.value = position.coords.latitude.toFixed(8);
+                            lngInput.value = position.coords.longitude.toFixed(8);
+                        }
+                    },
+                    function(error) {
+                        // Silently fail on page load - user can click button if needed
+                        console.log('Geolocation not available on page load:', error.message);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            }
+            
+            // Manual button click to get location
+            document.getElementById('btnGetLocation').addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    var btn = this;
+                    var originalText = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = '<small>Getting location...</small>';
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            latInput.value = position.coords.latitude.toFixed(8);
+                            lngInput.value = position.coords.longitude.toFixed(8);
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                            
+                            // Show success feedback
+                            var feedback = document.createElement('small');
+                            feedback.className = 'text-success d-block mt-1';
+                            feedback.textContent = 'Location set successfully';
+                            btn.parentElement.appendChild(feedback);
+                            setTimeout(function() {
+                                feedback.remove();
+                            }, 3000);
+                        },
+                        function(error) {
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                            
+                            var errorMsg = 'Unable to get location. ';
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    errorMsg += 'Please allow location access.';
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    errorMsg += 'Location information unavailable.';
+                                    break;
+                                case error.TIMEOUT:
+                                    errorMsg += 'Location request timed out.';
+                                    break;
+                                default:
+                                    errorMsg += 'An unknown error occurred.';
+                                    break;
+                            }
+                            
+                            var feedback = document.createElement('small');
+                            feedback.className = 'text-danger d-block mt-1';
+                            feedback.textContent = errorMsg;
+                            btn.parentElement.appendChild(feedback);
+                            setTimeout(function() {
+                                feedback.remove();
+                            }, 5000);
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                } else {
+                    alert('Geolocation is not supported by your browser.');
+                }
+            });
+        });
+    </script>
+}
+

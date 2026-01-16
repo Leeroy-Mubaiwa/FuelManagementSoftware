@@ -1,0 +1,140 @@
+@model FuelManagementSoftware.Models.FuelTransaction
+@{
+    ViewData["Title"] = "Fuel Dispensing";
+}
+
+<div class="container mt-4">
+    <h2>Fuel Dispensing - Transaction @Model.TransactionNumber</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Transaction Details</h5>
+                    <p><strong>Status:</strong> <span id="transactionStatus" class="badge">@Model.TransactionStatus</span></p>
+                    <p><strong>Pump:</strong> @Model.FuelPump?.PumpNumber</p>
+                    <p><strong>Fuel Type:</strong> @Model.FuelType?.Name</p>
+                    <p><strong>Quantity:</strong> <span id="quantity">@Model.Quantity.ToString("F2")</span> Litres</p>
+                    <p><strong>Amount:</strong> <span id="amount">@Model.TotalAmount.ToString("F2")</span> @Model.Currency</p>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <button id="startBtn" class="btn btn-success" onclick="startDispensing()" style="display: @(Model.TransactionStatus == "Authorized" ? "block" : "none");">
+                    Start Dispensing
+                </button>
+                <button id="completeBtn" class="btn btn-primary" onclick="completeDispensing()" style="display: @(Model.TransactionStatus == "Dispensing" ? "block" : "none");">
+                    Complete
+                </button>
+                <button id="cancelBtn" class="btn btn-danger" onclick="cancelDispensing()" style="display: @(Model.TransactionStatus != "Completed" && Model.TransactionStatus != "Cancelled" ? "block" : "none");">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script>
+        const transactionId = @Model.Id;
+        const pumpId = @Model.FuelPumpId;
+        
+        // SignalR connection for real-time updates
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/pumpstatus")
+            .build();
+        
+        connection.start().then(() => {
+            connection.invoke("JoinPumpGroup", pumpId);
+        });
+        
+        connection.on("DispensingProgress", function(data) {
+            if (data.TransactionId === transactionId) {
+                document.getElementById('quantity').textContent = data.Quantity.toFixed(2);
+                document.getElementById('amount').textContent = data.Amount.toFixed(2);
+            }
+        });
+        
+        connection.on("TransactionStatus", function(data) {
+            if (data.TransactionId === transactionId) {
+                const statusBadge = document.getElementById('transactionStatus');
+                statusBadge.textContent = data.Status;
+                statusBadge.className = 'badge bg-' + (data.Status === 'Completed' ? 'success' : data.Status === 'Cancelled' ? 'danger' : 'warning');
+                
+                updateButtons(data.Status);
+            }
+        });
+        
+        function updateButtons(status) {
+            document.getElementById('startBtn').style.display = status === 'Authorized' ? 'block' : 'none';
+            document.getElementById('completeBtn').style.display = status === 'Dispensing' ? 'block' : 'none';
+            document.getElementById('cancelBtn').style.display = (status !== 'Completed' && status !== 'Cancelled') ? 'block' : 'none';
+        }
+        
+        function startDispensing() {
+            fetch('/FuelDispensing/Start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ transactionId: transactionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateButtons(data.status);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+        }
+        
+        function completeDispensing() {
+            const quantity = parseFloat(document.getElementById('quantity').textContent);
+            fetch('/FuelDispensing/Complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ transactionId: transactionId, finalQuantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Transaction completed successfully!');
+                    updateButtons(data.status);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+        }
+        
+        function cancelDispensing() {
+            if (!confirm('Are you sure you want to cancel this transaction?')) {
+                return;
+            }
+            
+            fetch('/FuelDispensing/Cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ transactionId: transactionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Transaction cancelled');
+                    updateButtons(data.status);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+        }
+    </script>
+}
+

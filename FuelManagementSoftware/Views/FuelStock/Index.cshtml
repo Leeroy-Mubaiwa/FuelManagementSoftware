@@ -1,0 +1,67 @@
+@model IEnumerable<FuelManagementSoftware.Models.FuelStock>
+@{
+    ViewData["Title"] = "Fuel Stock";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Fuel Stock@(ViewBag.StationName != null ? $" - {ViewBag.StationName}" : "")</h4>
+    <a asp-action="Create" asp-route-stationId="@Context.Request.Query["stationId"]" class="btn btn-sm btn-primary">Create New</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Station</th>
+                <th>Fuel Type</th>
+                <th>Current Quantity</th>
+                <th>Capacity</th>
+                <th>Percentage</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var percentage = item.Capacity > 0 ? (item.CurrentQuantity / item.Capacity * 100) : 0;
+                <tr>
+                    <td><small>@item.FuelStation?.Name</small></td>
+                    <td>@item.FuelType?.Name</td>
+                    <td>@item.CurrentQuantity.ToString("F2") @item.Unit</td>
+                    <td>@item.Capacity.ToString("F2") @item.Unit</td>
+                    <td>
+                        <div class="progress" style="height: 20px; width: 100px;">
+                            <div class="progress-bar @(percentage < 20 ? "bg-danger" : percentage < 50 ? "bg-warning" : "bg-success")" 
+                                 role="progressbar" style="width: @percentage%">
+                                @percentage.ToString("F0")%
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        @if (item.IsLowStock)
+                        {
+                            <span class="badge bg-warning">Low Stock</span>
+                        }
+                        else if (item.CurrentQuantity <= 0)
+                        {
+                            <span class="badge bg-danger">Out of Stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Available</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
+                            <a asp-action="AddStock" asp-route-id="@item.Id" class="btn btn-outline-success">Add Stock</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

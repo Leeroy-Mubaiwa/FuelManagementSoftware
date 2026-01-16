@@ -1,0 +1,341 @@
+@model IEnumerable<FuelManagementSoftware.Models.FuelStation>
+@{
+    ViewData["Title"] = "Fuel Availability Map";
+    var stationsWithCoords = Model.Where(s => s.Latitude.HasValue && s.Longitude.HasValue).ToList();
+}
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Fuel Availability Map & Directions</h4>
+    <a asp-action="Index" class="btn btn-sm btn-secondary">List View</a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <label class="form-label small">Filter by Fuel Type</label>
+                <select id="fuelTypeFilter" class="form-select form-select-sm">
+                    <option value="">All Fuel Types</option>
+                    @foreach (var item in ViewBag.FuelTypes as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="button" id="btnGetLocation" class="btn btn-sm btn-primary">Use My Location</button>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="button" id="btnClearRoute" class="btn btn-sm btn-outline-secondary">Clear Route</button>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <select id="nearestStationSelect" class="form-select form-select-sm">
+                    <option value="">Select Nearest Station</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div id="map" style="height: 600px; border: 1px solid #dee2e6; border-radius: 0.375rem;"></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Stations (@stationsWithCoords.Count)</h6>
+            </div>
+            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                @foreach (var station in stationsWithCoords)
+                {
+                    <div class="card mb-2 station-card" 
+                         data-station-id="@station.Id"
+                         data-lat="@station.Latitude"
+                         data-lng="@station.Longitude"
+                         data-name="@station.Name"
+                         data-address="@station.Address"
+                         data-open="@station.IsOpen"
+                         data-offloading="@station.IsTankerOffloading">
+                        <div class="card-body p-2">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="mb-0 small">@station.Name</h6>
+                                @if (station.IsTankerOffloading)
+                                {
+                                    <span class="badge bg-warning">Offloading</span>
+                                }
+                                else if (!station.IsOpen)
+                                {
+                                    <span class="badge bg-danger">Closed</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Open</span>
+                                }
+                            </div>
+                            <p class="mb-1 small text-muted">@station.Address</p>
+                            @if (station.FuelStocks.Any(s => s.CurrentQuantity > 0))
+                            {
+                                <div class="mb-1">
+                                    @foreach (var stock in station.FuelStocks.Where(s => s.CurrentQuantity > 0).Take(2))
+                                    {
+                                        <span class="badge bg-secondary small">@stock.FuelType?.Name: @stock.CurrentQuantity.ToString("F0")@stock.Unit</span>
+                                    }
+                                </div>
+                            }
+                            <button class="btn btn-sm btn-outline-primary btn-get-directions" data-station-id="@station.Id">Get Directions</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+
+<script>
+    // Initialize map centered on Harare, Zimbabwe
+    var map = L.map('map').setView([-17.8292, 31.0522], 12);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    var stations = @Html.Raw(Json.Serialize(stationsWithCoords.Select(s => new {
+        Id = s.Id,
+        Name = s.Name,
+        Address = s.Address,
+        Latitude = s.Latitude,
+        Longitude = s.Longitude,
+        IsOpen = s.IsOpen,
+        IsTankerOffloading = s.IsTankerOffloading,
+        FuelStocks = s.FuelStocks.Where(st => st.CurrentQuantity > 0).Select(st => new {
+            FuelTypeName = st.FuelType?.Name,
+            FuelTypeId = st.FuelTypeId,
+            CurrentQuantity = st.CurrentQuantity,
+            Unit = st.Unit
+        })
+    })));
+    
+    var selectedStationId = @(ViewBag.SelectedStationId != null ? ViewBag.SelectedStationId : "null");
+    
+    var markers = [];
+    var userMarker = null;
+    var routingControl = null;
+    var userLocation = null;
+    
+    // Add station markers
+    function addStationMarkers(filteredStations) {
+        // Clear existing markers
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+        
+        filteredStations.forEach(function(station) {
+            var iconColor = station.IsTankerOffloading ? 'orange' : (!station.IsOpen ? 'red' : 'green');
+            var icon = L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="background-color: ' + iconColor + '; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            var marker = L.marker([station.Latitude, station.Longitude], { icon: icon })
+                .addTo(map)
+                .bindPopup('<strong>' + station.Name + '</strong><br>' + station.Address);
+            
+            marker.stationData = station;
+            markers.push(marker);
+        });
+    }
+    
+    // Initialize with all stations
+    addStationMarkers(stations);
+    
+    // If a station is pre-selected, center map on it
+    if (selectedStationId && stations.length > 0) {
+        var selectedStation = stations.find(s => s.Id === selectedStationId);
+        if (selectedStation) {
+            map.setView([selectedStation.Latitude, selectedStation.Longitude], 15);
+            // Highlight the selected station card
+            var selectedCard = document.querySelector('.station-card[data-station-id="' + selectedStationId + '"]');
+            if (selectedCard) {
+                selectedCard.classList.add('border-primary', 'border-2');
+            }
+        }
+    }
+    
+    // Get user location
+    document.getElementById('btnGetLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                userLocation = [position.coords.latitude, position.coords.longitude];
+                
+                // Remove existing user marker
+                if (userMarker) {
+                    map.removeLayer(userMarker);
+                }
+                
+                // Add user location marker
+                userMarker = L.marker(userLocation, {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background-color: blue; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    })
+                }).addTo(map).bindPopup('Your Location');
+                
+                map.setView(userLocation, 14);
+                
+                // Find nearest station
+                findNearestStation(userLocation);
+            }, function(error) {
+                alert('Unable to get your location. Please enter coordinates manually.');
+            });
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    });
+    
+    // Find nearest station
+    function findNearestStation(location) {
+        var nearest = null;
+        var minDistance = Infinity;
+        
+        stations.forEach(function(station) {
+            var distance = map.distance(location, [station.Latitude, station.Longitude]);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearest = station;
+            }
+        });
+        
+        if (nearest) {
+            // Update select dropdown
+            var select = document.getElementById('nearestStationSelect');
+            select.innerHTML = '<option value="' + nearest.Id + '">' + nearest.Name + ' (' + (minDistance / 1000).toFixed(2) + ' km away)</option>';
+            select.value = nearest.Id;
+            
+            // Auto-show directions
+            showDirections(nearest.Id);
+        }
+    }
+    
+    // Show directions
+    function showDirections(stationId) {
+        if (!userLocation) {
+            alert('Please get your location first.');
+            return;
+        }
+        
+        var station = stations.find(s => s.Id == stationId);
+        if (!station) return;
+        
+        // Remove existing route
+        if (routingControl) {
+            map.removeControl(routingControl);
+        }
+        
+        // Add route using OSRM (free routing service)
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(userLocation[0], userLocation[1]),
+                L.latLng(station.Latitude, station.Longitude)
+            ],
+            router: L.Routing.osrmv1({
+                serviceUrl: 'https://router.project-osrm.org/route/v1'
+            }),
+            routeWhileDragging: false,
+            showAlternatives: false,
+            lineOptions: {
+                styles: [{ color: '#3388ff', weight: 5 }]
+            },
+            createMarker: function() { return null; } // Don't add extra markers
+        }).addTo(map);
+        
+        routingControl.on('routesfound', function(e) {
+            var routes = e.routes;
+            if (routes && routes.length > 0) {
+                var route = routes[0];
+                var distance = (route.summary.totalDistance / 1000).toFixed(2);
+                var duration = Math.round(route.summary.totalTime / 60);
+                alert('Route found: ' + distance + ' km, approximately ' + duration + ' minutes');
+            }
+        });
+    }
+    
+    // Get directions button handlers
+    document.querySelectorAll('.btn-get-directions').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var stationId = parseInt(this.getAttribute('data-station-id'));
+            if (userLocation) {
+                showDirections(stationId);
+            } else {
+                alert('Please click "Use My Location" first.');
+            }
+        });
+    });
+    
+    // Nearest station select change
+    document.getElementById('nearestStationSelect').addEventListener('change', function() {
+        if (this.value && userLocation) {
+            showDirections(parseInt(this.value));
+        }
+    });
+    
+    // Clear route
+    document.getElementById('btnClearRoute').addEventListener('click', function() {
+        if (routingControl) {
+            map.removeControl(routingControl);
+            routingControl = null;
+        }
+    });
+    
+    // Fuel type filter
+    document.getElementById('fuelTypeFilter').addEventListener('change', function() {
+        var fuelTypeId = this.value;
+        if (!fuelTypeId) {
+            addStationMarkers(stations);
+            document.querySelectorAll('.station-card').forEach(card => card.style.display = '');
+            return;
+        }
+        
+        // Filter stations that have the selected fuel type in stock
+        var filtered = stations.filter(function(station) {
+            return station.FuelStocks.some(function(stock) {
+                return stock.FuelTypeName && station.FuelStocks.some(s => s.CurrentQuantity > 0);
+            });
+        });
+        
+        addStationMarkers(filtered);
+        
+        // Hide/show station cards
+        document.querySelectorAll('.station-card').forEach(function(card) {
+            var stationId = parseInt(card.getAttribute('data-station-id'));
+            var hasFuelType = filtered.some(s => s.Id === stationId);
+            card.style.display = hasFuelType ? '' : 'none';
+        });
+    });
+</script>
+
+<style>
+    .custom-marker {
+        background: transparent;
+        border: none;
+    }
+    .leaflet-routing-container {
+        background-color: white;
+        border-radius: 0.375rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+</style>
+

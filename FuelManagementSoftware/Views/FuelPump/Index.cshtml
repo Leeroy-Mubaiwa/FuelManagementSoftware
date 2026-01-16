@@ -1,0 +1,56 @@
+@model IEnumerable<FuelManagementSoftware.Models.FuelPump>
+@{
+    ViewData["Title"] = "Fuel Pumps";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Fuel Pumps@(ViewBag.StationName != null ? $" - {ViewBag.StationName}" : "")</h4>
+    <a asp-action="Create" asp-route-stationId="@Context.Request.Query["stationId"]" class="btn btn-sm btn-primary">Create New</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Station</th>
+                <th>Pump Number</th>
+                <th>Fuel Type</th>
+                <th>Status</th>
+                <th>Last Maintenance</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><small>@item.FuelStation?.Name</small></td>
+                    <td>@item.PumpNumber</td>
+                    <td>@item.FuelType?.Name</td>
+                    <td>
+                        @if (item.IsOperational && item.IsActive)
+                        {
+                            <span class="badge bg-success">Operational</span>
+                        }
+                        else if (!item.IsActive)
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Not Operational</span>
+                        }
+                    </td>
+                    <td><small class="text-muted">@(item.LastMaintenanceDate?.ToString("MM/dd/yyyy") ?? "Never")</small></td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

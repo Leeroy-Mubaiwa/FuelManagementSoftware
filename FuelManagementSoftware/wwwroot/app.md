@@ -1,0 +1,52 @@
+TITLE : Blockchain Enabled Automated Fuel Dispensing with Real Time Fuel Availability and Routing
+
+Background of the story
+Fuel retailing in developed countries such as the United States, Japan, Singapore, and the United Kingdom has increasingly shifted toward automation and digital payment systems to improve operational efficiency, safety, and customer experience. Contactless payment technologies, RFID-enabled smart cards, and mobile applications allow motorists to pay at the pump without interacting with a station attendant, reducing transaction times and streamlining fuel purchases (RFID Journal, 2022; Gas Tech, 2025). These systems improve accuracy in transactions, minimize human errors, and enhance customer convenience in refueling operations (Smart Card Alliance, 2011). Despite these advancements, most automated fueling systems in developed economies do not provide real-time fuel availability or routing information because fuel shortages are uncommon, making such features unnecessary (Gas Tech, 2025).
+In Zimbabwe, the fuel retail sector remains heavily dependent on manual processes, which exposes it to inefficiencies, customer frustration, and revenue losses. Motorists often face long queues, unpredictable fuel availability, and inconsistent service due to the lack of up-to-date fuel information. This problem is particularly severe during tanker offloading periods when fuel stations temporarily close for safety reasons, yet customers frequently arrive unaware of these closures, resulting in wasted time, increased fuel consumption, and traffic congestion. The absence of real-time fuel availability and routing information forces motorists to move between multiple stations, aggravating inefficiencies and dissatisfaction (Auditor-General of Zimbabwe, 2016; Auditor-General of Zimbabwe, 2019).
+Zimbabwe’s continued reliance on paper-based fuel coupon systems further exposes fuel companies to fraud and financial losses. Petrotrade, a major fuel supplier, has experienced significant losses due to coupon duplication, theft, and mismanagement. For example, a 2025 Newsday report revealed that 59,856 litres of fuel were lost through duplicated Petrotrade coupons involving Zimbabwe Mining Development Corporation officials (Newsday, 2025). Additionally, ZimbabweNow (2023) reported the theft of diesel coupons valued at over US$6,400. Auditor-General reports have consistently highlighted weak internal controls and procurement irregularities in Petrotrade’s coupon management systems (Auditor-General of Zimbabwe, 2016; Auditor-General of Zimbabwe, 2019). These challenges demonstrate the urgent need for secure, transparent, and tamper-proof mechanisms for recording fuel transactions.
+Emerging technologies such as blockchain have been widely recognized for their ability to enhance transparency, traceability, and security in complex transaction systems (Casino, Dasaklis and Patsakis, 2019; Journal of Procurement and Supply Chain Management, 2024). By maintaining immutable and verifiable transaction records, blockchain reduces the risk of fraud, improves accountability, and ensures reliable monitoring across supply chains. Applying blockchain technology in fuel retail can address the vulnerabilities associated with paper-based coupon systems and provide stakeholders with transparent and tamper-proof records of all fuel transactions.
+Given these challenges, there is a clear need for an integrated digital solution that combines automation, secure transaction management, and real-time fuel availability. The proposed Automated Fuel Management System leverages smart cards and RFID technology to enable automated fuel dispensing, while blockchain provides secure, immutable transaction records to prevent fraud and strengthen revenue accountability. In addition, the system incorporates a real-time fuel availability and routing feature, allowing motorists to check which stations have fuel in stock and which are temporarily closed, thereby reducing wasted time and improving refueling efficiency.
+
+Unlike automated fuel systems in developed countries, which generally do not require real-time stock information, the proposed system is specifically designed for Zimbabwe’s context, where supply inconsistencies, manual processes, and information gaps create significant operational challenges. By integrating automation, blockchain-secured transactions, and live fuel information into a single platform, the system aligns with global best practices while addressing local operational realities, improving efficiency, enhancing customer experience, and supporting digital transformation in Zimbabwe’s fuel sector.
+Statement of the problem
+Zimbabwe’s fuel retail sector continues to face major operational challenges caused by manual processes.Customers often travel from one station to another without knowing which sites actually have fuel, leading to wasted time, congestion, and frustration especially when stations temporarily close during tanker offloading. The absence of a real-time fuel availability and routing system further intensifies these inefficiencies, leaving both service providers and motorists without reliable information for planning, monitoring, and decision-making.
+
+Aim
+The aim of this project is to design and develop an integrated fuel management system that automates fuel dispensing, incorporates blockchain-based transaction management, and provides real-time fuel availability and routing information. The system seeks to address inefficiencies, revenue losses, and customer frustration arising from Zimbabwe’s largely manual fuel retail operations by improving operational accuracy, enhancing transparency, reducing fraud, and enabling motorists to access timely and reliable fuel information for a smoother and more dependable refuelling experience.
+Objectives
+To implement an automated fuel dispensing system with a prepaid smart card functionality
+To integrate blockchain technology into fuel transactions
+To introduce a real-time fuel availability and routing feature
+
+Research Questions
+How can fuel dispensing be automated to reduce reliance on manual operations and improve efficiency in Zimbabwean fuel stations?
+How effective is a prepaid smart card system in minimizing fuel coupon fraud and ensuring secure transactions?
+In what ways can blockchain integration enhance transparency and security in fuel transactions?
+How can real-time fuel availability and routing information improve customer experience and reduce waiting time at fuel stations?
+Relevance of the study
+Fuel retailing in Zimbabwe faces challenges such as long queues, manual dispensing, coupon fraud, and unpredictable fuel availability. Customers often waste time during station closures, while companies like Petrotrade lose revenue due to duplicated or stolen coupons. This study proposes an automated fuel station system with prepaid PetroCards and real-time fuel availability, simultaneously improving operational efficiency and customer experience.
+Promotes Operational Efficiency: Automates fuel dispensing to reduce human error and speed up service.
+Reduces Fraud and Revenue Losses: Prepaid PetroCards and blockchain-secured transactions prevent coupon duplication and unauthorized fuel access.
+Improves Customer Experience: Real-time fuel availability and routing help customers locate fuel quickly and avoid closed or empty stations.
+Supports Accurate Record-Keeping: Provides reliable data for audits, management decisions, and performance monitoring.
+Contributes to Digital Transformation: Introduces smart technologies in the fuel sector, aligning with national goals for modernization and technological advancement.
+
+Assumptions of the study
+This study is based on several key assumptions that guided its development and direction. It is assumed that:
+Petrotrade will adopt and support the implementation of an automated fuel station system.
+Customers will be willing to use prepaid PetroCards for fuel transactions.
+Fuel stations have the necessary infrastructure (e.g., pumps, internet connectivity) to support automation and real-time monitoring.
+The blockchain and digital systems will function reliably to secure transactions and maintain accurate records.
+Real-time fuel availability data will be updated consistently to ensure accurate routing and customer guidance.
+Limitations of the study
+Dependence on Petrotrade’s willingness to adopt and implement the automated system.
+Potential technical challenges, such as network connectivity issues or system malfunctions.
+Customer adaptation to the new technology may be slow or inconsistent.
+Delimitations of the study
+The study focuses only on selected Petrotrade fuel stations in Harare, excluding stations in other cities or rural areas.
+The system is designed specifically for fuel dispensing, prepaid smart card usage, blockchain transaction recording, and real-time fuel availability and routing, excluding other management areas such as HR, maintenance, or inventory control.
+The study considers Petrotrade as the primary case organization, and does not compare detailed operations of other fuel companies in Zimbabwe.
+The study focuses on customers using prepaid smart cards or digital payments, excluding cash-only transactions.
+The blockchain integration is deliberately limited to transaction recording for fuel purchases, without implementing advanced features like smart contracts or third-party integrations.
+Conclusion
+Chapter 1 has laid the groundwork for understanding why an automated fuel management system is needed in Zimbabwe. It highlighted the everyday challenges faced by both fuel companies and customers long queues, unreliable fuel information, manual processes, and losses caused by fraud. The chapter also introduced the goal of developing a smarter, more transparent system that uses automation, prepaid smart cards, blockchain technology, and real-time fuel availability updates to improve how fuel stations operate. By outlining the aim, objectives, assumptions, and delimitations, this chapter provides a clear direction for the study moving forward and prepares the foundation for designing a solution that can genuinely transform fuel service delivery in Zimbabwe.

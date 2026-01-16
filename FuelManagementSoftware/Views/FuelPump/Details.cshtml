@@ -1,0 +1,52 @@
+@model FuelManagementSoftware.Models.FuelPump
+@{
+    ViewData["Title"] = "Pump Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Pump @Model.PumpNumber</h4>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">Edit</a>
+        <a asp-action="Index" asp-route-stationId="@Model.FuelStationId" class="btn btn-sm btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Pump Information</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Station:</dt>
+                    <dd class="col-sm-8">@Model.FuelStation?.Name</dd>
+                    <dt class="col-sm-4">Pump Number:</dt>
+                    <dd class="col-sm-8">@Model.PumpNumber</dd>
+                    <dt class="col-sm-4">Fuel Type:</dt>
+                    <dd class="col-sm-8">@Model.FuelType?.Name</dd>
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsOperational && Model.IsActive)
+                        {
+                            <span class="badge bg-success">Operational</span>
+                        }
+                        else if (!Model.IsActive)
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Not Operational</span>
+                        }
+                    </dd>
+                    <dt class="col-sm-4">Last Maintenance:</dt>
+                    <dd class="col-sm-8"><small class="text-muted">@(Model.LastMaintenanceDate?.ToString("MM/dd/yyyy") ?? "Never")</small></dd>
+                    <dt class="col-sm-4">Created:</dt>
+                    <dd class="col-sm-8"><small class="text-muted">@Model.CreatedAt.ToString("MM/dd/yyyy")</small></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+

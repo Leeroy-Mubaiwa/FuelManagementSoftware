@@ -1,0 +1,104 @@
+@model FuelManagementSoftware.Models.FuelTransaction
+@{
+    ViewData["Title"] = "Transaction Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Transaction @Model.TransactionNumber</h4>
+    <a asp-action="Index" class="btn btn-sm btn-secondary">Back to List</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Transaction Information</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Transaction #:</dt>
+                    <dd class="col-sm-8"><code>@Model.TransactionNumber</code></dd>
+                    <dt class="col-sm-4">Date:</dt>
+                    <dd class="col-sm-8">@Model.TransactionDate.ToString("MM/dd/yyyy HH:mm:ss")</dd>
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge @(Model.TransactionStatus == "Completed" ? "bg-success" : Model.TransactionStatus == "Cancelled" ? "bg-danger" : Model.TransactionStatus == "Dispensing" ? "bg-warning" : "bg-secondary")">
+                            @Model.TransactionStatus
+                        </span>
+                    </dd>
+                    <dt class="col-sm-4">Station:</dt>
+                    <dd class="col-sm-8">@Model.FuelStation?.Name</dd>
+                    <dt class="col-sm-4">Pump:</dt>
+                    <dd class="col-sm-8">@Model.FuelPump?.PumpNumber</dd>
+                    <dt class="col-sm-4">Fuel Type:</dt>
+                    <dd class="col-sm-8">@Model.FuelType?.Name</dd>
+                    <dt class="col-sm-4">PetroCard:</dt>
+                    <dd class="col-sm-8">@(Model.PetroCard?.CardNumber ?? "-")</dd>
+                    <dt class="col-sm-4">User:</dt>
+                    <dd class="col-sm-8">@(Model.User?.UserName ?? "-")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Transaction Details</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Quantity:</dt>
+                    <dd class="col-sm-8"><strong>@Model.Quantity.ToString("F2") Litres</strong></dd>
+                    <dt class="col-sm-4">Unit Price:</dt>
+                    <dd class="col-sm-8">@Model.UnitPrice.ToString("F2") @Model.Currency</dd>
+                    <dt class="col-sm-4">Total Amount:</dt>
+                    <dd class="col-sm-8"><strong>@Model.TotalAmount.ToString("F2") @Model.Currency</strong></dd>
+                    <dt class="col-sm-4">Payment Method:</dt>
+                    <dd class="col-sm-8">@(Model.PaymentMethod ?? "-")</dd>
+                    <dt class="col-sm-4">Started At:</dt>
+                    <dd class="col-sm-8"><small class="text-muted">@(Model.StartedAt?.ToString("MM/dd/yyyy HH:mm:ss") ?? "-")</small></dd>
+                    <dt class="col-sm-4">Completed At:</dt>
+                    <dd class="col-sm-8"><small class="text-muted">@(Model.CompletedAt?.ToString("MM/dd/yyyy HH:mm:ss") ?? "-")</small></dd>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <dt class="col-sm-4">Notes:</dt>
+                        <dd class="col-sm-8"><small>@Model.Notes</small></dd>
+                    }
+                </dl>
+            </div>
+        </div>
+        
+        @if (Model.BlockchainTransactions.Any())
+        {
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">Blockchain Records</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Hash</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var bc in Model.BlockchainTransactions)
+                                {
+                                    <tr>
+                                        <td><small><code>@bc.BlockchainHash.Substring(0, Math.Min(20, bc.BlockchainHash.Length))...</code></small></td>
+                                        <td><span class="badge @(bc.Status == "Confirmed" ? "bg-success" : bc.Status == "Failed" ? "bg-danger" : "bg-warning")">@bc.Status</span></td>
+                                        <td><small class="text-muted">@bc.CreatedAt.ToString("MM/dd/yyyy HH:mm")</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+

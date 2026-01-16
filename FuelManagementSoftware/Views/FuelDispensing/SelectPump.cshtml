@@ -1,0 +1,43 @@
+@model IEnumerable<FuelManagementSoftware.Models.FuelPump>
+@{
+    ViewData["Title"] = "Select Pump";
+    var station = ViewBag.Station as FuelManagementSoftware.Models.FuelStation;
+}
+
+<div class="container mt-4">
+    <h2>Select Fuel Pump - @station?.Name</h2>
+    
+    <div class="row">
+        @foreach (var pump in Model)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Pump @pump.PumpNumber</h5>
+                        <p class="card-text">
+                            <strong>Fuel Type:</strong> @pump.FuelType?.Name<br>
+                            <strong>Status:</strong> 
+                            @if (pump.IsOperational && pump.IsActive)
+                            {
+                                <span class="badge bg-success">Operational</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Not Available</span>
+                            }
+                        </p>
+                        @if (pump.IsOperational && pump.IsActive)
+                        {
+                            <a href="@Url.Action("StartDispensing", new { pumpId = pump.Id })" class="btn btn-primary">Start Dispensing</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    <div class="mt-3">
+        <a href="@Url.Action("Index")" class="btn btn-secondary">Back to Stations</a>
+    </div>
+</div>
+

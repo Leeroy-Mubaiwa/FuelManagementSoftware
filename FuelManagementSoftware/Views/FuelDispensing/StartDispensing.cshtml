@@ -1,0 +1,121 @@
+@{
+    ViewData["Title"] = "Start Fuel Dispensing";
+    var pump = ViewBag.Pump as FuelManagementSoftware.Models.FuelPump;
+}
+
+<div class="container mt-4">
+    <h2>Start Fuel Dispensing - Pump @pump?.PumpNumber</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Pump Information</h5>
+                    <p><strong>Fuel Type:</strong> @pump?.FuelType?.Name</p>
+                    <p><strong>Station:</strong> @pump?.FuelStation?.Name</p>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Instructions</h5>
+                    <ol>
+                        <li>Tap your NFC card on the reader</li>
+                        <li>Enter your PIN if required</li>
+                        <li>Select the quantity (or leave empty for fill-up)</li>
+                        <li>Click "Start Dispensing"</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <form id="dispensingForm" asp-action="Initiate" method="post">
+                <input type="hidden" name="FuelStationId" value="@pump?.FuelStationId" />
+                <input type="hidden" name="FuelPumpId" value="@pump?.Id" />
+                <input type="hidden" name="FuelTypeId" value="@pump?.FuelTypeId" />
+                
+                <div class="form-group mb-3">
+                    <label for="NfcTag" class="form-label">NFC Tag</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="NfcTag" name="NfcTag" required readonly />
+                        <button type="button" class="btn btn-outline-secondary" id="readNfcBtn" onclick="readNfcTag()">
+                            <span id="readNfcBtnText">Read NFC Tag</span>
+                        </button>
+                    </div>
+                    <small class="form-text text-muted">Tap your card and click "Read NFC Tag"</small>
+                </div>
+                
+                <div class="form-group mb-3" id="cardInfo" style="display: none;">
+                    <div class="alert alert-info">
+                        <strong>Card:</strong> <span id="cardNumber"></span><br>
+                        <strong>Balance:</strong> <span id="cardBalance"></span> <span id="cardCurrency"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="Pin" class="form-label">PIN (if required)</label>
+                    <input type="password" class="form-control" id="Pin" name="Pin" maxlength="6" />
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="RequestedQuantity" class="form-label">Requested Quantity (Litres) - Leave empty for fill-up</label>
+                    <input type="number" class="form-control" id="RequestedQuantity" name="RequestedQuantity" step="0.01" min="0" />
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="startBtn" disabled>Start Dispensing</button>
+                <a href="@Url.Action("SelectPump", new { stationId = pump?.FuelStationId })" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let pumpId = @pump?.Id;
+        let requiresPin = false;
+        
+        function readNfcTag() {
+            const btn = document.getElementById('readNfcBtn');
+            const btnText = document.getElementById('readNfcBtnText');
+            const nfcTagInput = document.getElementById('NfcTag');
+            const cardInfo = document.getElementById('cardInfo');
+            const startBtn = document.getElementById('startBtn');
+            
+            btn.disabled = true;
+            btnText.textContent = 'Reading...';
+            
+            fetch(`/FuelDispensing/ReadNfcTag?pumpId=${pumpId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        nfcTagInput.value = data.nfcTag;
+                        document.getElementById('cardNumber').textContent = data.cardNumber;
+                        document.getElementById('cardBalance').textContent = data.balance.toFixed(2);
+                        document.getElementById('cardCurrency').textContent = data.currency;
+                        cardInfo.style.display = 'block';
+                        requiresPin = data.requiresPin;
+                        
+                        if (!requiresPin) {
+                            startBtn.disabled = false;
+                        } else {
+                            const pinInput = document.getElementById('Pin');
+                            pinInput.required = true;
+                            pinInput.addEventListener('input', function() {
+                                startBtn.disabled = pinInput.value.length < 4;
+                            });
+                        }
+                    } else {
+                        alert(data.message || 'Failed to read NFC tag');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error reading NFC tag');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btnText.textContent = 'Read NFC Tag';
+                });
+        }
+    </script>
+}
+
