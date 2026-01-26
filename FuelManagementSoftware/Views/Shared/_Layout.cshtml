@@ -3,8 +3,10 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FuelManagementSoftware</title>
+    <title>@ViewData["Title"] - PetroChain™</title>
+    <link rel="icon" type="image/png" href="~/images/petro-logo.png" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/FuelManagementSoftware.styles.css" asp-append-version="true" />
 </head>
@@ -12,7 +14,10 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FuelManagementSoftware</a>
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="me-2" style="height: 40px; width: auto;" />
+                    <span class="fw-bold">PetroChain™</span>
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -93,9 +98,20 @@
         </main>
     </div>
 
-    <footer class="border-top  text-muted">
-        <div class="container">
-            &copy; 2026 - FuelManagementSoftware - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="border-top text-muted">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="me-2" style="height: 30px; width: auto;" />
+                        <span class="fw-semibold">PetroChain™</span>
+                    </div>
+                    <p class="mb-0 small">Blockchain-Enabled Automated Fuel Management System</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 small">&copy; 2026 PetroChain™ - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></p>
+                </div>
+            </div>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

@@ -1,8 +1,262 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-3">
+                <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="me-3" style="height: 60px; width: auto;" />
+                <div>
+                    <h1 class="display-5 fw-bold mb-0">Welcome to PetroChain™</h1>
+                    <p class="lead text-muted mb-0">Blockchain-Enabled Automated Fuel Management System</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 rounded p-3 me-3">
+                            <i class="bi bi-credit-card text-white" style="font-size: 24px;"></i>
+                        </div>
+                        <h5 class="card-title mb-0">PetroCards</h5>
+                    </div>
+                    <p class="card-text text-muted">Manage your prepaid smart cards for automated fuel dispensing.</p>
+                    <a asp-controller="PetroCard" asp-action="Index" class="btn btn-primary btn-sm">Manage Cards</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success bg-opacity-10 rounded p-3 me-3">
+                            <i class="bi bi-fuel-pump text-success" style="font-size: 24px;"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Fuel Availability</h5>
+                    </div>
+                    <p class="card-text text-muted">Check real-time fuel availability and find nearby stations.</p>
+                    <a asp-controller="FuelAvailability" asp-action="Index" class="btn btn-success btn-sm">View Availability</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info bg-opacity-10 rounded p-3 me-3">
+                            <i class="bi bi-arrow-up-circle text-info" style="font-size: 24px;"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Fuel Dispensing</h5>
+                    </div>
+                    <p class="card-text text-muted">Access automated fuel dispensing with your PetroCard.</p>
+                    <a asp-controller="FuelDispensing" asp-action="Index" class="btn btn-info btn-sm text-white">Start Dispensing</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Recent Transactions</h5>
+                    <p class="card-text text-muted">View your recent fuel transactions and blockchain records.</p>
+                    <div class="d-flex gap-2">
+                        <a asp-controller="FuelTransaction" asp-action="Index" class="btn btn-outline-primary btn-sm">View Transactions</a>
+                        <a asp-controller="BlockchainTransaction" asp-action="Index" class="btn btn-outline-secondary btn-sm">Blockchain Records</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">System Features</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Automated fuel dispensing
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Blockchain-secured transactions
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Real-time fuel availability
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Smart routing and directions
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row align-items-center min-vh-50">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="d-flex align-items-center mb-4">
+                <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="me-3" style="height: 80px; width: auto;" />
+                <div>
+                    <h1 class="display-4 fw-bold mb-0">PetroChain™</h1>
+                    <p class="lead mb-0 text-muted">Blockchain-Enabled Automated Fuel Management System</p>
+                </div>
+            </div>
+            <p class="mb-5">Transform your fuel retail operations with automated dispensing, secure blockchain transactions, and real-time fuel availability tracking. Designed for efficiency, transparency, and reliability.</p>
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <a asp-area="Identity" asp-page="/Account/Register" class="text-decoration-none">
+                        <div class="card border-0 shadow-lg h-100 text-center hover-lift gradient-signup" style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; overflow: hidden; position: relative;">
+                            <div class="card-body p-5 position-relative" style="z-index: 2;">
+                                <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="mb-3" style="height: 40px; width: auto; filter: brightness(0) invert(1); opacity: 0.9;" />
+                                <div class="bg-white bg-opacity-30 rounded-circle mb-4 d-inline-flex align-items-center justify-content-center shadow-lg" style="width: 100px; height: 100px; backdrop-filter: blur(10px); border: 3px solid rgba(255,255,255,0.4);">
+                                    <i class="bi bi-person-plus-fill text-primary" style="font-size: 50px; line-height: 1;"></i>
+                                </div>
+                                <h3 class="card-title fw-bold mb-3 text-white">Get Started</h3>
+                                <p class="card-text text-white mb-4" style="opacity: 0.95;">Create a new account and start using PetroChain™</p>
+                                <div class="d-inline-flex align-items-center text-white fw-semibold">
+                                    <span class="me-2">Register Now</span>
+                                    <i class="bi bi-arrow-right-circle-fill"></i>
+                                </div>
+                            </div>
+                            <div class="position-absolute top-0 end-0" style="width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(30%, -30%);"></div>
+                            <div class="position-absolute bottom-0 start-0" style="width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(-30%, 30%);"></div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a asp-area="Identity" asp-page="/Account/Login" class="text-decoration-none">
+                        <div class="card border-0 shadow-lg h-100 text-center hover-lift gradient-signin" style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; overflow: hidden; position: relative;">
+                            <div class="card-body p-5 position-relative" style="z-index: 2;">
+                                <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="mb-3" style="height: 40px; width: auto; filter: brightness(0) invert(1); opacity: 0.9;" />
+                                <div class="bg-white bg-opacity-30 rounded-circle mb-4 d-inline-flex align-items-center justify-content-center shadow-lg" style="width: 100px; height: 100px; backdrop-filter: blur(10px); border: 3px solid rgba(255,255,255,0.4);">
+                                    <i class="bi bi-box-arrow-in-right text-info" style="font-size: 50px; line-height: 1;"></i>
+                                </div>
+                                <h3 class="card-title fw-bold mb-3 text-white">Sign In</h3>
+                                <p class="card-text text-white mb-4" style="opacity: 0.95;">Access your existing PetroChain™ account</p>
+                                <div class="d-inline-flex align-items-center text-white fw-semibold">
+                                    <span class="me-2">Login</span>
+                                    <i class="bi bi-arrow-right-circle-fill"></i>
+                                </div>
+                            </div>
+                            <div class="position-absolute top-0 start-0" style="width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(-30%, -30%);"></div>
+                            <div class="position-absolute bottom-0 end-0" style="width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(30%, 30%);"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="bg-primary bg-opacity-10 rounded p-3 mb-3 d-inline-block">
+                                <i class="bi bi-credit-card text-white" style="font-size: 32px;"></i>
+                            </div>
+                            <h5 class="card-title">Smart Cards</h5>
+                            <p class="card-text text-muted small">Prepaid PetroCards for secure, automated fuel purchases without cash handling.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="bg-success bg-opacity-10 rounded p-3 mb-3 d-inline-block">
+                                <i class="bi bi-fuel-pump text-white" style="font-size: 32px;"></i>
+                            </div>
+                            <h5 class="card-title">Real-Time Availability</h5>
+                            <p class="card-text text-muted small">Check fuel availability and station status in real-time to avoid wasted trips.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="bg-info bg-opacity-10 rounded p-3 mb-3 d-inline-block">
+                                <i class="bi bi-shield-check text-white" style="font-size: 32px;"></i>
+                            </div>
+                            <h5 class="card-title">Blockchain Security</h5>
+                            <p class="card-text text-muted small">Immutable transaction records prevent fraud and ensure complete transparency.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="bg-warning bg-opacity-10 rounded p-3 mb-3 d-inline-block">
+                                <i class="bi bi-geo-alt text-white" style="font-size: 32px;"></i>
+                            </div>
+                            <h5 class="card-title">Smart Routing</h5>
+                            <p class="card-text text-muted small">Get directions to the nearest available fuel station with optimal routing.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-5 border-top">
+        <div class="col-12">
+            <h3 class="fw-bold mb-4 text-center">Key Benefits</h3>
+            <div class="row g-4">
+                <div class="col-md-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-shield-check text-primary" style="font-size: 48px;"></i>
+                    </div>
+                    <h5>Reduced Fraud</h5>
+                    <p class="text-muted">Blockchain-secured transactions eliminate coupon duplication and unauthorized access.</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-speedometer2 text-success" style="font-size: 48px;"></i>
+                    </div>
+                    <h5>Operational Efficiency</h5>
+                    <p class="text-muted">Automated dispensing reduces human error and speeds up service delivery.</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-heart text-info" style="font-size: 48px;"></i>
+                    </div>
+                    <h5>Better Experience</h5>
+                    <p class="text-muted">Real-time information helps customers find fuel faster and avoid unnecessary trips.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <style>
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .gradient-signup {
+            background: linear-gradient(135deg, #1D4ED8 0%, #3B82F6 50%, #60A5FA 100%);
+        }
+        
+        .gradient-signin {
+            background: linear-gradient(135deg, #0891B2 0%, #06B6D4 50%, #22D3EE 100%);
+        }
+        
+        .gradient-signup:hover {
+            background: linear-gradient(135deg, #1E40AF 0%, #2563EB 50%, #3B82F6 100%);
+        }
+        
+        .gradient-signin:hover {
+            background: linear-gradient(135deg, #0E7490 0%, #0891B2 50%, #06B6D4 100%);
+        }
+    </style>
+}
