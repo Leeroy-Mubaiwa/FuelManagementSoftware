@@ -12,86 +12,181 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-light bg-white border-bottom box-shadow">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
                     <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="me-2" style="height: 40px; width: auto;" />
                     <span class="fw-bold">PetroChain™</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="FuelDispensing" asp-action="Index">Fuel Dispensing</a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="availabilityDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Fuel Availability
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="availabilityDropdown">
-                                    <li><a class="dropdown-item" asp-controller="FuelAvailability" asp-action="Index">List View</a></li>
-                                    <li><a class="dropdown-item" asp-controller="FuelAvailability" asp-action="Map">Map & Directions</a></li>
-                                </ul>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="managementDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Management
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="managementDropdown">
-                                    <li><a class="dropdown-item" asp-controller="FuelStation" asp-action="Index">Stations</a></li>
-                                    <li><a class="dropdown-item" asp-controller="FuelPump" asp-action="Index">Pumps</a></li>
-                                    <li><a class="dropdown-item" asp-controller="PetroCard" asp-action="Index">PetroCards</a></li>
-                                    <li><a class="dropdown-item" asp-controller="FuelStock" asp-action="Index">Fuel Stock</a></li>
-                                    <li><a class="dropdown-item" asp-controller="FuelType" asp-action="Index">Fuel Types</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" asp-controller="FuelTransaction" asp-action="Index">Transactions</a></li>
-                                    <li><a class="dropdown-item" asp-controller="BlockchainTransaction" asp-action="Index">Blockchain Transactions</a></li>
-                                </ul>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Reports
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
-                                    <li><a class="dropdown-item" asp-controller="FuelTransaction" asp-action="Index">Sales Reports</a></li>
-                                    <li><a class="dropdown-item" asp-controller="FuelStock" asp-action="Index">Stock Reports</a></li>
-                                    <li><a class="dropdown-item" asp-controller="FuelTransaction" asp-action="Index">Transaction History</a></li>
-                                    <li><a class="dropdown-item" asp-controller="BlockchainTransaction" asp-action="Index">Blockchain Records</a></li>
-                                </ul>
-                            </li>
-                            @if (User.IsInRole("SuperAdmin") || User.IsInRole("SystemAdmin") || User.IsInRole("OrganizationAdmin"))
-                            {
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Administration
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                                        <li><a class="dropdown-item" href="#">Organizations</a></li>
-                                        <li><a class="dropdown-item" href="#">Users</a></li>
-                                        <li><a class="dropdown-item" href="#">Roles</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="#">System Configuration</a></li>
-                                    </ul>
-                                </li>
-                            }
-                        }
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+                        <i class="bi bi-list"></i> Menu
+                    </button>
+                }
+                else
+                {
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-outline-primary btn-sm" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                        <a class="btn btn-primary btn-sm" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                    </div>
+                }
             </div>
         </nav>
     </header>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <!-- Offcanvas Sidebar Menu -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+            <div class="offcanvas-header border-bottom">
+                <div class="d-flex align-items-center">
+                    <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="me-2" style="height: 35px; width: auto;" />
+                    <h5 class="offcanvas-title fw-bold mb-0" id="sidebarMenuLabel">Menu</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-0 d-flex flex-column">
+                <nav class="nav flex-column flex-grow-1">
+                    <a class="nav-link px-3 py-2 border-bottom" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house-door me-2"></i>Home
+                    </a>
+                    <a class="nav-link px-3 py-2 border-bottom" asp-controller="FuelDispensing" asp-action="Index">
+                        <i class="bi bi-fuel-pump me-2"></i>Fuel Dispensing
+                    </a>
+                    
+                    <!-- Fuel Availability -->
+                    <div class="border-bottom">
+                        <a class="nav-link px-3 py-2" data-bs-toggle="collapse" href="#availabilityCollapse" role="button" aria-expanded="false" aria-controls="availabilityCollapse">
+                            <i class="bi bi-geo-alt me-2"></i>Fuel Availability
+                            <i class="bi bi-chevron-down float-end"></i>
+                        </a>
+                        <div class="collapse" id="availabilityCollapse">
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelAvailability" asp-action="Index">
+                                <i class="bi bi-list-ul me-2"></i>List View
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelAvailability" asp-action="Map">
+                                <i class="bi bi-map me-2"></i>Map & Directions
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Management -->
+                    <div class="border-bottom">
+                        <a class="nav-link px-3 py-2" data-bs-toggle="collapse" href="#managementCollapse" role="button" aria-expanded="false" aria-controls="managementCollapse">
+                            <i class="bi bi-gear me-2"></i>Management
+                            <i class="bi bi-chevron-down float-end"></i>
+                        </a>
+                        <div class="collapse" id="managementCollapse">
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelStation" asp-action="Index">
+                                <i class="bi bi-building me-2"></i>Stations
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelPump" asp-action="Index">
+                                <i class="bi bi-droplet me-2"></i>Pumps
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="PetroCard" asp-action="Index">
+                                <i class="bi bi-credit-card me-2"></i>PetroCards
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelStock" asp-action="Index">
+                                <i class="bi bi-box-seam me-2"></i>Fuel Stock
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelType" asp-action="Index">
+                                <i class="bi bi-tag me-2"></i>Fuel Types
+                            </a>
+                            <hr class="my-1">
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelTransaction" asp-action="Index">
+                                <i class="bi bi-receipt me-2"></i>Transactions
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="BlockchainTransaction" asp-action="Index">
+                                <i class="bi bi-link-45deg me-2"></i>Blockchain Transactions
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Reports -->
+                    <div class="border-bottom">
+                        <a class="nav-link px-3 py-2" data-bs-toggle="collapse" href="#reportsCollapse" role="button" aria-expanded="false" aria-controls="reportsCollapse">
+                            <i class="bi bi-graph-up me-2"></i>Reports
+                            <i class="bi bi-chevron-down float-end"></i>
+                        </a>
+                        <div class="collapse" id="reportsCollapse">
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelTransaction" asp-action="Index">
+                                <i class="bi bi-cart-check me-2"></i>Sales Reports
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelStock" asp-action="Index">
+                                <i class="bi bi-boxes me-2"></i>Stock Reports
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelTransaction" asp-action="Index">
+                                <i class="bi bi-clock-history me-2"></i>Transaction History
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="BlockchainTransaction" asp-action="Index">
+                                <i class="bi bi-shield-check me-2"></i>Blockchain Records
+                            </a>
+                        </div>
+                    </div>
+
+                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("SystemAdmin") || User.IsInRole("OrganizationAdmin"))
+                    {
+                        <!-- Administration -->
+                        <div class="border-bottom">
+                            <a class="nav-link px-3 py-2" data-bs-toggle="collapse" href="#adminCollapse" role="button" aria-expanded="false" aria-controls="adminCollapse">
+                                <i class="bi bi-shield-lock me-2"></i>Administration
+                                <i class="bi bi-chevron-down float-end"></i>
+                            </a>
+                            <div class="collapse" id="adminCollapse">
+                                <a class="nav-link px-3 py-2 ps-5" href="#">
+                                    <i class="bi bi-building me-2"></i>Organizations
+                                </a>
+                                <a class="nav-link px-3 py-2 ps-5" href="#">
+                                    <i class="bi bi-people me-2"></i>Users
+                                </a>
+                                <a class="nav-link px-3 py-2 ps-5" href="#">
+                                    <i class="bi bi-person-badge me-2"></i>Roles
+                                </a>
+                                <hr class="my-1">
+                                <a class="nav-link px-3 py-2 ps-5" href="#">
+                                    <i class="bi bi-sliders me-2"></i>System Configuration
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <a class="nav-link px-3 py-2 border-bottom" asp-area="" asp-controller="Home" asp-action="Privacy">
+                        <i class="bi bi-shield-check me-2"></i>Privacy
+                    </a>
+                </nav>
+
+                <!-- User Section at Bottom -->
+                <div class="border-top mt-auto p-3">
+                    @using Microsoft.AspNetCore.Identity
+                    @using FuelManagementSoftware.Areas.Identity.Data
+                    @inject SignInManager<FuelManagementSoftwareUser> SignInManager
+                    @inject UserManager<FuelManagementSoftwareUser> UserManager
+                    
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-person-circle me-2" style="font-size: 24px;"></i>
+                                <div>
+                                    <div class="fw-semibold">@UserManager.GetUserName(User)</div>
+                                    <small class="text-muted">Logged in</small>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="nav-link px-3 py-2" asp-area="Identity" asp-page="/Account/Manage/Index">
+                            <i class="bi bi-gear me-2"></i>Manage Account
+                        </a>
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" class="mt-2">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-box-arrow-right me-2"></i>Logout
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
     <div class="container"> 
         <main role="main" class="pb-3">
             @RenderBody()
@@ -117,6 +212,45 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <style>
+        .offcanvas {
+            width: 280px !important;
+        }
+        
+        @@media (min-width: 992px) {
+            .offcanvas {
+                width: 300px !important;
+            }
+        }
+        
+        .offcanvas-body .nav-link {
+            color: #1E293B;
+            transition: all 0.2s;
+        }
+        
+        .offcanvas-body .nav-link:hover {
+            background-color: #F8FAFC;
+            color: #1D4ED8;
+        }
+        
+        .offcanvas-body .nav-link.active {
+            background-color: #1D4ED8;
+            color: white;
+        }
+        
+        .offcanvas-body .collapse .nav-link {
+            font-size: 0.9rem;
+        }
+        
+        .offcanvas-body .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .offcanvas-header {
+            background-color: #F8FAFC;
+        }
+    </style>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
