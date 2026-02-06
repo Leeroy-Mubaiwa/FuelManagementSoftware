@@ -20,7 +20,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Instructions</h5>
                     <ol>
-                        <li>Tap your NFC card on the reader</li>
+                        <li>Tap your PetroCard on this device</li>
                         <li>Enter your PIN if required</li>
                         <li>Select the quantity (or leave empty for fill-up)</li>
                         <li>Click "Start Dispensing"</li>
@@ -33,15 +33,17 @@
                 <input type="hidden" name="FuelPumpId" value="@pump?.Id" />
                 <input type="hidden" name="FuelTypeId" value="@pump?.FuelTypeId" />
                 
+                <div id="nfcStatus" class="alert alert-info small mb-3">Checking card reader...</div>
+
                 <div class="form-group mb-3">
-                    <label for="NfcTag" class="form-label">NFC Tag</label>
+                    <label for="NfcTag" class="form-label">Card ID</label>
                     <div class="input-group">
                         <input type="text" class="form-control" id="NfcTag" name="NfcTag" required readonly />
                         <button type="button" class="btn btn-outline-secondary" id="readNfcBtn" onclick="readNfcTag()">
-                            <span id="readNfcBtnText">Read NFC Tag</span>
+                            <i class="bi bi-wifi me-1"></i><span id="readNfcBtnText">Tap Card</span>
                         </button>
                     </div>
-                    <small class="form-text text-muted">Tap your card and click "Read NFC Tag"</small>
+                    <small class="form-text text-muted">Tap your PetroCard on this device, or use the button to read</small>
                 </div>
                 
                 <div class="form-group mb-3" id="cardInfo" style="display: none;">
@@ -72,49 +74,104 @@
     <script>
         let pumpId = @pump?.Id;
         let requiresPin = false;
-        
-        function readNfcTag() {
+        let nfcSupported = ('NDEFReader' in window);
+
+        // Show NFC status
+        document.addEventListener('DOMContentLoaded', function () {
+            const nfcStatus = document.getElementById('nfcStatus');
+            if (nfcSupported) {
+                nfcStatus.innerHTML = '<i class="bi bi-wifi me-1"></i>Card reader ready — tap your PetroCard on this device';
+                nfcStatus.className = 'alert alert-success small';
+            } else {
+                nfcStatus.innerHTML = '<i class="bi bi-wifi-off me-1"></i>Contactless reading not available on this browser. You can type your card ID manually, or use Chrome on an Android device.';
+                nfcStatus.className = 'alert alert-warning small';
+                document.getElementById('NfcTag').removeAttribute('readonly');
+            }
+        });
+
+        async function readNfcTag() {
             const btn = document.getElementById('readNfcBtn');
             const btnText = document.getElementById('readNfcBtnText');
             const nfcTagInput = document.getElementById('NfcTag');
-            const cardInfo = document.getElementById('cardInfo');
-            const startBtn = document.getElementById('startBtn');
-            
-            btn.disabled = true;
-            btnText.textContent = 'Reading...';
-            
-            fetch(`/FuelDispensing/ReadNfcTag?pumpId=${pumpId}`)
-                .then(response => response.json())
-                .then(data => {
+
+            if (nfcSupported) {
+                // Use real Web NFC API
+                btn.disabled = true;
+                btnText.textContent = 'Waiting for tap...';
+                try {
+                    const ndef = new NDEFReader();
+                    await ndef.scan();
+                    ndef.addEventListener('reading', ({ serialNumber }) => {
+                        const uid = serialNumber.replace(/:/g, '').toUpperCase();
+                        nfcTagInput.value = uid;
+                        btnText.textContent = 'Tap Card';
+                        btn.disabled = false;
+                        lookupCard(uid);
+                    }, { once: true });
+                } catch (error) {
+                    console.error('Card read error:', error);
+                    btnText.textContent = 'Tap Card';
+                    btn.disabled = false;
+                    alert('Could not read your card. Please try again.');
+                }
+            } else {
+                // Fallback: use server-side NFC reader or manual entry
+                btn.disabled = true;
+                btnText.textContent = 'Reading...';
+                try {
+                    const response = await fetch(`/FuelDispensing/ReadNfcTag?pumpId=${pumpId}`);
+                    const data = await response.json();
                     if (data.success) {
                         nfcTagInput.value = data.nfcTag;
-                        document.getElementById('cardNumber').textContent = data.cardNumber;
-                        document.getElementById('cardBalance').textContent = data.balance.toFixed(2);
-                        document.getElementById('cardCurrency').textContent = data.currency;
-                        cardInfo.style.display = 'block';
-                        requiresPin = data.requiresPin;
-                        
-                        if (!requiresPin) {
-                            startBtn.disabled = false;
-                        } else {
-                            const pinInput = document.getElementById('Pin');
-                            pinInput.required = true;
-                            pinInput.addEventListener('input', function() {
-                                startBtn.disabled = pinInput.value.length < 4;
-                            });
-                        }
+                        showCardInfo(data);
                     } else {
-                        alert(data.message || 'Failed to read NFC tag');
+                        // Allow manual entry
+                        nfcTagInput.removeAttribute('readonly');
+                        nfcTagInput.focus();
+                        alert(data.message || 'No card detected. You can type your card ID manually.');
                     }
-                })
-                .catch(error => {
+                } catch (error) {
                     console.error('Error:', error);
-                    alert('Error reading NFC tag');
-                })
-                .finally(() => {
+                    nfcTagInput.removeAttribute('readonly');
+                    alert('Could not read card. You can type your card ID manually.');
+                } finally {
                     btn.disabled = false;
-                    btnText.textContent = 'Read NFC Tag';
+                    btnText.textContent = 'Tap Card';
+                }
+            }
+        }
+
+        async function lookupCard(nfcTag) {
+            try {
+                const response = await fetch(`/FuelDispensing/LookupCard?nfcTag=${encodeURIComponent(nfcTag)}`);
+                const data = await response.json();
+                if (data.success) {
+                    showCardInfo(data);
+                } else {
+                    alert(data.message || 'Card not recognised. Please check and try again.');
+                }
+            } catch (error) {
+                console.error('Card lookup error:', error);
+            }
+        }
+
+        function showCardInfo(data) {
+            document.getElementById('cardNumber').textContent = data.cardNumber;
+            document.getElementById('cardBalance').textContent = data.balance.toFixed(2);
+            document.getElementById('cardCurrency').textContent = data.currency;
+            document.getElementById('cardInfo').style.display = 'block';
+            requiresPin = data.requiresPin;
+            const startBtn = document.getElementById('startBtn');
+
+            if (!requiresPin) {
+                startBtn.disabled = false;
+            } else {
+                const pinInput = document.getElementById('Pin');
+                pinInput.required = true;
+                pinInput.addEventListener('input', function () {
+                    startBtn.disabled = pinInput.value.length < 4;
                 });
+            }
         }
     </script>
 }

@@ -1,0 +1,174 @@
+@{
+    ViewData["Title"] = "Verify Transaction";
+    var chainResult = ViewBag.ChainResult as FuelManagementSoftware.Services.BlockchainVerifyResult;
+    var dbRecord = ViewBag.DbRecord as FuelManagementSoftware.Models.BlockchainTransaction;
+    var transactionNumber = ViewBag.TransactionNumber as string;
+    var explorerTxUrl = ViewBag.ExplorerTxUrl as string;
+    var contractAddress = ViewBag.ContractAddress as string;
+    var isConfigured = (bool)(ViewBag.IsConfigured ?? false);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>Verify Transaction</h4>
+    <a asp-action="Index" class="btn btn-sm btn-secondary">Back to List</a>
+</div>
+
+@if (!isConfigured)
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>Transaction verification is currently unavailable. Please contact your administrator.
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <p class="text-muted mb-3">Enter a fuel transaction number to check if it has been securely recorded and is tamper-proof.</p>
+        <form method="post">
+            @Html.AntiForgeryToken()
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label">Transaction Number</label>
+                    <input name="transactionNumber" type="text" class="form-control" placeholder="e.g. TXN-20260206-143022-1234" value="@transactionNumber" required />
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Verify</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(ViewBag.Error as string))
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+@if (chainResult != null)
+{
+    <div class="row">
+        <!-- On-Chain Verification -->
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header @(chainResult.ExistsOnChain ? "bg-success text-white" : chainResult.Success ? "bg-warning" : "bg-danger text-white")">
+                    <h6 class="mb-0">
+                        @if (chainResult.ExistsOnChain)
+                        {
+                            <i class="bi bi-check-circle-fill me-2"></i>@("Transaction Verified — Secure & Tamper-Proof")
+                        }
+                        else if (chainResult.Success)
+                        {
+                            <i class="bi bi-x-circle me-2"></i>@("Transaction Not Found in Secure Ledger")
+                        }
+                        else
+                        {
+                            <i class="bi bi-exclamation-triangle me-2"></i>@("Verification Could Not Be Completed")
+                        }
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (chainResult.ExistsOnChain)
+                    {
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5">Transaction #:</dt>
+                            <dd class="col-sm-7"><code>@chainResult.TransactionNumber</code></dd>
+                            <dt class="col-sm-5">Station:</dt>
+                            <dd class="col-sm-7">@chainResult.StationId</dd>
+                            <dt class="col-sm-5">Pump:</dt>
+                            <dd class="col-sm-7">@chainResult.PumpId</dd>
+                            <dt class="col-sm-5">Quantity:</dt>
+                            <dd class="col-sm-7">@chainResult.Quantity.ToString("F2") litres</dd>
+                            <dt class="col-sm-5">Amount:</dt>
+                            <dd class="col-sm-7"><strong>@chainResult.Amount.ToString("F2")</strong></dd>
+                            <dt class="col-sm-5">Card Fingerprint:</dt>
+                            <dd class="col-sm-7"><code class="small">@(chainResult.CardNumberHash?.Substring(0, Math.Min(16, chainResult.CardNumberHash?.Length ?? 0)))...</code></dd>
+                            <dt class="col-sm-5">Recorded At:</dt>
+                            <dd class="col-sm-7">@chainResult.BlockchainTimestamp?.ToString("MM/dd/yyyy HH:mm:ss") UTC</dd>
+                            <dt class="col-sm-5">Recorded By:</dt>
+                            <dd class="col-sm-7"><code class="small">@chainResult.RecorderAddress</code></dd>
+                            <dt class="col-sm-5">Record #:</dt>
+                            <dd class="col-sm-7">#@chainResult.RecordIndex</dd>
+                        </dl>
+                        <div class="mt-3 p-2 bg-light rounded">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>This record is permanently stored on a secure, tamper-proof ledger and cannot be changed or deleted.
+                            </small>
+                        </div>
+                    }
+                    else if (!chainResult.Success)
+                    {
+                        <p class="text-danger mb-0">Something went wrong while verifying. Please try again later.</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Transaction <code>@transactionNumber</code> was not found in the secure ledger. It may not have been recorded yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Record -->
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header @(dbRecord != null ? "bg-primary text-white" : "bg-light")">
+                    <h6 class="mb-0">
+                        @if (dbRecord != null)
+                        {
+                            <i class="bi bi-database-check me-2"></i>@("System Record")
+                        }
+                        else
+                        {
+                            <i class="bi bi-database-x me-2"></i>@("No System Record")
+                        }
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (dbRecord != null)
+                    {
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5">Reference:</dt>
+                            <dd class="col-sm-7"><code class="small">@dbRecord.BlockchainHash.Substring(0, Math.Min(20, dbRecord.BlockchainHash.Length))...</code></dd>
+                            <dt class="col-sm-5">Ledger Entry:</dt>
+                            <dd class="col-sm-7">@dbRecord.BlockNumber</dd>
+                            <dt class="col-sm-5">Network:</dt>
+                            <dd class="col-sm-7">@dbRecord.BlockchainNetwork</dd>
+                            <dt class="col-sm-5">Status:</dt>
+                            <dd class="col-sm-7"><span class="badge bg-success">@dbRecord.Status</span></dd>
+                            <dt class="col-sm-5">Processing Cost:</dt>
+                            <dd class="col-sm-7">@dbRecord.GasUsed</dd>
+                            <dt class="col-sm-5">Confirmed At:</dt>
+                            <dd class="col-sm-7">@dbRecord.ConfirmedAt?.ToString("MM/dd/yyyy HH:mm:ss")</dd>
+                        </dl>
+                        @if (!string.IsNullOrWhiteSpace(explorerTxUrl))
+                        {
+                            <div class="mt-3">
+                                <a href="@explorerTxUrl" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>View Public Proof
+                                </a>
+                                <a asp-action="Details" asp-route-id="@dbRecord.Id" class="btn btn-sm btn-outline-secondary">
+                                    Full Details
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">No matching record found in the system.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(contractAddress))
+{
+    <div class="card">
+        <div class="card-body">
+            <h6>Secure Ledger Info</h6>
+            <p class="mb-1"><small class="text-muted">Ledger Address:</small></p>
+            <code class="small">@contractAddress</code>
+            <br /><small class="text-muted">Network: Ethereum Sepolia</small>
+        </div>
+    </div>
+}
+

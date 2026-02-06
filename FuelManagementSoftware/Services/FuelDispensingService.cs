@@ -20,6 +20,7 @@ public class FuelDispensingService : IFuelDispensingService
     private readonly IPetroCardService _petroCardService;
     private readonly IFuelStockService _fuelStockService;
     private readonly IPumpControlService _pumpControlService;
+    private readonly IBlockchainService _blockchainService;
     private readonly ILogger<FuelDispensingService> _logger;
 
     public FuelDispensingService(
@@ -28,6 +29,7 @@ public class FuelDispensingService : IFuelDispensingService
         IPetroCardService petroCardService,
         IFuelStockService fuelStockService,
         IPumpControlService pumpControlService,
+        IBlockchainService blockchainService,
         ILogger<FuelDispensingService> logger)
     {
         _context = context;
@@ -35,6 +37,7 @@ public class FuelDispensingService : IFuelDispensingService
         _petroCardService = petroCardService;
         _fuelStockService = fuelStockService;
         _pumpControlService = pumpControlService;
+        _blockchainService = blockchainService;
         _logger = logger;
     }
 
@@ -290,6 +293,64 @@ public class FuelDispensingService : IFuelDispensingService
             cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Record to blockchain
+        try
+        {
+            if (_blockchainService.IsConfigured())
+            {
+                // Ensure PetroCard is loaded for hashing
+                if (transaction.PetroCard == null && transaction.PetroCardId.HasValue)
+                {
+                    await _context.Entry(transaction).Reference(t => t.PetroCard).LoadAsync(cancellationToken);
+                }
+
+                var blockchainResult = await _blockchainService.RecordTransactionAsync(transaction, cancellationToken);
+
+                if (blockchainResult.Success)
+                {
+                    var previousHash = await _context.BlockchainTransactions
+                        .Where(bt => bt.OrganisationId == transaction.OrganisationId && bt.Status == "Confirmed")
+                        .OrderByDescending(bt => bt.CreatedAt)
+                        .Select(bt => bt.BlockchainHash)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    var blockchainTx = new BlockchainTransaction
+                    {
+                        OrganisationId = transaction.OrganisationId,
+                        FuelTransactionId = transaction.Id,
+                        BlockchainHash = blockchainResult.TransactionHash!,
+                        PreviousHash = previousHash,
+                        BlockNumber = blockchainResult.BlockNumber,
+                        TransactionIndex = blockchainResult.TransactionIndex,
+                        BlockchainNetwork = "Sepolia",
+                        SmartContractAddress = blockchainResult.ContractAddress,
+                        GasUsed = blockchainResult.GasUsed,
+                        Status = "Confirmed",
+                        ConfirmationCount = 1,
+                        CreatedAt = DateTime.UtcNow,
+                        ConfirmedAt = DateTime.UtcNow,
+                        CreatorId = transaction.CreatorId
+                    };
+
+                    _context.BlockchainTransactions.Add(blockchainTx);
+                    await _context.SaveChangesAsync(cancellationToken);
+
+                    _logger.LogInformation("Transaction {TxNumber} recorded on Sepolia blockchain. Hash: {Hash}",
+                        transaction.TransactionNumber, blockchainResult.TransactionHash);
+                }
+                else
+                {
+                    _logger.LogWarning("Blockchain recording failed for {TxNumber}: {Error}",
+                        transaction.TransactionNumber, blockchainResult.ErrorMessage);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Blockchain recording failed for transaction {TxNumber}. Fuel transaction still completed.",
+                transaction.TransactionNumber);
+        }
 
         _logger.LogInformation("Fuel dispensing completed for transaction {TransactionNumber}. Quantity: {Quantity}, Amount: {Amount}", 
             transaction.TransactionNumber, finalQuantity, transaction.TotalAmount);

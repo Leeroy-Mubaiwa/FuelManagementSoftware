@@ -1,0 +1,43 @@
+{
+  "name": "PetroChain - Fuel Management System",
+  "short_name": "PetroChain",
+  "description": "Blockchain-enabled automated fuel dispensing with real-time availability and routing",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#1D4ED8",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Fuel Availability",
+      "url": "/FuelAvailability",
+      "description": "Check real-time fuel availability"
+    },
+    {
+      "name": "Map & Routing",
+      "url": "/FuelAvailability/Map",
+      "description": "Find nearest fuel station"
+    },
+    {
+      "name": "Verify Transaction",
+      "url": "/BlockchainTransaction/Verify",
+      "description": "Verify a transaction on blockchain"
+    }
+  ]
+}
+

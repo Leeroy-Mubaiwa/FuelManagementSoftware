@@ -1,0 +1,919 @@
+@{
+    ViewData["Title"] = "User Manual";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-3">
+            <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="me-3" style="height: 50px; width: auto;" />
+            <div>
+                <h1 class="display-6 fw-bold mb-0">PetroChain™ User Manual</h1>
+                <p class="lead text-muted mb-0">Complete guide to using the Automated Fuel Management System</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Navigation -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="fw-bold mb-3"><i class="bi bi-signpost-split me-2 text-primary"></i>Quick Navigation</h5>
+        <div class="row g-2">
+            <div class="col-md-3 col-6">
+                <a href="#section-getting-started" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-play-circle me-1"></i>Getting Started
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#section-petrocard" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-credit-card me-1"></i>PetroCards
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#section-dispensing" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-fuel-pump me-1"></i>Fuel Dispensing
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#section-availability" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-geo-alt me-1"></i>Find Fuel
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#section-transactions" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-receipt me-1"></i>Transactions
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#section-secured-records" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-shield-check me-1"></i>Secured Records
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#section-verify" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-patch-check me-1"></i>Verify Records
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="#section-install" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-phone me-1"></i>Install App
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: GETTING STARTED -->
+<!-- ============================================================ -->
+<div id="section-getting-started" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-play-circle me-2"></i>1. Getting Started</h4>
+    </div>
+    <div class="card-body">
+        <h5 class="fw-bold">What is PetroChain™?</h5>
+        <p>
+            PetroChain™ is an <strong>Automated Fuel Management System</strong> designed to make buying fuel faster, safer, and more transparent.
+            Instead of relying on paper coupons, cash handling, and manual record-keeping, PetroChain™ uses:
+        </p>
+        <ul>
+            <li><strong>Prepaid Smart Cards (PetroCards)</strong> — tap-to-pay contactless cards for quick and secure fuel purchases</li>
+            <li><strong>Automated Fuel Dispensing</strong> — fuel is released automatically once your card is verified</li>
+            <li><strong>Real-Time Fuel Availability</strong> — check which stations have fuel before you travel</li>
+            <li><strong>Tamper-Proof Transaction Records</strong> — every transaction is permanently and securely stored so it can never be altered or deleted</li>
+        </ul>
+
+        <div class="alert alert-info border-0 mt-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>For your dissertation:</strong> PetroChain™ addresses three core objectives — (1) automated fuel dispensing with prepaid smart card functionality,
+            (2) secure, tamper-proof transaction management using <em>blockchain technology and smart contracts on the Ethereum Sepolia network</em>, and
+            (3) real-time fuel availability with routing. Every completed fuel transaction is recorded on a <em>public blockchain</em> via a <em>Solidity smart contract</em>,
+            making it independently verifiable by anyone.
+        </div>
+
+        <h5 class="fw-bold mt-4">Creating an Account</h5>
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <ol>
+                    <li>Click the <strong>Register</strong> button on the top-right of the home page.</li>
+                    <li>Enter your email address and choose a strong password.</li>
+                    <li>Confirm your password and click <strong>Register</strong>.</li>
+                    <li>Once registered, you will be logged in and redirected to the home page.</li>
+                </ol>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="bg-light rounded p-4">
+                    <i class="bi bi-person-plus-fill text-primary" style="font-size: 64px;"></i>
+                    <p class="mt-2 mb-0 text-muted small">Create your account to get started</p>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mt-4">Logging In</h5>
+        <ol>
+            <li>Click the <strong>Login</strong> button on the top-right.</li>
+            <li>Enter your email and password.</li>
+            <li>Click <strong>Log in</strong> to access the system.</li>
+        </ol>
+
+        <h5 class="fw-bold mt-4">Navigating the System</h5>
+        <p>
+            Once logged in, click the <strong><i class="bi bi-list"></i> Menu</strong> button on the top-right to open the sidebar menu.
+            From here, you can access all system features:
+        </p>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Menu Item</th>
+                            <th>What It Does</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="bi bi-house-door me-1"></i>Home</td>
+                            <td>Returns to the main dashboard</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-fuel-pump me-1"></i>Fuel Dispensing</td>
+                            <td>Start a fuel purchase</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-geo-alt me-1"></i>Fuel Availability</td>
+                            <td>Check fuel stock at stations</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-credit-card me-1"></i>PetroCards</td>
+                            <td>Manage your smart cards</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Menu Item</th>
+                            <th>What It Does</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="bi bi-receipt me-1"></i>Transactions</td>
+                            <td>View fuel purchase history</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-link-45deg me-1"></i>Secured Records</td>
+                            <td>View permanently secured records</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-shield-check me-1"></i>Verify Transaction</td>
+                            <td>Check if a record is authentic</td>
+                        </tr>
+                        <tr>
+                            <td><i class="bi bi-map me-1"></i>Map & Directions</td>
+                            <td>Find stations and get directions</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: PETROCARD -->
+<!-- ============================================================ -->
+<div id="section-petrocard" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-credit-card me-2"></i>2. PetroCards (Prepaid Smart Cards)</h4>
+    </div>
+    <div class="card-body">
+        <p>
+            A <strong>PetroCard</strong> is your prepaid smart card used to buy fuel. It works like a tap-to-pay card — you load money onto it,
+            then tap it at the fuel pump to pay for fuel automatically.
+        </p>
+
+        <h5 class="fw-bold mt-3">How PetroCards Work</h5>
+        <div class="row g-3 mb-3">
+            <div class="col-md-3 col-6 text-center">
+                <div class="bg-light rounded p-3">
+                    <i class="bi bi-credit-card-2-front text-primary" style="font-size: 40px;"></i>
+                    <p class="mt-2 mb-0 fw-semibold small">1. Get a Card</p>
+                    <p class="text-muted small mb-0">Register a PetroCard in the system</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 text-center">
+                <div class="bg-light rounded p-3">
+                    <i class="bi bi-wallet2 text-success" style="font-size: 40px;"></i>
+                    <p class="mt-2 mb-0 fw-semibold small">2. Load Funds</p>
+                    <p class="text-muted small mb-0">Top up your card with money</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 text-center">
+                <div class="bg-light rounded p-3">
+                    <i class="bi bi-nfc text-info" style="font-size: 40px;"></i>
+                    <p class="mt-2 mb-0 fw-semibold small">3. Tap to Pay</p>
+                    <p class="text-muted small mb-0">Tap your card at the pump</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 text-center">
+                <div class="bg-light rounded p-3">
+                    <i class="bi bi-check-circle text-success" style="font-size: 40px;"></i>
+                    <p class="mt-2 mb-0 fw-semibold small">4. Fuel Dispensed</p>
+                    <p class="text-muted small mb-0">Balance deducted, fuel dispensed</p>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold">Managing PetroCards</h5>
+        <p>Go to <strong>Menu → Management → PetroCards</strong> to:</p>
+        <ul>
+            <li><strong>View all cards</strong> — see card number, balance, status, and expiry date</li>
+            <li><strong>Create a new card</strong> — register a new PetroCard with a unique card number and NFC ID</li>
+            <li><strong>Top up a card</strong> — add funds to an existing card</li>
+            <li><strong>Edit card details</strong> — update card information</li>
+            <li><strong>View card details</strong> — see full card information including recent transactions</li>
+        </ul>
+
+        <h5 class="fw-bold mt-3">Topping Up a PetroCard</h5>
+        <ol>
+            <li>Go to <strong>PetroCards</strong> and find the card you want to top up.</li>
+            <li>Click the <strong>Top Up</strong> button.</li>
+            <li>Enter the amount you want to load onto the card.</li>
+            <li>Confirm the top-up — the new balance will be reflected immediately.</li>
+        </ol>
+
+        <h5 class="fw-bold mt-3">Card Security</h5>
+        <ul>
+            <li>Each card has a <strong>PIN</strong> for added security. The PIN is securely encrypted and never stored in plain text.</li>
+            <li>Cards can be <strong>blocked</strong> if lost or stolen to prevent unauthorised use.</li>
+            <li>Cards have an <strong>expiry date</strong> — expired cards cannot be used for purchases.</li>
+        </ul>
+
+        <div class="alert alert-info border-0 mt-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>For your dissertation:</strong> PetroCards use <em>NFC (Near Field Communication)</em> technology for contactless authentication at fuel pumps.
+            The Web NFC API enables browser-based card reading on supported devices, with a server-side fallback for other environments.
+            Card PINs are hashed using the <em>BCrypt</em> algorithm, ensuring they cannot be reverse-engineered even if the database is compromised.
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: FUEL DISPENSING -->
+<!-- ============================================================ -->
+<div id="section-dispensing" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-fuel-pump me-2"></i>3. Fuel Dispensing</h4>
+    </div>
+    <div class="card-body">
+        <p>
+            PetroChain™ automates the entire fuel dispensing process — from card tap to fuel delivery.
+            No cash handling, no paper coupons, no manual calculations.
+        </p>
+
+        <h5 class="fw-bold">Step-by-Step: Buying Fuel</h5>
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">1</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Select a Station</h6>
+                        <p class="text-muted mb-0">Go to <strong>Menu → Fuel Dispensing</strong>. Choose the fuel station where you are located from the list of available stations.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start mb-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">2</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Select a Pump</h6>
+                        <p class="text-muted mb-0">Choose the pump number you are standing at. Only active pumps with fuel in stock are shown.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start mb-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">3</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Tap Your PetroCard</h6>
+                        <p class="text-muted mb-0">Tap your PetroCard on the device. The system reads your card and checks your identity and balance. If your device supports contactless reading, hold your card near the device. Otherwise, you can enter your Card ID manually.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start mb-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">4</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Enter Your PIN</h6>
+                        <p class="text-muted mb-0">If your card has a PIN, enter it when prompted. This verifies that you are the rightful card owner.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start mb-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">5</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Enter Fuel Amount</h6>
+                        <p class="text-muted mb-0">Enter how many litres you want, or the total dollar amount. The system checks that you have enough balance and that the station has enough stock.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start mb-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">6</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Fuel is Dispensed</h6>
+                        <p class="text-muted mb-0">The pump activates and fuel is dispensed. You can monitor the progress in real time on the dispensing screen.</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">7</div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Transaction Complete</h6>
+                        <p class="text-muted mb-0">When dispensing finishes, your card balance is deducted and a transaction record is created. The record is then <strong>permanently secured</strong> so it can never be altered or deleted.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold">Cancelling a Transaction</h5>
+        <p>If you need to cancel during dispensing, click the <strong>Cancel</strong> button. Only the fuel already dispensed will be charged to your card.</p>
+
+        <div class="alert alert-info border-0 mt-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>For your dissertation:</strong> The automated dispensing workflow orchestrates multiple services — <em>NFC card authentication</em>,
+            <em>PIN verification (BCrypt)</em>, <em>fuel stock management</em>, and <em>pump control</em>. Upon completion, the transaction is submitted to the
+            <em>Ethereum Sepolia blockchain</em> via a <em>Solidity smart contract</em> called <code>FuelTransactionLedger</code>. This contract stores the
+            transaction number, station ID, pump ID, quantity, amount, and a hashed card identifier on-chain, making the record publicly verifiable and immutable.
+            The pump status is broadcast in real time using <em>SignalR</em> WebSocket connections.
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: FUEL AVAILABILITY -->
+<!-- ============================================================ -->
+<div id="section-availability" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-geo-alt me-2"></i>4. Fuel Availability & Routing</h4>
+    </div>
+    <div class="card-body">
+        <p>
+            Never waste a trip to a station that has no fuel. PetroChain™ shows you <strong>real-time fuel availability</strong>
+            at every station, along with <strong>directions</strong> to get there.
+        </p>
+
+        <h5 class="fw-bold mt-3">List View</h5>
+        <p>Go to <strong>Menu → Fuel Availability → List View</strong> to see:</p>
+        <ul>
+            <li><strong>Station name and location</strong></li>
+            <li><strong>Available fuel types</strong> (Petrol, Diesel, etc.) with current stock levels</li>
+            <li><strong>Station status</strong> — Open, Closed, or Offloading (temporarily closed for tanker delivery)</li>
+            <li><strong>Estimated queue length</strong> and wait time</li>
+            <li><strong>Distance from your location</strong></li>
+        </ul>
+        <p>You can <strong>filter by fuel type</strong> to show only stations that have the fuel you need.</p>
+
+        <h5 class="fw-bold mt-3">Map View & Directions</h5>
+        <p>Go to <strong>Menu → Fuel Availability → Map & Directions</strong> to see all stations on an interactive map.</p>
+        <div class="row g-3 mb-3">
+            <div class="col-md-4 text-center">
+                <div class="bg-light rounded p-3">
+                    <span class="badge bg-success mb-2" style="font-size: 14px;">● Green</span>
+                    <p class="mb-0 small text-muted">Station has fuel available</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="bg-light rounded p-3">
+                    <span class="badge bg-warning text-dark mb-2" style="font-size: 14px;">● Amber</span>
+                    <p class="mb-0 small text-muted">Low stock — fuel running out</p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="bg-light rounded p-3">
+                    <span class="badge bg-danger mb-2" style="font-size: 14px;">● Red</span>
+                    <p class="mb-0 small text-muted">Closed or no fuel</p>
+                </div>
+            </div>
+        </div>
+        <p>Click on any station marker to see details, then click <strong>Get Directions</strong> to get turn-by-turn driving directions from your current location.</p>
+
+        <h5 class="fw-bold mt-3">Queue Information</h5>
+        <p>For each station, you can see:</p>
+        <ul>
+            <li><strong>Estimated number of vehicles</strong> in the queue</li>
+            <li><strong>Estimated wait time</strong> in minutes</li>
+            <li><strong>Number of active pumps</strong> currently serving customers</li>
+        </ul>
+
+        <div class="alert alert-info border-0 mt-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>For your dissertation:</strong> The map uses <em>Leaflet.js</em> with <em>OpenStreetMap</em> tiles and the <em>OSRM (Open Source Routing Machine)</em>
+            for turn-by-turn directions. Fuel stock data is sourced from the <code>FuelStock</code> table, updated in real time as transactions are processed.
+            Queue data is stored in the <code>QueueInformation</code> model. The system uses the browser's <em>Geolocation API</em> to determine the user's position
+            and calculates distances to each station.
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: FUEL TRANSACTIONS -->
+<!-- ============================================================ -->
+<div id="section-transactions" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-receipt me-2"></i>5. Fuel Transactions</h4>
+    </div>
+    <div class="card-body">
+        <p>
+            Every fuel purchase generates a detailed transaction record. You can view all your transactions
+            and drill down into the details of each one.
+        </p>
+
+        <h5 class="fw-bold">Viewing Transactions</h5>
+        <p>Go to <strong>Menu → Management → Transactions</strong> to see a list of all fuel transactions. Each entry shows:</p>
+        <ul>
+            <li><strong>Transaction Number</strong> — a unique identifier for the purchase</li>
+            <li><strong>Date & Time</strong> — when the transaction took place</li>
+            <li><strong>Station</strong> — where the fuel was purchased</li>
+            <li><strong>Pump</strong> — which pump was used</li>
+            <li><strong>Fuel Type</strong> — Petrol, Diesel, etc.</li>
+            <li><strong>Quantity</strong> — how many litres were dispensed</li>
+            <li><strong>Unit Price</strong> — price per litre</li>
+            <li><strong>Total Amount</strong> — total cost of the purchase</li>
+            <li><strong>Status</strong> — Completed, Pending, or Cancelled</li>
+        </ul>
+
+        <h5 class="fw-bold mt-3">Transaction Details</h5>
+        <p>Click on any transaction to see the full details, including:</p>
+        <ul>
+            <li>The PetroCard used for the purchase</li>
+            <li>Start and end times of the dispensing process</li>
+            <li>Whether the transaction has been permanently secured (recorded in the tamper-proof ledger)</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6: SECURED RECORDS -->
+<!-- ============================================================ -->
+<div id="section-secured-records" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>6. Secured Records (Tamper-Proof Ledger)</h4>
+    </div>
+    <div class="card-body">
+        <p>
+            PetroChain™ doesn't just store transaction records in a regular database — every completed fuel purchase is also
+            <strong>permanently recorded in a tamper-proof public ledger</strong>. This means the record:
+        </p>
+        <ul>
+            <li><i class="bi bi-check-circle text-success me-1"></i><strong>Cannot be changed</strong> — once recorded, no one can modify the details</li>
+            <li><i class="bi bi-check-circle text-success me-1"></i><strong>Cannot be deleted</strong> — the record exists permanently</li>
+            <li><i class="bi bi-check-circle text-success me-1"></i><strong>Is publicly verifiable</strong> — anyone can independently confirm the record is real</li>
+            <li><i class="bi bi-check-circle text-success me-1"></i><strong>Prevents fraud</strong> — duplicate coupons and false records are impossible</li>
+        </ul>
+
+        <h5 class="fw-bold mt-3">Viewing Secured Records</h5>
+        <p>Go to <strong>Menu → Management → Secured Records</strong> to see all transactions that have been permanently secured. Each entry shows:</p>
+        <ul>
+            <li><strong>Reference</strong> — a unique identifier for the secured record</li>
+            <li><strong>Ledger Entry</strong> — the position of the record in the public ledger</li>
+            <li><strong>Status</strong> — whether the record has been confirmed</li>
+            <li><strong>Processing Cost</strong> — the cost of securing the record</li>
+            <li><strong>Timestamp</strong> — when the record was permanently saved</li>
+        </ul>
+
+        <h5 class="fw-bold mt-3">Why This Matters</h5>
+        <p>
+            In Zimbabwe, paper-based fuel coupon systems have led to significant fraud losses through coupon duplication and theft.
+            PetroChain™'s tamper-proof records solve this problem by making it <strong>physically impossible</strong> to create fake records
+            or alter existing ones. Every record can be independently verified by fuel companies, auditors, and regulators.
+        </p>
+
+        <div class="alert alert-info border-0 mt-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>For your dissertation:</strong> Secured records are stored on the <em>Ethereum Sepolia blockchain</em> — a real, public, decentralised network.
+            Each fuel transaction is recorded using a <em>Solidity smart contract</em> called <code>FuelTransactionLedger</code>, which stores data in an immutable
+            on-chain array. The contract uses a <code>mapping(string => uint256)</code> to prevent duplicate transaction recording. The "Reference" shown
+            in the UI is the <em>Ethereum transaction hash (TxHash)</em>, "Ledger Entry" is the <em>block number</em>, and "Processing Cost" is the <em>gas consumed</em>
+            by the transaction. The contract is deployed at address <code>0xc32eab1c4ff86070621533b5dfe04c8579ad0d54</code> on Sepolia and can be viewed on
+            <a href="https://sepolia.etherscan.io/address/0xc32eab1c4ff86070621533b5dfe04c8579ad0d54" target="_blank">Etherscan</a>.
+            Interaction is handled by the <em>Nethereum</em> .NET library.
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 7: VERIFY TRANSACTION -->
+<!-- ============================================================ -->
+<div id="section-verify" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-patch-check me-2"></i>7. Verifying a Transaction</h4>
+    </div>
+    <div class="card-body">
+        <p>
+            You can independently verify that any fuel transaction has been permanently secured and has not been tampered with.
+            This is useful for audits, dispute resolution, and ensuring transparency.
+        </p>
+
+        <h5 class="fw-bold">How to Verify</h5>
+        <ol>
+            <li>Go to <strong>Menu → Management → Verify Transaction</strong>.</li>
+            <li>Enter the <strong>Transaction Number</strong> of the fuel purchase you want to verify.</li>
+            <li>Click <strong>Verify</strong>.</li>
+            <li>The system will check the public ledger and show you the results:</li>
+        </ol>
+
+        <div class="row g-3 mt-2 mb-3">
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light">
+                    <h6 class="fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i>Transaction Verified</h6>
+                    <p class="mb-0 small text-muted">
+                        The record was found in the public ledger. You can see the full details including station, pump, quantity,
+                        amount, and the exact time it was recorded. A link to "View Public Proof" takes you to an external, independent
+                        website where anyone can confirm the record exists.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 bg-light">
+                    <h6 class="fw-bold text-danger"><i class="bi bi-x-circle-fill me-1"></i>Transaction Not Found</h6>
+                    <p class="mb-0 small text-muted">
+                        The record was not found in the public ledger. This could mean the transaction is still being processed,
+                        the transaction number is incorrect, or the transaction was not completed.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mt-3">What "View Public Proof" Means</h5>
+        <p>
+            When you click "View Public Proof", you are taken to an <strong>independent, third-party website</strong> (Etherscan)
+            that is not controlled by PetroChain™. This website shows the raw record exactly as it was stored in the public ledger.
+            This proves that the record has not been altered by anyone — including PetroChain™ administrators.
+        </p>
+
+        <div class="alert alert-info border-0 mt-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>For your dissertation:</strong> The verification process calls the smart contract's <code>verifyTransaction(string _txNumber)</code> function,
+            which checks the on-chain <code>transactionNumberToIndex</code> mapping and retrieves the stored <code>FuelRecord</code> struct. The system then
+            compares the on-chain data with the local database record. "View Public Proof" links to <em>Etherscan</em> (<code>https://sepolia.etherscan.io</code>),
+            a block explorer for the Ethereum network, where the raw transaction data can be independently verified by any third party.
+            This implements the core principle of blockchain — <em>trustless verification</em>.
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 8: STATION & STOCK MANAGEMENT -->
+<!-- ============================================================ -->
+<div id="section-management" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-gear me-2"></i>8. Station & Stock Management</h4>
+    </div>
+    <div class="card-body">
+        <p>Administrators can manage fuel stations, pumps, fuel types, and stock levels through the Management menu.</p>
+
+        <h5 class="fw-bold">Fuel Stations</h5>
+        <p>Go to <strong>Menu → Management → Stations</strong> to:</p>
+        <ul>
+            <li>Add new fuel stations with name, address, and GPS coordinates</li>
+            <li>Edit station details</li>
+            <li>View station operating status and assigned pumps</li>
+        </ul>
+
+        <h5 class="fw-bold mt-3">Fuel Pumps</h5>
+        <p>Go to <strong>Menu → Management → Pumps</strong> to:</p>
+        <ul>
+            <li>Add pumps to stations and assign them a fuel type</li>
+            <li>Activate or deactivate pumps</li>
+            <li>View pump status and usage</li>
+        </ul>
+
+        <h5 class="fw-bold mt-3">Fuel Types</h5>
+        <p>Go to <strong>Menu → Management → Fuel Types</strong> to manage different fuel products (e.g., Petrol 93, Diesel 50ppm, etc.) including their current prices.</p>
+
+        <h5 class="fw-bold mt-3">Fuel Stock</h5>
+        <p>Go to <strong>Menu → Management → Fuel Stock</strong> to:</p>
+        <ul>
+            <li>View current stock levels at each station for each fuel type</li>
+            <li>Add new stock deliveries when a tanker arrives</li>
+            <li>Track stock movements (additions from deliveries, deductions from sales)</li>
+        </ul>
+        <p>Stock levels are <strong>automatically deducted</strong> each time a fuel transaction is completed, keeping records accurate without manual intervention.</p>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 9: INSTALL AS APP -->
+<!-- ============================================================ -->
+<div id="section-install" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-phone me-2"></i>9. Installing PetroChain™ on Your Phone</h4>
+    </div>
+    <div class="card-body">
+        <p>
+            PetroChain™ can be installed on your phone or tablet as a standalone app — no app store download required.
+            This gives you a full-screen experience with faster loading and offline access to cached pages.
+        </p>
+
+        <h5 class="fw-bold">On Android (Chrome)</h5>
+        <ol>
+            <li>Open PetroChain™ in <strong>Google Chrome</strong>.</li>
+            <li>Tap the <strong>three-dot menu</strong> (⋮) in the top-right corner.</li>
+            <li>Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>.</li>
+            <li>Confirm by tapping <strong>Install</strong>.</li>
+            <li>The PetroChain™ icon will appear on your home screen.</li>
+        </ol>
+
+        <h5 class="fw-bold mt-3">On iPhone / iPad (Safari)</h5>
+        <ol>
+            <li>Open PetroChain™ in <strong>Safari</strong>.</li>
+            <li>Tap the <strong>Share</strong> button (<i class="bi bi-box-arrow-up"></i>) at the bottom of the screen.</li>
+            <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
+            <li>Tap <strong>Add</strong> in the top-right corner.</li>
+            <li>The PetroChain™ icon will appear on your home screen.</li>
+        </ol>
+
+        <h5 class="fw-bold mt-3">On Desktop (Chrome / Edge)</h5>
+        <ol>
+            <li>Open PetroChain™ in your browser.</li>
+            <li>Look for the <strong>install icon</strong> (<i class="bi bi-download"></i>) in the address bar.</li>
+            <li>Click <strong>Install</strong>.</li>
+            <li>PetroChain™ will open as a standalone desktop app.</li>
+        </ol>
+
+        <div class="alert alert-info border-0 mt-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>For your dissertation:</strong> PetroChain™ is built as a <em>Progressive Web App (PWA)</em>.
+            This is implemented through a <code>manifest.json</code> file (defining app name, icons, colours, and display mode),
+            a <code>sw.js</code> service worker (for caching static assets and providing offline fallback), and appropriate
+            <code>&lt;meta&gt;</code> tags in the layout. The PWA approach was chosen over a native mobile app to avoid platform-specific
+            development while still providing an app-like experience. This satisfies the project objective of providing a mobile-accessible solution.
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 10: HOW SECURITY WORKS -->
+<!-- ============================================================ -->
+<div id="section-security" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-lock me-2"></i>10. How PetroChain™ Keeps Records Secure</h4>
+    </div>
+    <div class="card-body">
+        <p>
+            PetroChain™ uses a <strong>two-layer security system</strong> to protect your fuel transaction records:
+        </p>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="border rounded p-4 h-100">
+                    <h5 class="fw-bold"><i class="bi bi-database me-2 text-primary"></i>Layer 1: System Database</h5>
+                    <p>
+                        Every transaction is first stored in PetroChain™'s own secure database. This provides fast access
+                        to transaction history, reports, and analytics.
+                    </p>
+                    <ul class="text-muted small">
+                        <li>Fast queries and filtering</li>
+                        <li>Detailed reporting</li>
+                        <li>User management and access control</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-4 h-100">
+                    <h5 class="fw-bold"><i class="bi bi-shield-lock me-2 text-success"></i>Layer 2: Public Tamper-Proof Ledger</h5>
+                    <p>
+                        After being stored locally, each transaction is also submitted to a <strong>public, tamper-proof ledger</strong>
+                        that no one — not even PetroChain™ — can modify or delete.
+                    </p>
+                    <ul class="text-muted small">
+                        <li>Permanent, unalterable records</li>
+                        <li>Publicly verifiable by anyone</li>
+                        <li>Prevents fraud and coupon duplication</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold">What Makes This Different from a Normal System?</h5>
+        <p>
+            In a traditional system, an administrator could alter or delete transaction records — either accidentally or intentionally.
+            With PetroChain™, even if someone changes the local database, the public ledger still holds the original, unaltered record.
+            This means fraud can always be detected by comparing the local record with the public one.
+        </p>
+
+        <div class="alert alert-info border-0 mt-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>For your dissertation:</strong> This two-layer approach implements the <em>blockchain integration</em> objective.
+            The "public tamper-proof ledger" is the <em>Ethereum blockchain</em> — a decentralised, distributed network of thousands of nodes worldwide.
+            Records are stored via a <em>Solidity smart contract</em> (<code>FuelTransactionLedger.sol</code>) deployed on the <em>Sepolia testnet</em>.
+            The smart contract exposes functions: <code>recordTransaction()</code> to store records, <code>verifyTransaction()</code> to check existence,
+            and <code>getRecord()</code> to retrieve stored data. The contract emits a <code>TransactionRecorded</code> event for each new entry.
+            <br /><br />
+            The interaction flow is: <em>ASP.NET Core → Nethereum (C#) → Alchemy RPC → Ethereum Sepolia Network → Smart Contract</em>.
+            Each on-chain transaction costs <em>gas</em> (paid in Sepolia ETH), which is the "Processing Cost" displayed in the UI.
+            The private key used to sign transactions is stored in <code>appsettings.json</code>, and the contract address is persisted
+            in <code>Contracts/deployed-address.txt</code> for reuse across application restarts.
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 11: TROUBLESHOOTING -->
+<!-- ============================================================ -->
+<div id="section-troubleshooting" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-wrench me-2"></i>11. Troubleshooting</h4>
+    </div>
+    <div class="card-body">
+        <div class="accordion" id="troubleshootingAccordion">
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                        My card was not recognised when I tapped it
+                    </button>
+                </h2>
+                <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                    <div class="accordion-body text-muted">
+                        <ul>
+                            <li>Make sure you are using a <strong>supported device</strong> with NFC/contactless capabilities.</li>
+                            <li>Hold the card flat against the device for 2-3 seconds.</li>
+                            <li>If contactless reading is not supported on your device, you can enter your <strong>Card ID manually</strong> in the input field.</li>
+                            <li>If the problem persists, check that your card is <strong>not blocked or expired</strong>.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                        My transaction shows as "Pending" and hasn't completed
+                    </button>
+                </h2>
+                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                    <div class="accordion-body text-muted">
+                        <ul>
+                            <li>The dispensing process may still be in progress. Wait for the pump to finish.</li>
+                            <li>If the pump has stopped but the status is still "Pending", try refreshing the page.</li>
+                            <li>If the issue continues, contact your station administrator who can manually update the transaction status.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                        I can't see any fuel stations on the map
+                    </button>
+                </h2>
+                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                    <div class="accordion-body text-muted">
+                        <ul>
+                            <li>Make sure you have an <strong>active internet connection</strong> — the map requires online access.</li>
+                            <li>Allow the browser to access your <strong>location</strong> when prompted for distance calculations.</li>
+                            <li>Try zooming out on the map to see a wider area.</li>
+                            <li>If no stations appear, there may be no stations registered in the system yet. Contact your administrator.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                        My card balance seems incorrect
+                    </button>
+                </h2>
+                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                    <div class="accordion-body text-muted">
+                        <ul>
+                            <li>Check your <strong>transaction history</strong> to see all deductions from your card.</li>
+                            <li>If a transaction was cancelled, the deducted amount should have been refunded.</li>
+                            <li>If you believe there is an error, use the <strong>Verify Transaction</strong> feature to check the public record.</li>
+                            <li>Contact your administrator for further assistance.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item border-0">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                        The "Verify Transaction" page says the service is unavailable
+                    </button>
+                </h2>
+                <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                    <div class="accordion-body text-muted">
+                        <ul>
+                            <li>This means the connection to the public ledger is currently unavailable. This can happen due to network issues.</li>
+                            <li>Your transactions are still safely recorded in the system database.</li>
+                            <li>Try again later — the connection will be restored automatically.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 12: GLOSSARY -->
+<!-- ============================================================ -->
+<div id="section-glossary" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-book me-2"></i>12. Glossary of Terms</h4>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-3">Terms used in PetroChain™ and what they mean — both in the system and for your dissertation.</p>
+        <table class="table table-bordered table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 25%;">Term in PetroChain™</th>
+                    <th style="width: 35%;">What It Means (User)</th>
+                    <th style="width: 40%;">Technical Term (Dissertation)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>PetroCard</strong></td>
+                    <td>Your prepaid tap-to-pay fuel card</td>
+                    <td>NFC-enabled prepaid smart card with BCrypt PIN hashing</td>
+                </tr>
+                <tr>
+                    <td><strong>Secured Record</strong></td>
+                    <td>A permanently stored, unalterable transaction record</td>
+                    <td>Blockchain transaction on Ethereum Sepolia testnet</td>
+                </tr>
+                <tr>
+                    <td><strong>Reference</strong></td>
+                    <td>A unique identifier for a secured record</td>
+                    <td>Ethereum transaction hash (TxHash / 0x…)</td>
+                </tr>
+                <tr>
+                    <td><strong>Ledger Entry</strong></td>
+                    <td>The position of the record in the public ledger</td>
+                    <td>Block number on the Ethereum blockchain</td>
+                </tr>
+                <tr>
+                    <td><strong>Processing Cost</strong></td>
+                    <td>The cost of permanently securing the record</td>
+                    <td>Gas consumed × gas price (in Wei/Gwei)</td>
+                </tr>
+                <tr>
+                    <td><strong>Ledger Address</strong></td>
+                    <td>The address of the secure system that stores records</td>
+                    <td>Smart contract address on Ethereum</td>
+                </tr>
+                <tr>
+                    <td><strong>View Public Proof</strong></td>
+                    <td>View the record on an independent website</td>
+                    <td>View transaction on Etherscan block explorer</td>
+                </tr>
+                <tr>
+                    <td><strong>Card Fingerprint</strong></td>
+                    <td>A scrambled version of your card number for privacy</td>
+                    <td>SHA-256 hash of the card number stored on-chain</td>
+                </tr>
+                <tr>
+                    <td><strong>Verified</strong></td>
+                    <td>The record has been confirmed as authentic</td>
+                    <td>Transaction confirmed with ≥ 1 block confirmation</td>
+                </tr>
+                <tr>
+                    <td><strong>Tamper-Proof Ledger</strong></td>
+                    <td>A public record book that cannot be edited</td>
+                    <td>Ethereum blockchain (decentralised, immutable, distributed ledger)</td>
+                </tr>
+                <tr>
+                    <td><strong>Smart Contract</strong></td>
+                    <td>An automated rule system that stores records securely</td>
+                    <td>Solidity smart contract (<code>FuelTransactionLedger.sol</code>) deployed on EVM</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Back to top -->
+<div class="text-center mb-4">
+    <a href="#" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-up me-1"></i>Back to Top
+    </a>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary ms-2">
+        <i class="bi bi-house-door me-1"></i>Go to Home
+    </a>
+</div>
+
+@section Scripts {
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        .card-header {
+            border-radius: 0 !important;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            background-color: #F0F4FF;
+            color: #1D4ED8;
+        }
+        
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.2rem rgba(29, 78, 216, 0.25);
+        }
+    </style>
+}
+

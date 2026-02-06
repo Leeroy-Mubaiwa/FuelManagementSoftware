@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - PetroChain™</title>
     <link rel="icon" type="image/png" href="~/images/petro-logo.png" />
+    <link rel="manifest" href="~/manifest.json" />
+    <meta name="theme-color" content="#1D4ED8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PetroChain" />
+    <link rel="apple-touch-icon" href="~/icons/icon-192x192.png" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -98,7 +104,10 @@
                                 <i class="bi bi-receipt me-2"></i>Transactions
                             </a>
                             <a class="nav-link px-3 py-2 ps-5" asp-controller="BlockchainTransaction" asp-action="Index">
-                                <i class="bi bi-link-45deg me-2"></i>Blockchain Transactions
+                                <i class="bi bi-link-45deg me-2"></i>Secured Records
+                            </a>
+                            <a class="nav-link px-3 py-2 ps-5" asp-controller="BlockchainTransaction" asp-action="Verify">
+                                <i class="bi bi-shield-check me-2"></i>Verify Transaction
                             </a>
                         </div>
                     </div>
@@ -120,7 +129,7 @@
                                 <i class="bi bi-clock-history me-2"></i>Transaction History
                             </a>
                             <a class="nav-link px-3 py-2 ps-5" asp-controller="BlockchainTransaction" asp-action="Index">
-                                <i class="bi bi-shield-check me-2"></i>Blockchain Records
+                                <i class="bi bi-shield-check me-2"></i>Secured Records
                             </a>
                         </div>
                     </div>
@@ -151,6 +160,9 @@
                         </div>
                     }
 
+                    <a class="nav-link px-3 py-2 border-bottom" asp-area="" asp-controller="Home" asp-action="Manual">
+                        <i class="bi bi-book me-2"></i>User Manual
+                    </a>
                     <a class="nav-link px-3 py-2 border-bottom" asp-area="" asp-controller="Home" asp-action="Privacy">
                         <i class="bi bi-shield-check me-2"></i>Privacy
                     </a>
@@ -201,7 +213,7 @@
                         <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="me-2" style="height: 30px; width: auto;" />
                         <span class="fw-semibold">PetroChain™</span>
                     </div>
-                    <p class="mb-0 small">Blockchain-Enabled Automated Fuel Management System</p>
+                    <p class="mb-0 small">Automated Fuel Management System</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p class="mb-0 small">&copy; 2026 PetroChain™ - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></p>
@@ -252,5 +264,12 @@
         }
     </style>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
+    </script>
 </body>
 </html>

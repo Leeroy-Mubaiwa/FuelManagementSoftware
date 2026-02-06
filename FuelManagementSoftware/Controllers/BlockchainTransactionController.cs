@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
+using FuelManagementSoftware.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -14,13 +15,16 @@ namespace FuelManagementSoftware.Controllers;
 public class BlockchainTransactionController : Controller
 {
     private readonly FilteredFuelManagementSoftwareDbContext _context;
+    private readonly IBlockchainService _blockchainService;
     private readonly ILogger<BlockchainTransactionController> _logger;
 
     public BlockchainTransactionController(
         FilteredFuelManagementSoftwareDbContext context,
+        IBlockchainService blockchainService,
         ILogger<BlockchainTransactionController> logger)
     {
         _context = context;
+        _blockchainService = blockchainService;
         _logger = logger;
     }
 
@@ -57,6 +61,8 @@ public class BlockchainTransactionController : Controller
         ViewBag.Statuses = new SelectList(new[] { "Pending", "Confirmed", "Failed" }, status);
         ViewBag.StartDate = startDate;
         ViewBag.EndDate = endDate;
+        ViewBag.ExplorerUrl = _blockchainService.IsConfigured() ? _blockchainService.GetExplorerTransactionUrl("") : "";
+        ViewBag.ContractAddress = _blockchainService.GetContractAddress();
 
         return View(transactions);
     }
@@ -85,7 +91,54 @@ public class BlockchainTransactionController : Controller
             return NotFound();
         }
 
+        ViewBag.ExplorerTxUrl = _blockchainService.GetExplorerTransactionUrl(transaction.BlockchainHash);
+        ViewBag.ExplorerContractUrl = !string.IsNullOrWhiteSpace(transaction.SmartContractAddress)
+            ? _blockchainService.GetExplorerAddressUrl(transaction.SmartContractAddress)
+            : "";
+
         return View(transaction);
     }
-}
 
+    // GET: BlockchainTransaction/Verify
+    public IActionResult Verify()
+    {
+        ViewBag.ContractAddress = _blockchainService.GetContractAddress();
+        ViewBag.IsConfigured = _blockchainService.IsConfigured();
+        return View();
+    }
+
+    // POST: BlockchainTransaction/Verify
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Verify(string transactionNumber)
+    {
+        ViewBag.ContractAddress = _blockchainService.GetContractAddress();
+        ViewBag.IsConfigured = _blockchainService.IsConfigured();
+
+        if (string.IsNullOrWhiteSpace(transactionNumber))
+        {
+            ViewBag.Error = "Please enter a transaction number.";
+            return View();
+        }
+
+        // Verify on blockchain
+        var chainResult = await _blockchainService.VerifyTransactionOnChainAsync(transactionNumber);
+
+        // Also check local database
+        var dbRecord = await _context.BlockchainTransactions
+            .Include(bt => bt.FuelTransaction)
+            .ThenInclude(ft => ft.FuelStation)
+            .Include(bt => bt.FuelTransaction)
+            .ThenInclude(ft => ft.FuelType)
+            .FirstOrDefaultAsync(bt => bt.FuelTransaction.TransactionNumber == transactionNumber);
+
+        ViewBag.TransactionNumber = transactionNumber;
+        ViewBag.ChainResult = chainResult;
+        ViewBag.DbRecord = dbRecord;
+        ViewBag.ExplorerTxUrl = dbRecord != null
+            ? _blockchainService.GetExplorerTransactionUrl(dbRecord.BlockchainHash)
+            : "";
+
+        return View();
+    }
+}

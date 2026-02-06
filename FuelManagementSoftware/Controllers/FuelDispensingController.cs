@@ -194,6 +194,42 @@ public class FuelDispensingController : Controller
         }
     }
 
+    // GET: FuelDispensing/LookupCard?nfcTag=ABC123
+    [HttpGet]
+    public async Task<IActionResult> LookupCard(string nfcTag)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(nfcTag))
+            {
+                return Json(new { success = false, message = "NFC tag is required" });
+            }
+
+            var card = await _petroCardService.GetCardByNfcTagAsync(nfcTag);
+
+            if (card == null)
+            {
+                return Json(new { success = false, message = "Card not found for this NFC tag" });
+            }
+
+            return Json(new
+            {
+                success = true,
+                nfcTag = nfcTag,
+                cardId = card.Id,
+                cardNumber = card.CardNumber,
+                balance = card.Balance,
+                currency = card.Currency,
+                requiresPin = !string.IsNullOrWhiteSpace(card.PinHash)
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error looking up card by NFC tag");
+            return Json(new { success = false, error = ex.Message });
+        }
+    }
+
     // GET: FuelDispensing/ReadNfcTag?pumpId=1
     [HttpGet]
     public async Task<IActionResult> ReadNfcTag(int pumpId)

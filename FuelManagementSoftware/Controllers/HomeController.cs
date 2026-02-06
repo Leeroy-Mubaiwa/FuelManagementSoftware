@@ -23,6 +23,11 @@ namespace FuelManagementSoftware.Controllers
             return View();
         }
 
+        public IActionResult Manual()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

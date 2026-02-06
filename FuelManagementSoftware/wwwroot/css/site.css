@@ -29,7 +29,7 @@
   --petro-info-cyan: #0891B2;
   
   /* Typography */
-  --petro-font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --petro-font-ui: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   --petro-font-mono: 'IBM Plex Mono', 'Courier New', Courier, monospace;
   
   /* Spacing & Geometry */
@@ -51,7 +51,7 @@
    FONT IMPORTS
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 /* ==========================================================================
    BOOTSTRAP VARIABLE OVERRIDES

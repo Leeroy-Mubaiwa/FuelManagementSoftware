@@ -29,6 +29,10 @@ builder.Services.AddDefaultIdentity<FuelManagementSoftwareUser>(options => optio
 // Add HTTP context accessor for organisation context service
 builder.Services.AddHttpContextAccessor();
 
+// Register blockchain configuration
+builder.Services.Configure<BlockchainSettings>(builder.Configuration.GetSection("Blockchain"));
+builder.Services.AddSingleton<IBlockchainService, BlockchainService>();
+
 // Register application services
 builder.Services.AddScoped<IOrganisationContextService, OrganisationContextService>();
 builder.Services.AddScoped<INfcReaderService, NfcReaderService>();
@@ -73,6 +77,28 @@ using (var scope = app.Services.CreateScope())
 {
     var roleSeeder = scope.ServiceProvider.GetRequiredService<RoleSeederService>();
     await roleSeeder.SeedRolesAsync();
+}
+
+// Deploy blockchain smart contract if not yet deployed
+try
+{
+    var blockchainService = app.Services.GetRequiredService<IBlockchainService>();
+    if (blockchainService.IsConfigured())
+    {
+        var contractAddress = await blockchainService.EnsureContractDeployedAsync();
+        if (!string.IsNullOrWhiteSpace(contractAddress))
+        {
+            app.Logger.LogInformation("PetroChain smart contract ready at: {Address}", contractAddress);
+        }
+    }
+    else
+    {
+        app.Logger.LogWarning("Blockchain not configured. Fuel transactions will not be recorded on-chain.");
+    }
+}
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "Failed to deploy blockchain contract. App will continue without blockchain recording.");
 }
 
 app.MapRazorPages();
