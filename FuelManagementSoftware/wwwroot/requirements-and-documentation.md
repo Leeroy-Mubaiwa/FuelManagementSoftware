@@ -21,3 +21,7 @@
 - Database management system (SQL Server with Entity Framework Core)
 - Real-time monitoring and analytics software (SignalR for real-time pump status updates)
 
+
+
+
+
