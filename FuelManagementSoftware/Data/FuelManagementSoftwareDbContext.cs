@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using FuelManagementSoftware.Models;
 using Microsoft.EntityFrameworkCore;
@@ -57,7 +57,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
     public virtual DbSet<UserToken> UserTokens { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("name=FuelManagementSoftwareConnection");
+        => optionsBuilder.UseSqlite("name=FuelManagementSoftwareConnection");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,7 +65,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__AuditLog__3214EC0766CE7448");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now', 'utc')");
 
             entity.HasOne(d => d.Creator).WithMany(p => p.AuditLogCreators)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -80,7 +80,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Blockcha__3214EC0703A4D565");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.Status).HasDefaultValue("Pending");
 
             entity.HasOne(d => d.Creator).WithMany(p => p.BlockchainTransactions)
@@ -99,7 +99,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__CardTran__3214EC07015D32F2");
 
             entity.Property(e => e.Currency).HasDefaultValue("USD");
-            entity.Property(e => e.TransactionDate).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.TransactionDate).HasDefaultValueSql("datetime('now', 'utc')");
 
             entity.HasOne(d => d.Creator).WithMany(p => p.CardTransactions)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -116,7 +116,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__FuelPump__3214EC0766109EC3");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsOperational).HasDefaultValue(true);
 
@@ -139,7 +139,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__FuelStat__3214EC07AA22693D");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsOpen).HasDefaultValue(true);
 
@@ -154,8 +154,8 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__FuelStoc__3214EC07B8E88608");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.LastUpdated).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now', 'utc')");
+            entity.Property(e => e.LastUpdated).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.Unit).HasDefaultValue("Litre");
 
             entity.HasOne(d => d.Creator).WithMany(p => p.FuelStocks)
@@ -178,7 +178,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__FuelTran__3214EC0768AD478D");
 
             entity.Property(e => e.Currency).HasDefaultValue("USD");
-            entity.Property(e => e.TransactionDate).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.TransactionDate).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.TransactionStatus).HasDefaultValue("Completed");
 
             entity.HasOne(d => d.Creator).WithMany(p => p.FuelTransactionCreators)
@@ -208,7 +208,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__FuelType__3214EC0785D74B7C");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Unit).HasDefaultValue("Litre");
 
@@ -223,7 +223,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Organiza__3214EC0701075EE5");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
 
             entity.HasOne(d => d.Creator).WithMany(p => p.Organizations)
@@ -235,7 +235,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__PetroCar__3214EC0781ADAEA4");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.Currency).HasDefaultValue("USD");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
 
@@ -252,7 +252,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__QueueInf__3214EC07222CE06D");
 
-            entity.Property(e => e.RecordedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.RecordedAt).HasDefaultValueSql("datetime('now', 'utc')");
 
             entity.HasOne(d => d.Creator).WithMany(p => p.QueueInformations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -276,7 +276,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__StationS__3214EC07C6F93A9A");
 
-            entity.Property(e => e.StatusChangedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.StatusChangedAt).HasDefaultValueSql("datetime('now', 'utc')");
 
             entity.HasOne(d => d.Creator).WithMany(p => p.StationStatusHistories)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -293,7 +293,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__StockMov__3214EC077571867C");
 
-            entity.Property(e => e.MovementDate).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.MovementDate).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.Unit).HasDefaultValue("Litre");
 
             entity.HasOne(d => d.Creator).WithMany(p => p.StockMovements)
@@ -315,7 +315,7 @@ public partial class FuelManagementSoftwareDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__SystemCo__3214EC07E66E31AD");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("datetime('now', 'utc')");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
 
             entity.HasOne(d => d.Creator).WithMany(p => p.SystemConfigurations)

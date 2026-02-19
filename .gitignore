@@ -112,6 +112,11 @@ ipch/
 *.VC.db
 *.VC.VC.opendb
 
+# SQLite DB (wwwroot)
+wwwroot/fuelmanagement.db
+wwwroot/fuelmanagement.db-shm
+wwwroot/fuelmanagement.db-wal
+
 # Visual Studio profiler
 *.psess
 *.vsp

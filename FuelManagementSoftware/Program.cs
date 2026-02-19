@@ -6,12 +6,12 @@ using FuelManagementSoftware.Services;
 using FuelManagementSoftware.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("FuelManagementSoftwareConnection") ?? throw new InvalidOperationException("Connection string 'FuelManagementSoftwareIdentityContextConnection' not found.");
+var connectionString = $"Data Source={Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "fuelmanagement.db")}";
 
-builder.Services.AddDbContext<FuelManagementSoftwareIdentityContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<FuelManagementSoftwareIdentityContext>(options => options.UseSqlite(connectionString));
 
 // Register base DbContext (non-filtered)
-builder.Services.AddDbContext<FuelManagementSoftwareDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<FuelManagementSoftwareDbContext>(options => options.UseSqlite(connectionString));
 
 // Register filtered DbContext factory
 builder.Services.AddScoped<FilteredFuelManagementSoftwareDbContext>(serviceProvider =>
@@ -72,9 +72,10 @@ app.UseAuthorization();
 // Map SignalR hub
 app.MapHub<PumpStatusHub>("/hubs/pumpstatus");
 
-// Seed roles on application startup
 using (var scope = app.Services.CreateScope())
 {
+    var db = scope.ServiceProvider.GetRequiredService<FuelManagementSoftwareDbContext>();
+    await db.Database.MigrateAsync();
     var roleSeeder = scope.ServiceProvider.GetRequiredService<RoleSeederService>();
     await roleSeeder.SeedRolesAsync();
 }
