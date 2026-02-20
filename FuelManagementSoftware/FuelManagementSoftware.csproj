@@ -25,4 +25,10 @@
     <PackageReference Include="Nethereum.Web3" Version="4.21.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Contracts\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

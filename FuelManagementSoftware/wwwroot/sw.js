@@ -36,8 +36,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     const { request } = event;
 
-    // Skip non-GET and SignalR requests
-    if (request.method !== 'GET' || request.url.includes('/hubs/')) {
+    // Skip non-GET, SignalR, and non-http/https requests (like chrome-extension)
+    if (request.method !== 'GET' || request.url.includes('/hubs/') || !request.url.startsWith('http')) {
         return;
     }
 
