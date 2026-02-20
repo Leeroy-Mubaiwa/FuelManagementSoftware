@@ -122,8 +122,8 @@ public class FuelStockController : Controller
 
             stock.OrganisationId = organisationId.Value;
             stock.CreatorId = user.Id;
-            stock.CreatedAt = DateTime.UtcNow;
-            stock.LastUpdated = DateTime.UtcNow;
+            stock.CreatedAt = DateTime.Now;
+            stock.LastUpdated = DateTime.Now;
             stock.IsLowStock = stock.LowStockThreshold.HasValue && stock.CurrentQuantity <= stock.LowStockThreshold.Value;
 
             _context.FuelStocks.Add(stock);
@@ -192,7 +192,7 @@ public class FuelStockController : Controller
         {
             try
             {
-                stock.LastUpdated = DateTime.UtcNow;
+                stock.LastUpdated = DateTime.Now;
                 stock.IsLowStock = stock.LowStockThreshold.HasValue && stock.CurrentQuantity <= stock.LowStockThreshold.Value;
                 _context.Update(stock);
                 await _context.SaveChangesAsync();
@@ -278,7 +278,7 @@ public class FuelStockController : Controller
 
                 var stockBefore = stock.CurrentQuantity;
                 stock.CurrentQuantity += model.Quantity;
-                stock.LastUpdated = DateTime.UtcNow;
+                stock.LastUpdated = DateTime.Now;
                 stock.IsLowStock = stock.LowStockThreshold.HasValue && stock.CurrentQuantity <= stock.LowStockThreshold.Value;
 
                 var movement = new StockMovement
@@ -296,7 +296,7 @@ public class FuelStockController : Controller
                     TankerRegistration = model.TankerRegistration,
                     DriverName = model.DriverName,
                     Notes = model.Notes,
-                    MovementDate = DateTime.UtcNow,
+                    MovementDate = DateTime.Now,
                     CreatorId = user.Id
                 };
 

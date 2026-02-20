@@ -42,7 +42,7 @@ public class FuelTypeSeederService
                 UnitPrice = d.UnitPrice,
                 IsActive = true,
                 CreatorId = null,
-                CreatedAt = System.DateTime.UtcNow
+                CreatedAt = DateTime.Now
             });
             _logger.LogInformation("Seeded global fuel type: {Name}", d.Name);
         }

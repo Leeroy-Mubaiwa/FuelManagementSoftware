@@ -67,7 +67,7 @@ public class PetroCardService : IPetroCardService
         }
 
         // Check if card is expired
-        if (card.ExpiryDate.HasValue && card.ExpiryDate.Value < DateTime.UtcNow)
+        if (card.ExpiryDate.HasValue && card.ExpiryDate.Value < DateTime.Now)
         {
             _logger.LogWarning("Card {CardId} ({CardNumber}) has expired", card.Id, card.CardNumber);
             return CardValidationResult.Failure("Card has expired");
@@ -155,8 +155,8 @@ public class PetroCardService : IPetroCardService
 
         // Update card balance
         card.Balance = balanceAfter;
-        card.UpdatedAt = DateTime.UtcNow;
-        card.LastUsedAt = DateTime.UtcNow;
+        card.UpdatedAt = DateTime.Now;
+        card.LastUsedAt = DateTime.Now;
 
         // Create CardTransaction record
         var cardTransaction = new CardTransaction
@@ -170,7 +170,7 @@ public class PetroCardService : IPetroCardService
             Currency = card.Currency,
             ReferenceNumber = referenceNumber,
             Description = $"Balance deduction for {transactionType}",
-            TransactionDate = DateTime.UtcNow,
+            TransactionDate = DateTime.Now,
             CreatorId = creatorId
         };
 
@@ -190,7 +190,7 @@ public class PetroCardService : IPetroCardService
 
         if (card != null)
         {
-            card.LastUsedAt = DateTime.UtcNow;
+            card.LastUsedAt = DateTime.Now;
             await _context.SaveChangesAsync(cancellationToken);
             
             _logger.LogDebug("Updated LastUsedAt for card {CardId}", cardId);

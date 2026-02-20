@@ -139,7 +139,7 @@ public class FuelDispensingService : IFuelDispensingService
             Currency = currency,
             PaymentMethod = isCash ? "Cash" : "PetroCard",
             TransactionStatus = "Authorized",
-            TransactionDate = DateTime.UtcNow,
+            TransactionDate = DateTime.Now,
             StartedAt = null,
             CompletedAt = null,
             CreatorId = request.CreatorId
@@ -185,7 +185,7 @@ public class FuelDispensingService : IFuelDispensingService
         }
 
         transaction.TransactionStatus = "Dispensing";
-        transaction.StartedAt = DateTime.UtcNow;
+        transaction.StartedAt = DateTime.Now;
 
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -246,7 +246,7 @@ public class FuelDispensingService : IFuelDispensingService
         transaction.Quantity = finalQuantity;
         transaction.TotalAmount = finalQuantity * transaction.UnitPrice;
         transaction.TransactionStatus = "Completed";
-        transaction.CompletedAt = DateTime.UtcNow;
+        transaction.CompletedAt = DateTime.Now;
 
         // Stop the pump hardware
         await _pumpControlService.StopPumpAsync(transaction.FuelPumpId, cancellationToken);
@@ -308,8 +308,8 @@ public class FuelDispensingService : IFuelDispensingService
                         GasUsed = blockchainResult.GasUsed,
                         Status = "Confirmed",
                         ConfirmationCount = 1,
-                        CreatedAt = DateTime.UtcNow,
-                        ConfirmedAt = DateTime.UtcNow,
+                        CreatedAt = DateTime.Now,
+                        ConfirmedAt = DateTime.Now,
                         CreatorId = transaction.CreatorId
                     };
 
@@ -364,7 +364,7 @@ public class FuelDispensingService : IFuelDispensingService
 
         transaction.TransactionStatus = "Cancelled";
         transaction.Notes = reason ?? "Transaction cancelled";
-        transaction.CompletedAt = DateTime.UtcNow;
+        transaction.CompletedAt = DateTime.Now;
 
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -376,7 +376,7 @@ public class FuelDispensingService : IFuelDispensingService
     private string GenerateTransactionNumber()
     {
         // Generate unique transaction number: TXN-YYYYMMDD-HHMMSS-XXXX
-        var timestamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+        var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
         var random = new Random().Next(1000, 9999);
         return $"TXN-{timestamp}-{random}";
     }

@@ -68,10 +68,10 @@ public class NfcReaderService : INfcReaderService
     {
         _logger.LogInformation("Waiting for NFC tag on pump {PumpId} (timeout: {TimeoutMs}ms)", pumpId, timeoutMs);
 
-        var startTime = DateTime.UtcNow;
+        var startTime = DateTime.Now;
         var timeout = TimeSpan.FromMilliseconds(timeoutMs);
 
-        while (DateTime.UtcNow - startTime < timeout)
+        while (DateTime.Now - startTime < timeout)
         {
             cancellationToken.ThrowIfCancellationRequested();
 

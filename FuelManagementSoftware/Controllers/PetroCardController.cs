@@ -102,7 +102,7 @@ public class PetroCardController : Controller
                 IsBlocked = model.IsBlocked,
                 ExpiryDate = model.ExpiryDate,
                 PinHash = !string.IsNullOrWhiteSpace(model.Pin) ? PetroCardService.HashPin(model.Pin) : null,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 CreatorId = user.Id
             };
 
@@ -178,7 +178,7 @@ public class PetroCardController : Controller
                 card.IsActive = model.IsActive;
                 card.IsBlocked = model.IsBlocked;
                 card.ExpiryDate = model.ExpiryDate;
-                card.UpdatedAt = DateTime.UtcNow;
+                card.UpdatedAt = DateTime.Now;
 
                 if (!string.IsNullOrWhiteSpace(model.Pin))
                 {

@@ -86,7 +86,7 @@ public static class PumpStatusHubExtensions
             TransactionId = transactionId,
             Quantity = quantity,
             Amount = amount,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.Now
         });
     }
 
@@ -101,7 +101,7 @@ public static class PumpStatusHubExtensions
             TransactionId = transactionId,
             Status = status,
             Message = message,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.Now
         });
     }
 
@@ -115,7 +115,7 @@ public static class PumpStatusHubExtensions
             PumpId = pumpId,
             IsOperational = isOperational,
             IsActive = isActive,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.Now
         });
     }
 
@@ -128,7 +128,7 @@ public static class PumpStatusHubExtensions
         {
             PumpId = pumpId,
             NfcTag = nfcTag,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.Now
         });
     }
 }

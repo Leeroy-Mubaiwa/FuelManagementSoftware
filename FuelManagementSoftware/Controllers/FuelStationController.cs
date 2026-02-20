@@ -90,7 +90,7 @@ public class FuelStationController : Controller
 
             station.OrganisationId = organisationId.Value;
             station.CreatorId = user.Id;
-            station.CreatedAt = DateTime.UtcNow;
+            station.CreatedAt = DateTime.Now;
 
             _context.FuelStations.Add(station);
             await _context.SaveChangesAsync();
@@ -144,7 +144,7 @@ public class FuelStationController : Controller
                 existing.IsOpen = station.IsOpen;
                 existing.IsTankerOffloading = station.IsTankerOffloading;
                 existing.OrganisationId = station.OrganisationId;
-                existing.UpdatedAt = DateTime.UtcNow;
+                existing.UpdatedAt = DateTime.Now;
 
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -173,7 +173,7 @@ public class FuelStationController : Controller
         }
 
         station.IsOpen = !station.IsOpen;
-        station.UpdatedAt = DateTime.UtcNow;
+        station.UpdatedAt = DateTime.Now;
 
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Details), new { id });

@@ -121,7 +121,7 @@ public class FuelPumpController : Controller
 
             pump.OrganisationId = organisationId.Value;
             pump.CreatorId = user.Id;
-            pump.CreatedAt = DateTime.UtcNow;
+            pump.CreatedAt = DateTime.Now;
 
             _context.FuelPumps.Add(pump);
             await _context.SaveChangesAsync();
@@ -201,7 +201,7 @@ public class FuelPumpController : Controller
                 existing.IsActive = pump.IsActive;
                 existing.IsOperational = pump.IsOperational;
                 existing.LastMaintenanceDate = pump.LastMaintenanceDate;
-                existing.UpdatedAt = DateTime.UtcNow;
+                existing.UpdatedAt = DateTime.Now;
                 var entry = _context.Entry(existing);
                 entry.Property(p => p.CreatorId).IsModified = false;
                 entry.Property(p => p.CreatedAt).IsModified = false;

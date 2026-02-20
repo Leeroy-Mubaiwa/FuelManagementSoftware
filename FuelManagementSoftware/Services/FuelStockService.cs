@@ -78,7 +78,7 @@ public class FuelStockService : IFuelStockService
 
         // Update stock
         stock.CurrentQuantity = stockAfter;
-        stock.LastUpdated = DateTime.UtcNow;
+        stock.LastUpdated = DateTime.Now;
         stock.IsLowStock = stock.LowStockThreshold.HasValue && stock.CurrentQuantity <= stock.LowStockThreshold.Value;
 
         // Create StockMovement record
@@ -93,7 +93,7 @@ public class FuelStockService : IFuelStockService
             StockBefore = stockBefore,
             StockAfter = stockAfter,
             ReferenceNumber = referenceNumber,
-            MovementDate = DateTime.UtcNow,
+            MovementDate = DateTime.Now,
             CreatorId = creatorId
         };
 

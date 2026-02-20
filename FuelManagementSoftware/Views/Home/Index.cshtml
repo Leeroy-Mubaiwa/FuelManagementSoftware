@@ -31,6 +31,170 @@
             </div>
         </div>
 
+        @if (isOrg && ViewBag.StationsCount != null)
+        {
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card border-0 bg-primary bg-opacity-10 h-100">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-building text-primary fs-4 me-2"></i>
+                                <div>
+                                    <div class="fw-bold fs-5">@ViewBag.StationsCount</div>
+                                    <small class="text-muted">Stations</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card border-0 bg-success bg-opacity-10 h-100">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-droplet text-success fs-4 me-2"></i>
+                                <div>
+                                    <div class="fw-bold fs-5">@ViewBag.PumpsCount</div>
+                                    <small class="text-muted">Pumps</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card border-0 bg-info bg-opacity-10 h-100">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-currency-dollar text-info fs-4 me-2"></i>
+                                <div>
+                                    <div class="fw-bold fs-5">@(((decimal)ViewBag.TotalSales).ToString("N0"))</div>
+                                    <small class="text-muted">Total sales</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card border-0 bg-warning bg-opacity-10 h-100">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-fuel-pump text-warning fs-4 me-2"></i>
+                                <div>
+                                    <div class="fw-bold fs-5">@(((decimal)ViewBag.TotalFuelLitres).ToString("N0"))</div>
+                                    <small class="text-muted">Litres sold</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card border-0 bg-secondary bg-opacity-10 h-100">
+                        <div class="card-body py-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-receipt text-secondary fs-4 me-2"></i>
+                                <div>
+                                    <div class="fw-bold fs-5">@ViewBag.TransactionsCount</div>
+                                    <small class="text-muted">Transactions</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            var chartLabels = ViewBag.SalesChartLabels as IList<string>;
+            var hasChartData = chartLabels != null && chartLabels.Count > 0;
+            <div class="row g-3 mb-4">
+                <div class="col-lg-8">
+                    <div class="card h-100">
+                        <div class="card-header bg-transparent"><h6 class="mb-0">Sales (last 14 days)</h6></div>
+                        <div class="card-body">
+                            @if (hasChartData)
+                            {
+                                <canvas id="salesChart" height="200"></canvas>
+                            }
+                            else
+                            {
+                                <p class="text-muted small mb-0">No completed transactions in the last 14 days.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">Low stock</h6>
+                            <a asp-controller="FuelStock" asp-action="Index" class="btn btn-sm btn-outline-primary">View all</a>
+                        </div>
+                        <div class="card-body p-0">
+                            @{
+                                var lowStock = ViewBag.LowStock as IEnumerable<FuelManagementSoftware.Models.FuelStock>;
+                            }
+                            @if (lowStock != null && lowStock.Any())
+                            {
+                                <ul class="list-group list-group-flush">
+                                    @foreach (var s in lowStock)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>@s.FuelStation?.Name – @s.FuelType?.Name</span>
+                                            <span class="badge @(s.CurrentQuantity <= 0 ? "bg-danger" : "bg-warning")">@s.CurrentQuantity.ToString("F0") L</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted small p-3 mb-0">No low stock alerts.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            var recentTx = ViewBag.RecentTransactions as IEnumerable<FuelManagementSoftware.Models.FuelTransaction>;
+            if (recentTx != null && recentTx.Any())
+            {
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Recent transactions</h6>
+                                <a asp-controller="FuelTransaction" asp-action="Index" class="btn btn-sm btn-outline-primary">View all</a>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Transaction</th>
+                                                <th>Date</th>
+                                                <th>Station</th>
+                                                <th>Fuel</th>
+                                                <th>Quantity</th>
+                                                <th>Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var t in recentTx)
+                                            {
+                                                <tr>
+                                                    <td><code>@t.TransactionNumber</code></td>
+                                                    <td><small>@(t.CompletedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</small></td>
+                                                    <td><small>@t.FuelStation?.Name</small></td>
+                                                    <td><small>@t.FuelType?.Name</small></td>
+                                                    <td>@t.Quantity.ToString("F0") L</td>
+                                                    <td>@t.TotalAmount.ToString("F2") @t.Currency</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
         <div class="row g-3 mb-4">
             <div class="col-sm-6 col-lg-4">
                 <div class="card dashboard-card h-100">
@@ -213,5 +377,41 @@ else
             </div>
         </div>
     </div>
+}
+
+@section Scripts {
+    @if (User.Identity?.IsAuthenticated == true && ViewBag.SalesChartLabels != null)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script>
+            (function () {
+                var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SalesChartLabels));
+                var data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.SalesChartData));
+                var el = document.getElementById('salesChart');
+                if (el && labels && labels.length > 0) {
+                    new Chart(el, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Sales',
+                                data: data,
+                                backgroundColor: 'rgba(29, 78, 216, 0.5)',
+                                borderColor: 'rgb(29, 78, 216)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+            })();
+        </script>
+    }
 }
 

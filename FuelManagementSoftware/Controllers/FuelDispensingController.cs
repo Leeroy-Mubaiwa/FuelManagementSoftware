@@ -121,7 +121,12 @@ public class FuelDispensingController : Controller
         {
             _logger.LogError(ex, "Error initiating fuel dispensing");
             ModelState.AddModelError("", ex.Message);
-            return View("StartDispensing", new { pumpId = request.FuelPumpId });
+            var pump = await _context.FuelPumps
+                .Include(p => p.FuelStation)
+                .Include(p => p.FuelType)
+                .FirstOrDefaultAsync(p => p.Id == request.FuelPumpId);
+            ViewBag.Pump = pump;
+            return View("StartDispensing");
         }
     }
 

@@ -253,7 +253,7 @@ namespace FuelManagementSoftware.Areas.Identity.Pages.Account
                     Phone = string.IsNullOrWhiteSpace(input.Phone) ? null : input.Phone,
                     Email = input.Email,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.Now,
                     CreatorId = userId
                 };
 
