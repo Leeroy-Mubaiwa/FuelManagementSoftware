@@ -69,6 +69,12 @@ public class FuelTransactionController : Controller
         ViewBag.Statuses = new SelectList(new[] { "Authorized", "Dispensing", "Completed", "Cancelled", "Failed" }, status);
         ViewBag.StartDate = startDate;
         ViewBag.EndDate = endDate;
+        if (stationId.HasValue)
+        {
+            var station = await _context.FuelStations.FindAsync(stationId.Value);
+            ViewBag.StationId = stationId.Value;
+            ViewBag.StationName = station?.Name;
+        }
 
         return View(transactions);
     }
@@ -95,6 +101,8 @@ public class FuelTransactionController : Controller
             return NotFound();
         }
 
+        ViewBag.StationId = transaction.FuelStationId;
+        ViewBag.StationName = transaction.FuelStation?.Name;
         return View(transaction);
     }
 }

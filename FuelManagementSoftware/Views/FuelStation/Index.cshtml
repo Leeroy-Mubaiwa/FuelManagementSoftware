@@ -24,7 +24,7 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.Name</td>
+                    <td><a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none fw-medium">@item.Name</a></td>
                     <td><small class="text-muted">@(item.Code ?? "-")</small></td>
                     <td><small>@item.Address</small></td>
                     <td><small>@(item.City ?? "-")</small></td>

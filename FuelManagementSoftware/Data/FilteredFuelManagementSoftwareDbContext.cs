@@ -15,14 +15,16 @@ namespace FuelManagementSoftware.Data;
 public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbContext
 {
     private readonly int? _organisationId;
+    private readonly string? _creatorId;
 
     /// <summary>Value used in query filters. When organisation is null, use -1 so no rows match (avoids Nullable.Value exception with cached model).</summary>
     private int _organisationIdForFilter => _organisationId ?? -1;
 
-    public FilteredFuelManagementSoftwareDbContext(DbContextOptions<FuelManagementSoftwareDbContext> options, int? organisationId = null)
+    public FilteredFuelManagementSoftwareDbContext(DbContextOptions<FuelManagementSoftwareDbContext> options, int? organisationId = null, string? creatorId = null)
         : base(options)
     {
         _organisationId = organisationId;
+        _creatorId = creatorId;
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,7 +39,6 @@ public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbC
         modelBuilder.Entity<FuelStation>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
         modelBuilder.Entity<FuelStock>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
         modelBuilder.Entity<FuelTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<FuelType>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
         modelBuilder.Entity<PetroCard>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
         modelBuilder.Entity<QueueInformation>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
         modelBuilder.Entity<StationStatusHistory>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
@@ -46,20 +47,22 @@ public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbC
     }
 
     /// <summary>
-    /// Override SaveChanges to ensure organisation_id is set on new entities
+    /// Override SaveChanges to ensure organisation_id and creator_id are set where needed.
     /// </summary>
     public override int SaveChanges()
     {
         EnsureOrganisationId();
+        EnsureCreatorId();
         return base.SaveChanges();
     }
 
     /// <summary>
-    /// Override SaveChangesAsync to ensure organisation_id is set on new entities
+    /// Override SaveChangesAsync to ensure organisation_id and creator_id are set where needed.
     /// </summary>
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         EnsureOrganisationId();
+        EnsureCreatorId();
         return base.SaveChangesAsync(cancellationToken);
     }
 
@@ -72,18 +75,38 @@ public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbC
 
         foreach (var entry in entries)
         {
-            // Use reflection to set OrganisationId if the entity has it
-            // Try both "OrganisationId" (property name) and check if it's an int
-            var organisationIdProperty = entry.Entity.GetType().GetProperty("OrganisationId", 
+            var organisationIdProperty = entry.Entity.GetType().GetProperty("OrganisationId",
                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
             if (organisationIdProperty != null && organisationIdProperty.PropertyType == typeof(int))
             {
                 var currentValue = (int)organisationIdProperty.GetValue(entry.Entity)!;
-                // Set if value is 0 (default) or if it's a new entity
                 if (currentValue == 0 || entry.State == EntityState.Added)
                 {
                     organisationIdProperty.SetValue(entry.Entity, _organisationId.Value);
+                }
+            }
+        }
+    }
+
+    private void EnsureCreatorId()
+    {
+        if (string.IsNullOrEmpty(_creatorId)) return;
+
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+        foreach (var entry in entries)
+        {
+            var creatorIdProperty = entry.Entity.GetType().GetProperty("CreatorId",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+
+            if (creatorIdProperty != null && creatorIdProperty.PropertyType == typeof(string))
+            {
+                var currentValue = (string?)creatorIdProperty.GetValue(entry.Entity);
+                if (string.IsNullOrEmpty(currentValue))
+                {
+                    creatorIdProperty.SetValue(entry.Entity, _creatorId);
                 }
             }
         }

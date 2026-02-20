@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -61,9 +61,6 @@ public partial class Organization
 
     [InverseProperty("Organisation")]
     public virtual ICollection<FuelTransaction> FuelTransactions { get; set; } = new List<FuelTransaction>();
-
-    [InverseProperty("Organisation")]
-    public virtual ICollection<FuelType> FuelTypes { get; set; } = new List<FuelType>();
 
     [InverseProperty("Organisation")]
     public virtual ICollection<PetroCard> PetroCards { get; set; } = new List<PetroCard>();

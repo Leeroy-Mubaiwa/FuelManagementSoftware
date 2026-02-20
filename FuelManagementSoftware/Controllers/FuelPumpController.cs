@@ -51,6 +51,7 @@ public class FuelPumpController : Controller
         if (stationId.HasValue)
         {
             var station = await _context.FuelStations.FindAsync(stationId.Value);
+            ViewBag.StationId = stationId.Value;
             ViewBag.StationName = station?.Name;
         }
 
@@ -76,6 +77,8 @@ public class FuelPumpController : Controller
             return NotFound();
         }
 
+        ViewBag.StationId = pump.FuelStationId;
+        ViewBag.StationName = pump.FuelStation?.Name;
         return View(pump);
     }
 
@@ -94,6 +97,12 @@ public class FuelPumpController : Controller
 
         ViewBag.FuelStationId = new SelectList(stations, "Id", "Name", stationId);
         ViewBag.FuelTypeId = new SelectList(fuelTypes, "Id", "Name");
+        if (stationId.HasValue)
+        {
+            var station = await _context.FuelStations.FindAsync(stationId.Value);
+            ViewBag.StationId = stationId.Value;
+            ViewBag.StationName = station?.Name;
+        }
         return View();
     }
 
@@ -160,6 +169,9 @@ public class FuelPumpController : Controller
 
         ViewBag.FuelStationId = new SelectList(stations, "Id", "Name", pump.FuelStationId);
         ViewBag.FuelTypeId = new SelectList(fuelTypes, "Id", "Name", pump.FuelTypeId);
+        var station = await _context.FuelStations.FindAsync(pump.FuelStationId);
+        ViewBag.StationId = pump.FuelStationId;
+        ViewBag.StationName = station?.Name;
         return View(pump);
     }
 
@@ -177,10 +189,24 @@ public class FuelPumpController : Controller
         {
             try
             {
-                pump.UpdatedAt = DateTime.UtcNow;
-                _context.Update(pump);
+                var existing = await _context.FuelPumps.FindAsync(id);
+                if (existing == null)
+                {
+                    return NotFound();
+                }
+                existing.OrganisationId = pump.OrganisationId;
+                existing.FuelStationId = pump.FuelStationId;
+                existing.PumpNumber = pump.PumpNumber;
+                existing.FuelTypeId = pump.FuelTypeId;
+                existing.IsActive = pump.IsActive;
+                existing.IsOperational = pump.IsOperational;
+                existing.LastMaintenanceDate = pump.LastMaintenanceDate;
+                existing.UpdatedAt = DateTime.UtcNow;
+                var entry = _context.Entry(existing);
+                entry.Property(p => p.CreatorId).IsModified = false;
+                entry.Property(p => p.CreatedAt).IsModified = false;
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index), new { stationId = pump.FuelStationId });
+                return RedirectToAction(nameof(Index), new { stationId = existing.FuelStationId });
             }
             catch (DbUpdateConcurrencyException)
             {

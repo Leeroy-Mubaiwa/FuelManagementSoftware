@@ -52,6 +52,7 @@ public class FuelStockController : Controller
         if (stationId.HasValue)
         {
             var station = await _context.FuelStations.FindAsync(stationId.Value);
+            ViewBag.StationId = stationId.Value;
             ViewBag.StationName = station?.Name;
         }
 
@@ -77,6 +78,8 @@ public class FuelStockController : Controller
             return NotFound();
         }
 
+        ViewBag.StationId = stock.FuelStationId;
+        ViewBag.StationName = stock.FuelStation?.Name;
         return View(stock);
     }
 
@@ -95,6 +98,12 @@ public class FuelStockController : Controller
 
         ViewBag.FuelStationId = new SelectList(stations, "Id", "Name", stationId);
         ViewBag.FuelTypeId = new SelectList(fuelTypes, "Id", "Name");
+        if (stationId.HasValue)
+        {
+            var station = await _context.FuelStations.FindAsync(stationId.Value);
+            ViewBag.StationId = stationId.Value;
+            ViewBag.StationName = station?.Name;
+        }
         return View();
     }
 
@@ -163,6 +172,9 @@ public class FuelStockController : Controller
 
         ViewBag.FuelStationId = new SelectList(stations, "Id", "Name", stock.FuelStationId);
         ViewBag.FuelTypeId = new SelectList(fuelTypes, "Id", "Name", stock.FuelTypeId);
+        var station = await _context.FuelStations.FindAsync(stock.FuelStationId);
+        ViewBag.StationId = stock.FuelStationId;
+        ViewBag.StationName = station?.Name;
         return View(stock);
     }
 

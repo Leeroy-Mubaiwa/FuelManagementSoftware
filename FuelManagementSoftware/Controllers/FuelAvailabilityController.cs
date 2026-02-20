@@ -75,8 +75,8 @@ public class FuelAvailabilityController : Controller
         IQueryable<FuelStation> query = _context.FuelStations
             .Include(s => s.FuelStocks)
             .ThenInclude(st => st.FuelType)
-            .Include(s => s.FuelPumps)
-            .Where(s => s.IsActive && s.Latitude.HasValue && s.Longitude.HasValue);
+            .Include(s => s.FuelPumps.Where(p => p.IsActive && p.IsOperational))
+            .Where(s => s.IsActive && s.IsOpen && !s.IsTankerOffloading && s.Latitude.HasValue && s.Longitude.HasValue);
 
         if (fuelTypeId.HasValue)
         {

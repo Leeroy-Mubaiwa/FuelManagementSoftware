@@ -213,10 +213,8 @@ public partial class FuelManagementSoftwareDbContext : DbContext
             entity.Property(e => e.Unit).HasDefaultValue("Litre");
 
             entity.HasOne(d => d.Creator).WithMany(p => p.FuelTypes)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_FuelTypes_Users");
-
-            entity.HasOne(d => d.Organisation).WithMany(p => p.FuelTypes).HasConstraintName("FK_FuelTypes_Organizations");
         });
 
         modelBuilder.Entity<Organization>(entity =>

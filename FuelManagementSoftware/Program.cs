@@ -19,7 +19,15 @@ builder.Services.AddScoped<FilteredFuelManagementSoftwareDbContext>(serviceProvi
     var options = serviceProvider.GetRequiredService<DbContextOptions<FuelManagementSoftwareDbContext>>();
     var organisationContextService = serviceProvider.GetRequiredService<IOrganisationContextService>();
     var organisationId = organisationContextService.GetCurrentOrganisationIdAsync().GetAwaiter().GetResult();
-    return new FilteredFuelManagementSoftwareDbContext(options, organisationId);
+    string? creatorId = null;
+    var httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext;
+    if (httpContext?.User != null)
+    {
+        var userManager = serviceProvider.GetRequiredService<UserManager<FuelManagementSoftwareUser>>();
+        var user = userManager.GetUserAsync(httpContext.User).GetAwaiter().GetResult();
+        creatorId = user?.Id;
+    }
+    return new FilteredFuelManagementSoftwareDbContext(options, organisationId, creatorId);
 });
 
 builder.Services.AddDefaultIdentity<FuelManagementSoftwareUser>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -51,6 +59,7 @@ builder.Services.AddRazorPages();
 
 // Register role seeder
 builder.Services.AddScoped<RoleSeederService>();
+builder.Services.AddScoped<FuelTypeSeederService>();
 
 var app = builder.Build();
 
@@ -76,9 +85,12 @@ app.MapHub<PumpStatusHub>("/hubs/pumpstatus");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FuelManagementSoftwareDbContext>();
+    await ApplyMakeFuelTypeGlobalIfNeededAsync(db);
     await db.Database.MigrateAsync();
     var roleSeeder = scope.ServiceProvider.GetRequiredService<RoleSeederService>();
     await roleSeeder.SeedRolesAsync();
+    var fuelTypeSeeder = scope.ServiceProvider.GetRequiredService<FuelTypeSeederService>();
+    await fuelTypeSeeder.SeedFuelTypesAsync();
 }
 
 // Deploy blockchain smart contract if not yet deployed
@@ -110,3 +122,51 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+static async Task ApplyMakeFuelTypeGlobalIfNeededAsync(FuelManagementSoftwareDbContext db)
+{
+    const string migrationId = "20260219120000_MakeFuelTypeGlobal";
+    var hasOldColumn = await db.Database.SqlQueryRaw<string>(
+        "SELECT name FROM pragma_table_info('FuelTypes') WHERE name = 'organisation_id' LIMIT 1").ToListAsync();
+    if (hasOldColumn.Count == 0) return;
+
+    var conn = db.Database.GetDbConnection();
+    await conn.OpenAsync();
+    try
+    {
+        async Task Exec(string sql)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = sql;
+            await cmd.ExecuteNonQueryAsync();
+        }
+        await Exec("PRAGMA foreign_keys = 0;");
+        await Exec(@"
+            CREATE TABLE FuelTypes_new (
+                Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                Name TEXT NOT NULL,
+                Code TEXT NULL,
+                Description TEXT NULL,
+                UnitPrice REAL NOT NULL,
+                Unit TEXT NOT NULL DEFAULT 'Litre',
+                IsActive INTEGER NOT NULL DEFAULT 1,
+                CreatedAt TEXT NOT NULL DEFAULT (datetime('now', 'utc')),
+                UpdatedAt TEXT NULL,
+                creator_id TEXT NULL,
+                FOREIGN KEY (creator_id) REFERENCES Users(Id) ON DELETE SET NULL
+            );");
+        await Exec(@"
+            INSERT INTO FuelTypes_new (Id, Name, Code, Description, UnitPrice, Unit, IsActive, CreatedAt, UpdatedAt, creator_id)
+            SELECT Id, Name, Code, Description, UnitPrice, Unit, IsActive, CreatedAt, UpdatedAt, creator_id FROM FuelTypes;");
+        await Exec("DROP TABLE FuelTypes;");
+        await Exec("ALTER TABLE FuelTypes_new RENAME TO FuelTypes;");
+        await Exec("CREATE INDEX IX_FuelTypes_creator_id ON FuelTypes(creator_id);");
+        await Exec("PRAGMA foreign_keys = 1;");
+        await db.Database.ExecuteSqlRawAsync(
+            "INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) VALUES ({0}, '8.0.23');", migrationId);
+    }
+    finally
+    {
+        await conn.CloseAsync();
+    }
+}

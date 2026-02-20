@@ -2,11 +2,13 @@
 @{
     ViewData["Title"] = "Pump Details";
 }
+@await Html.PartialAsync("_StationContext")
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Pump @Model.PumpNumber</h4>
     <div>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">Edit</a>
+        <a asp-controller="FuelStation" asp-action="Details" asp-route-id="@Model.FuelStationId" class="btn btn-sm btn-outline-secondary">Station overview</a>
         <a asp-action="Index" asp-route-stationId="@Model.FuelStationId" class="btn btn-sm btn-secondary">Back to List</a>
     </div>
 </div>

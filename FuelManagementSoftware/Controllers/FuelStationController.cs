@@ -64,6 +64,8 @@ public class FuelStationController : Controller
             return NotFound();
         }
 
+        ViewBag.StationId = station.Id;
+        ViewBag.StationName = station.Name;
         return View(station);
     }
 

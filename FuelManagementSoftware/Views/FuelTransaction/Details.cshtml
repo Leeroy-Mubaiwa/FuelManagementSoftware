@@ -2,10 +2,18 @@
 @{
     ViewData["Title"] = "Transaction Details";
 }
+@await Html.PartialAsync("_StationContext")
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Transaction @Model.TransactionNumber</h4>
-    <a asp-action="Index" class="btn btn-sm btn-secondary">Back to List</a>
+    <div>
+        @if (Model.FuelStationId > 0)
+        {
+            <a asp-controller="FuelStation" asp-action="Details" asp-route-id="@Model.FuelStationId" class="btn btn-sm btn-outline-secondary me-1">Station overview</a>
+            <a asp-action="Index" asp-route-stationId="@Model.FuelStationId" class="btn btn-sm btn-outline-secondary me-1">Station transactions</a>
+        }
+        <a asp-action="Index" class="btn btn-sm btn-secondary">All transactions</a>
+    </div>
 </div>
 
 <div class="row">

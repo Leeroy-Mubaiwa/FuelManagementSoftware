@@ -146,11 +146,15 @@ public class FuelDispensingController : Controller
     // POST: FuelDispensing/Start
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Start(int transactionId)
+    public async Task<IActionResult> Start([FromBody] StartDispensingRequest request)
     {
+        if (request == null || request.TransactionId <= 0)
+        {
+            return Json(new { success = false, error = "Invalid transaction ID" });
+        }
         try
         {
-            var transaction = await _fuelDispensingService.StartDispensingAsync(transactionId);
+            var transaction = await _fuelDispensingService.StartDispensingAsync(request.TransactionId);
             return Json(new { success = true, transactionId = transaction.Id, status = transaction.TransactionStatus });
         }
         catch (Exception ex)
@@ -163,11 +167,15 @@ public class FuelDispensingController : Controller
     // POST: FuelDispensing/Complete
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Complete(int transactionId, decimal finalQuantity)
+    public async Task<IActionResult> Complete([FromBody] CompleteDispensingRequest request)
     {
+        if (request == null || request.TransactionId <= 0)
+        {
+            return Json(new { success = false, error = "Invalid transaction ID" });
+        }
         try
         {
-            var transaction = await _fuelDispensingService.CompleteDispensingAsync(transactionId, finalQuantity);
+            var transaction = await _fuelDispensingService.CompleteDispensingAsync(request.TransactionId, request.FinalQuantity);
             return Json(new { success = true, transactionId = transaction.Id, status = transaction.TransactionStatus });
         }
         catch (Exception ex)
@@ -180,11 +188,15 @@ public class FuelDispensingController : Controller
     // POST: FuelDispensing/Cancel
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Cancel(int transactionId, string? reason = null)
+    public async Task<IActionResult> Cancel([FromBody] CancelDispensingRequest request)
     {
+        if (request == null || request.TransactionId <= 0)
+        {
+            return Json(new { success = false, error = "Invalid transaction ID" });
+        }
         try
         {
-            var transaction = await _fuelDispensingService.CancelDispensingAsync(transactionId, reason);
+            var transaction = await _fuelDispensingService.CancelDispensingAsync(request.TransactionId, request.Reason);
             return Json(new { success = true, transactionId = transaction.Id, status = transaction.TransactionStatus });
         }
         catch (Exception ex)
@@ -267,5 +279,8 @@ public class FuelDispensingController : Controller
             return Json(new { success = false, error = ex.Message });
         }
     }
-}
 
+    public class StartDispensingRequest { public int TransactionId { get; set; } }
+    public class CompleteDispensingRequest { public int TransactionId { get; set; } public decimal FinalQuantity { get; set; } }
+    public class CancelDispensingRequest { public int TransactionId { get; set; } public string? Reason { get; set; } }
+}

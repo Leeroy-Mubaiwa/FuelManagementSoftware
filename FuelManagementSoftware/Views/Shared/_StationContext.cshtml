@@ -1,0 +1,34 @@
+@{
+    var stationId = ViewBag.StationId as int?;
+    var stationName = ViewBag.StationName as string;
+    if (!stationId.HasValue || string.IsNullOrEmpty(stationName)) { return; }
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+<div class="card mb-3 bg-light border-0">
+    <div class="card-body py-2">
+        <nav aria-label="Station context">
+            <ol class="breadcrumb mb-2 mb-md-0 small">
+                <li class="breadcrumb-item"><a asp-controller="FuelStation" asp-action="Index">Stations</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@stationName</li>
+            </ol>
+            <div class="d-flex flex-wrap gap-1 align-items-center">
+                <a asp-controller="FuelStation" asp-action="Details" asp-route-id="@stationId" class="btn btn-sm @(currentController == "FuelStation" && currentAction == "Details" ? "btn-primary" : "btn-outline-primary")">
+                    <i class="bi bi-building me-1"></i>Overview
+                </a>
+                <a asp-controller="FuelPump" asp-action="Index" asp-route-stationId="@stationId" class="btn btn-sm @(currentController == "FuelPump" ? "btn-primary" : "btn-outline-secondary")">
+                    <i class="bi bi-droplet me-1"></i>Pumps
+                </a>
+                <a asp-controller="FuelStock" asp-action="Index" asp-route-stationId="@stationId" class="btn btn-sm @(currentController == "FuelStock" ? "btn-primary" : "btn-outline-secondary")">
+                    <i class="bi bi-box-seam me-1"></i>Stock
+                </a>
+                <a asp-controller="FuelTransaction" asp-action="Index" asp-route-stationId="@stationId" class="btn btn-sm @(currentController == "FuelTransaction" ? "btn-primary" : "btn-outline-secondary")">
+                    <i class="bi bi-receipt me-1"></i>Transactions
+                </a>
+                <a asp-controller="FuelDispensing" asp-action="SelectPump" asp-route-stationId="@stationId" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-fuel-pump me-1"></i>Start Dispensing
+                </a>
+            </div>
+        </nav>
+    </div>
+</div>
