@@ -19,12 +19,7 @@
             <div class="card mt-3">
                 <div class="card-body">
                     <h5 class="card-title">Instructions</h5>
-                    <ol>
-                        <li>Tap your PetroCard on this device</li>
-                        <li>Enter your PIN if required</li>
-                        <li>Select the quantity (or leave empty for fill-up)</li>
-                        <li>Click "Start Dispensing"</li>
-                    </ol>
+                    <p id="instructionsText">Choose payment method, then follow the steps.</p>
                 </div>
             </div>
             
@@ -32,38 +27,52 @@
                 <input type="hidden" name="FuelStationId" value="@pump?.FuelStationId" />
                 <input type="hidden" name="FuelPumpId" value="@pump?.Id" />
                 <input type="hidden" name="FuelTypeId" value="@pump?.FuelTypeId" />
-                
-                <div id="nfcStatus" class="alert alert-info small mb-3">Checking card reader...</div>
+                <input type="hidden" name="PaymentMethod" id="PaymentMethod" value="PetroCard" />
 
                 <div class="form-group mb-3">
-                    <label for="NfcTag" class="form-label">Card ID</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="NfcTag" name="NfcTag" required readonly />
-                        <button type="button" class="btn btn-outline-secondary" id="readNfcBtn" onclick="readNfcTag()">
-                            <i class="bi bi-wifi me-1"></i><span id="readNfcBtnText">Tap Card</span>
-                        </button>
-                    </div>
-                    <small class="form-text text-muted">Tap your PetroCard on this device, or use the button to read</small>
-                </div>
-                
-                <div class="form-group mb-3" id="cardInfo" style="display: none;">
-                    <div class="alert alert-info">
-                        <strong>Card:</strong> <span id="cardNumber"></span><br>
-                        <strong>Balance:</strong> <span id="cardBalance"></span> <span id="cardCurrency"></span>
+                    <label class="form-label">Payment method</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="PaymentMethodRadio" id="payPetroCard" value="PetroCard" checked>
+                            <label class="form-check-label" for="payPetroCard"><i class="bi bi-credit-card me-1"></i>PetroCard</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="PaymentMethodRadio" id="payCash" value="Cash">
+                            <label class="form-check-label" for="payCash"><i class="bi bi-cash me-1"></i>Cash</label>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="form-group mb-3">
-                    <label for="Pin" class="form-label">PIN (if required)</label>
-                    <input type="password" class="form-control" id="Pin" name="Pin" maxlength="6" />
+
+                <div id="cardPaymentSection">
+                    <div id="nfcStatus" class="alert alert-info small mb-3">Checking card reader...</div>
+                    <div class="form-group mb-3">
+                        <label for="NfcTag" class="form-label">Card ID</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="NfcTag" name="NfcTag" readonly />
+                            <button type="button" class="btn btn-outline-secondary" id="readNfcBtn" onclick="readNfcTag()">
+                                <i class="bi bi-wifi me-1"></i><span id="readNfcBtnText">Tap Card</span>
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">Tap your PetroCard, or use the button to read</small>
+                    </div>
+                    <div class="form-group mb-3" id="cardInfo" style="display: none;">
+                        <div class="alert alert-info">
+                            <strong>Card:</strong> <span id="cardNumber"></span><br>
+                            <strong>Balance:</strong> <span id="cardBalance"></span> <span id="cardCurrency"></span>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="Pin" class="form-label">PIN (if required)</label>
+                        <input type="password" class="form-control" id="Pin" name="Pin" maxlength="6" />
+                    </div>
                 </div>
-                
+
                 <div class="form-group mb-3">
-                    <label for="RequestedQuantity" class="form-label">Requested Quantity (Litres) - Leave empty for fill-up</label>
+                    <label for="RequestedQuantity" class="form-label">Requested quantity (litres) — leave empty for fill-up</label>
                     <input type="number" class="form-control" id="RequestedQuantity" name="RequestedQuantity" step="0.01" min="0" />
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="startBtn" disabled>Start Dispensing</button>
+                <button type="submit" class="btn btn-primary" id="startBtn">Start Dispensing</button>
                 <a href="@Url.Action("SelectPump", new { stationId = pump?.FuelStationId })" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
@@ -76,17 +85,46 @@
         let requiresPin = false;
         let nfcSupported = ('NDEFReader' in window);
 
-        // Show NFC status
+        function isCash() {
+            return document.getElementById('payCash').checked;
+        }
+
+        function updatePaymentUI() {
+            const cash = isCash();
+            const cardSection = document.getElementById('cardPaymentSection');
+            const startBtn = document.getElementById('startBtn');
+            const instructionsText = document.getElementById('instructionsText');
+            const nfcInput = document.getElementById('NfcTag');
+
+            document.getElementById('PaymentMethod').value = cash ? 'Cash' : 'PetroCard';
+            cardSection.style.display = cash ? 'none' : 'block';
+
+            if (cash) {
+                nfcInput.removeAttribute('required');
+                nfcInput.value = '';
+                startBtn.disabled = false;
+                instructionsText.innerHTML = '<strong>Cash:</strong> Select quantity (or leave empty for fill-up), then click Start Dispensing. Customer pays cash at the end.';
+            } else {
+                nfcInput.setAttribute('required', 'required');
+                instructionsText.innerHTML = '<strong>PetroCard:</strong> Tap your card, enter PIN if required, set quantity (or leave empty for fill-up), then click Start Dispensing.';
+                startBtn.disabled = !nfcInput.value.trim() || (requiresPin && document.getElementById('Pin').value.length < 4);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('payPetroCard').addEventListener('change', updatePaymentUI);
+            document.getElementById('payCash').addEventListener('change', updatePaymentUI);
+
             const nfcStatus = document.getElementById('nfcStatus');
             if (nfcSupported) {
                 nfcStatus.innerHTML = '<i class="bi bi-wifi me-1"></i>Card reader ready — tap your PetroCard on this device';
                 nfcStatus.className = 'alert alert-success small';
             } else {
-                nfcStatus.innerHTML = '<i class="bi bi-wifi-off me-1"></i>Contactless reading not available on this browser. You can type your card ID manually, or use Chrome on an Android device.';
+                nfcStatus.innerHTML = '<i class="bi bi-wifi-off me-1"></i>Contactless reading not available. You can type your card ID manually.';
                 nfcStatus.className = 'alert alert-warning small';
                 document.getElementById('NfcTag').removeAttribute('readonly');
             }
+            updatePaymentUI();
         });
 
         async function readNfcTag() {
@@ -156,13 +194,13 @@
         }
 
         function showCardInfo(data) {
+            if (isCash()) return;
             document.getElementById('cardNumber').textContent = data.cardNumber;
             document.getElementById('cardBalance').textContent = data.balance.toFixed(2);
             document.getElementById('cardCurrency').textContent = data.currency;
             document.getElementById('cardInfo').style.display = 'block';
             requiresPin = data.requiresPin;
             const startBtn = document.getElementById('startBtn');
-
             if (!requiresPin) {
                 startBtn.disabled = false;
             } else {

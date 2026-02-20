@@ -20,17 +20,20 @@ public class PetroCardController : Controller
     private readonly FilteredFuelManagementSoftwareDbContext _context;
     private readonly UserManager<FuelManagementSoftwareUser> _userManager;
     private readonly IPetroCardService _petroCardService;
+    private readonly IOrganisationContextService _organisationContext;
     private readonly ILogger<PetroCardController> _logger;
 
     public PetroCardController(
         FilteredFuelManagementSoftwareDbContext context,
         UserManager<FuelManagementSoftwareUser> userManager,
         IPetroCardService petroCardService,
+        IOrganisationContextService organisationContext,
         ILogger<PetroCardController> logger)
     {
         _context = context;
         _userManager = userManager;
         _petroCardService = petroCardService;
+        _organisationContext = organisationContext;
         _logger = logger;
     }
 
@@ -69,28 +72,22 @@ public class PetroCardController : Controller
     }
 
     // GET: PetroCard/Create
-    public async Task<IActionResult> Create()
+    public IActionResult Create()
     {
-        var users = await _context.Users
-            .OrderBy(u => u.UserName)
-            .Select(u => new { u.Id, u.UserName })
-            .ToListAsync();
-
-        ViewBag.UserId = new SelectList(users, "Id", "UserName");
         return View();
     }
 
     // POST: PetroCard/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("CardNumber,Rfidtag,UserId,Balance,Currency,IsActive,IsBlocked,ExpiryDate,Pin")] PetroCardViewModel model)
+    public async Task<IActionResult> Create([Bind("CardNumber,Rfidtag,Balance,Currency,IsActive,IsBlocked,ExpiryDate,Pin")] PetroCardViewModel model)
     {
         if (ModelState.IsValid)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var organisationId = await GetCurrentOrganisationIdAsync();
+            var organisationId = await _organisationContext.GetCurrentOrganisationIdAsync();
             if (!organisationId.HasValue) return BadRequest("Organization not found");
 
             var card = new PetroCard
@@ -98,7 +95,7 @@ public class PetroCardController : Controller
                 OrganisationId = organisationId.Value,
                 CardNumber = model.CardNumber,
                 Rfidtag = model.Rfidtag,
-                UserId = model.UserId,
+                UserId = user.Id,
                 Balance = model.Balance,
                 Currency = model.Currency ?? "USD",
                 IsActive = model.IsActive,
@@ -114,12 +111,6 @@ public class PetroCardController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        var users = await _context.Users
-            .OrderBy(u => u.UserName)
-            .Select(u => new { u.Id, u.UserName })
-            .ToListAsync();
-
-        ViewBag.UserId = new SelectList(users, "Id", "UserName");
         return View(model);
     }
 
@@ -280,19 +271,6 @@ public class PetroCardController : Controller
     {
         return await _context.PetroCards.AnyAsync(e => e.Id == id);
     }
-
-    private async Task<int?> GetCurrentOrganisationIdAsync()
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return null;
-
-        var card = await _context.PetroCards
-            .Where(c => c.UserId == user.Id && c.IsActive)
-            .OrderByDescending(c => c.LastUsedAt ?? c.CreatedAt)
-            .FirstOrDefaultAsync();
-
-        return card?.OrganisationId;
-    }
 }
 
 public class PetroCardViewModel
@@ -306,9 +284,8 @@ public class PetroCardViewModel
     [Display(Name = "NFC Tag")]
     public string? Rfidtag { get; set; }
     
-    [Required]
     [Display(Name = "User")]
-    public string UserId { get; set; } = null!;
+    public string? UserId { get; set; }
     
     [Required]
     [Display(Name = "Balance")]

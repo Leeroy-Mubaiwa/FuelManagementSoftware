@@ -4,19 +4,21 @@
     var stationsWithCoords = Model.Where(s => s.Latitude.HasValue && s.Longitude.HasValue).ToList();
 }
 
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+@section Styles {
+     
+          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+}
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Fuel Availability Map & Directions</h4>
+    <h4 class="mb-0">Fuel Availability Map</h4>
     <a asp-action="Index" class="btn btn-sm btn-secondary">List View</a>
 </div>
 
 <div class="card mb-3">
     <div class="card-body">
         <div class="row g-2">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label class="form-label small">Filter by Fuel Type</label>
                 <select id="fuelTypeFilter" class="form-select form-select-sm">
                     <option value="">All Fuel Types</option>
@@ -26,16 +28,8 @@
                     }
                 </select>
             </div>
-            <div class="col-md-3 d-flex align-items-end">
+            <div class="col-md-4 d-flex align-items-end">
                 <button type="button" id="btnGetLocation" class="btn btn-sm btn-primary">Use My Location</button>
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="button" id="btnClearRoute" class="btn btn-sm btn-outline-secondary">Clear Route</button>
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <select id="nearestStationSelect" class="form-select form-select-sm">
-                    <option value="">Select Nearest Station</option>
-                </select>
             </div>
         </div>
     </div>
@@ -43,7 +37,12 @@
 
 <div class="row">
     <div class="col-md-8">
-        <div id="map" style="height: 600px; border: 1px solid #dee2e6; border-radius: 0.375rem;"></div>
+        <div id="map" style="height: 600px; border: 1px solid #dee2e6; border-radius: 0.375rem; background: #e8e8e8; position: relative; z-index: 1;">
+            <div id="mapLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; text-align: center;">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted small">Loading map…</p>
+            </div>
+        </div>
     </div>
     <div class="col-md-4">
         <div class="card">
@@ -87,7 +86,7 @@
                                     }
                                 </div>
                             }
-                            <button class="btn btn-sm btn-outline-primary btn-get-directions" data-station-id="@station.Id">Get Directions</button>
+                            <a class="btn btn-sm btn-outline-primary btn-open-google-maps" href="https://www.google.com/maps/search/?api=1&query=@(station.Latitude?.ToString(System.Globalization.CultureInfo.InvariantCulture)),@(station.Longitude?.ToString(System.Globalization.CultureInfo.InvariantCulture))" target="_blank" rel="noopener noreferrer" data-station-id="@station.Id" data-lat="@station.Latitude" data-lng="@station.Longitude" data-address="@station.Address"><i class="bi bi-geo-alt me-1"></i>Open in Google Maps</a>
                         </div>
                     </div>
                 }
@@ -96,246 +95,182 @@
     </div>
 </div>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+@section Scripts {
+   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var mapEl = document.getElementById('map');
+            var loadingEl = document.getElementById('mapLoading');
 
-<script>
-    // Initialize map centered on Harare, Zimbabwe
-    var map = L.map('map').setView([-17.8292, 31.0522], 12);
-    
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19
-    }).addTo(map);
-    
-    var stations = @Html.Raw(Json.Serialize(stationsWithCoords.Select(s => new {
-        Id = s.Id,
-        Name = s.Name,
-        Address = s.Address,
-        Latitude = s.Latitude,
-        Longitude = s.Longitude,
-        IsOpen = s.IsOpen,
-        IsTankerOffloading = s.IsTankerOffloading,
-        FuelStocks = s.FuelStocks.Where(st => st.CurrentQuantity > 0).Select(st => new {
-            FuelTypeName = st.FuelType?.Name,
-            FuelTypeId = st.FuelTypeId,
-            CurrentQuantity = st.CurrentQuantity,
-            Unit = st.Unit
-        })
-    })));
-    
-    var selectedStationId = @(ViewBag.SelectedStationId != null ? ViewBag.SelectedStationId : "null");
-    
-    var markers = [];
-    var userMarker = null;
-    var routingControl = null;
-    var userLocation = null;
-    
-    // Add station markers
-    function addStationMarkers(filteredStations) {
-        // Clear existing markers
-        markers.forEach(m => map.removeLayer(m));
-        markers = [];
-        
-        filteredStations.forEach(function(station) {
-            var iconColor = station.IsTankerOffloading ? 'orange' : (!station.IsOpen ? 'red' : 'green');
-            var icon = L.divIcon({
-                className: 'custom-marker',
-                html: '<div style="background-color: ' + iconColor + '; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-                iconSize: [20, 20],
-                iconAnchor: [10, 10]
-            });
-            
-            var marker = L.marker([station.Latitude, station.Longitude], { icon: icon })
-                .addTo(map)
-                .bindPopup('<strong>' + station.Name + '</strong><br>' + station.Address);
-            
-            marker.stationData = station;
-            markers.push(marker);
-        });
-    }
-    
-    // Initialize with all stations
-    addStationMarkers(stations);
-    
-    // If a station is pre-selected, center map on it
-    if (selectedStationId && stations.length > 0) {
-        var selectedStation = stations.find(s => s.Id === selectedStationId);
-        if (selectedStation) {
-            map.setView([selectedStation.Latitude, selectedStation.Longitude], 15);
-            // Highlight the selected station card
-            var selectedCard = document.querySelector('.station-card[data-station-id="' + selectedStationId + '"]');
-            if (selectedCard) {
-                selectedCard.classList.add('border-primary', 'border-2');
+            // Guard: make sure Leaflet loaded
+            if (typeof L === 'undefined') {
+                if (loadingEl) loadingEl.innerHTML = '<div class="alert alert-danger">Map library failed to load. Please check your internet connection and refresh the page.</div>';
+                return;
             }
-        }
-    }
-    
-    // Get user location
-    document.getElementById('btnGetLocation').addEventListener('click', function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                userLocation = [position.coords.latitude, position.coords.longitude];
-                
-                // Remove existing user marker
-                if (userMarker) {
-                    map.removeLayer(userMarker);
+
+            var map = L.map('map').setView([-17.8292, 31.0522], 12);
+
+            // Primary tile layer (OpenStreetMap)
+            var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            });
+
+            // Fallback tile layer (CartoDB Positron)
+            var cartoLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+            });
+
+            // Try OSM first; on error fall back to CartoDB
+            var tileLoadFailed = false;
+            osmLayer.on('tileerror', function () {
+                if (!tileLoadFailed) {
+                    tileLoadFailed = true;
+                    map.removeLayer(osmLayer);
+                    cartoLayer.addTo(map);
+                    console.warn('OpenStreetMap tiles failed to load, switching to CartoDB fallback.');
                 }
-                
-                // Add user location marker
-                userMarker = L.marker(userLocation, {
-                    icon: L.divIcon({
+            });
+
+            osmLayer.addTo(map);
+
+            // Hide loading spinner once first tile loads
+            osmLayer.on('tileload', function () { if (loadingEl) { loadingEl.style.display = 'none'; loadingEl = null; } });
+            cartoLayer.on('tileload', function () { if (loadingEl) { loadingEl.style.display = 'none'; loadingEl = null; } });
+
+            // Hide loading after a timeout regardless (in case tiles silently fail)
+            setTimeout(function () { var el = document.getElementById('mapLoading'); if (el) el.style.display = 'none'; }, 5000);
+
+            var stations = @Html.Raw(Json.Serialize(stationsWithCoords.Select(s => new {
+                Id = s.Id,
+                Name = s.Name,
+                Address = s.Address,
+                Latitude = s.Latitude,
+                Longitude = s.Longitude,
+                IsOpen = s.IsOpen,
+                IsTankerOffloading = s.IsTankerOffloading,
+                FuelStocks = s.FuelStocks.Where(st => st.CurrentQuantity > 0).Select(st => new {
+                    FuelTypeName = st.FuelType?.Name,
+                    FuelTypeId = st.FuelTypeId,
+                    CurrentQuantity = st.CurrentQuantity,
+                    Unit = st.Unit
+                })
+            })));
+
+            var selectedStationId = @(ViewBag.SelectedStationId != null ? ViewBag.SelectedStationId : "null");
+            var markers = [];
+            var userMarker = null;
+
+            function googleMapsUrl(lat, lng) {
+                return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lat + ',' + lng);
+            }
+
+            function addStationMarkers(filteredStations) {
+                markers.forEach(m => map.removeLayer(m));
+                markers = [];
+                filteredStations.forEach(function (station) {
+                    var lat = station.latitude !== undefined ? station.latitude : station.Latitude;
+                    var lng = station.longitude !== undefined ? station.longitude : station.Longitude;
+                    if (lat == null || lng == null) return;
+                    var isTankerOffloading = station.isTankerOffloading !== undefined ? station.isTankerOffloading : station.IsTankerOffloading;
+                    var isOpen = station.isOpen !== undefined ? station.isOpen : station.IsOpen;
+                    var iconColor = isTankerOffloading ? 'orange' : (!isOpen ? 'red' : 'green');
+                    var icon = L.divIcon({
                         className: 'custom-marker',
-                        html: '<div style="background-color: blue; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                        html: '<div style="background-color: ' + iconColor + '; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
                         iconSize: [20, 20],
                         iconAnchor: [10, 10]
-                    })
-                }).addTo(map).bindPopup('Your Location');
-                
-                map.setView(userLocation, 14);
-                
-                // Find nearest station
-                findNearestStation(userLocation);
-            }, function(error) {
-                alert('Unable to get your location. Please enter coordinates manually.');
-            });
-        } else {
-            alert('Geolocation is not supported by your browser.');
-        }
-    });
-    
-    // Find nearest station
-    function findNearestStation(location) {
-        var nearest = null;
-        var minDistance = Infinity;
-        
-        stations.forEach(function(station) {
-            var distance = map.distance(location, [station.Latitude, station.Longitude]);
-            if (distance < minDistance) {
-                minDistance = distance;
-                nearest = station;
+                    });
+                    var name = station.name ?? station.Name;
+                    var address = station.address ?? station.Address;
+                    var gmapsUrl = googleMapsUrl(lat, lng);
+                    var popupContent = '<strong>' + name + '</strong><br>' + (address || '') + '<br><a href="' + gmapsUrl + '" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-geo-alt me-1"></i>Open in Google Maps</a>';
+                    var marker = L.marker([lat, lng], { icon: icon })
+                        .addTo(map)
+                        .bindPopup(popupContent);
+                    marker.stationData = station;
+                    markers.push(marker);
+                });
             }
-        });
-        
-        if (nearest) {
-            // Update select dropdown
-            var select = document.getElementById('nearestStationSelect');
-            select.innerHTML = '<option value="' + nearest.Id + '">' + nearest.Name + ' (' + (minDistance / 1000).toFixed(2) + ' km away)</option>';
-            select.value = nearest.Id;
-            
-            // Auto-show directions
-            showDirections(nearest.Id);
-        }
-    }
-    
-    // Show directions
-    function showDirections(stationId) {
-        if (!userLocation) {
-            alert('Please get your location first.');
-            return;
-        }
-        
-        var station = stations.find(s => s.Id == stationId);
-        if (!station) return;
-        
-        // Remove existing route
-        if (routingControl) {
-            map.removeControl(routingControl);
-        }
-        
-        // Add route using OSRM (free routing service)
-        routingControl = L.Routing.control({
-            waypoints: [
-                L.latLng(userLocation[0], userLocation[1]),
-                L.latLng(station.Latitude, station.Longitude)
-            ],
-            router: L.Routing.osrmv1({
-                serviceUrl: 'https://router.project-osrm.org/route/v1'
-            }),
-            routeWhileDragging: false,
-            showAlternatives: false,
-            lineOptions: {
-                styles: [{ color: '#3388ff', weight: 5 }]
-            },
-            createMarker: function() { return null; } // Don't add extra markers
-        }).addTo(map);
-        
-        routingControl.on('routesfound', function(e) {
-            var routes = e.routes;
-            if (routes && routes.length > 0) {
-                var route = routes[0];
-                var distance = (route.summary.totalDistance / 1000).toFixed(2);
-                var duration = Math.round(route.summary.totalTime / 60);
-                alert('Route found: ' + distance + ' km, approximately ' + duration + ' minutes');
-            }
-        });
-    }
-    
-    // Get directions button handlers
-    document.querySelectorAll('.btn-get-directions').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var stationId = parseInt(this.getAttribute('data-station-id'));
-            if (userLocation) {
-                showDirections(stationId);
-            } else {
-                alert('Please click "Use My Location" first.');
-            }
-        });
-    });
-    
-    // Nearest station select change
-    document.getElementById('nearestStationSelect').addEventListener('change', function() {
-        if (this.value && userLocation) {
-            showDirections(parseInt(this.value));
-        }
-    });
-    
-    // Clear route
-    document.getElementById('btnClearRoute').addEventListener('click', function() {
-        if (routingControl) {
-            map.removeControl(routingControl);
-            routingControl = null;
-        }
-    });
-    
-    // Fuel type filter
-    document.getElementById('fuelTypeFilter').addEventListener('change', function() {
-        var fuelTypeId = this.value;
-        if (!fuelTypeId) {
+
             addStationMarkers(stations);
-            document.querySelectorAll('.station-card').forEach(card => card.style.display = '');
-            return;
-        }
-        
-        // Filter stations that have the selected fuel type in stock
-        var filtered = stations.filter(function(station) {
-            return station.FuelStocks.some(function(stock) {
-                return stock.FuelTypeName && station.FuelStocks.some(s => s.CurrentQuantity > 0);
+
+            // If there are markers, fit the map to show all of them
+            if (markers.length > 0) {
+                var group = L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+
+            if (selectedStationId && stations.length > 0) {
+                var selectedStation = stations.find(s => (s.id !== undefined ? s.id : s.Id) === selectedStationId);
+                if (selectedStation) {
+                    var slat = selectedStation.latitude !== undefined ? selectedStation.latitude : selectedStation.Latitude;
+                    var slng = selectedStation.longitude !== undefined ? selectedStation.longitude : selectedStation.Longitude;
+                    if (slat != null && slng != null) map.setView([slat, slng], 15);
+                    var selectedCard = document.querySelector('.station-card[data-station-id="' + selectedStationId + '"]');
+                    if (selectedCard) selectedCard.classList.add('border-primary', 'border-2');
+                }
+            }
+
+            document.getElementById('btnGetLocation').addEventListener('click', function () {
+                if (!navigator.geolocation) { alert('Geolocation is not supported.'); return; }
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var userLoc = [position.coords.latitude, position.coords.longitude];
+                    if (userMarker) map.removeLayer(userMarker);
+                    userMarker = L.marker(userLoc, {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background-color: blue; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 10]
+                        })
+                    }).addTo(map).bindPopup('Your Location');
+                    map.setView(userLoc, 14);
+                }, function () { alert('Unable to get your location.'); });
             });
+
+            document.querySelectorAll('.btn-open-google-maps').forEach(function (link) {
+                var lat = link.getAttribute('data-lat');
+                var lng = link.getAttribute('data-lng');
+                if (lat && lng) link.href = googleMapsUrl(lat, lng);
+            });
+
+            // Fuel type filter
+            document.getElementById('fuelTypeFilter').addEventListener('change', function () {
+                var fuelTypeId = this.value;
+                if (!fuelTypeId) {
+                    addStationMarkers(stations);
+                    document.querySelectorAll('.station-card').forEach(card => card.style.display = '');
+                    return;
+                }
+
+                var filtered = stations.filter(function (station) {
+                    var stocks = (station.fuelStocks !== undefined ? station.fuelStocks : station.FuelStocks) || [];
+                    return stocks.some(function (stock) {
+                        var fuelTypeName = stock.fuelTypeName !== undefined ? stock.fuelTypeName : stock.FuelTypeName;
+                        var currentQuantity = stock.currentQuantity !== undefined ? stock.currentQuantity : stock.CurrentQuantity;
+                        return fuelTypeName && currentQuantity > 0;
+                    });
+                });
+
+                addStationMarkers(filtered);
+
+                document.querySelectorAll('.station-card').forEach(function (card) {
+                    var stationId = parseInt(card.getAttribute('data-station-id'));
+                    var hasFuelType = filtered.some(s => (s.id ?? s.Id) === stationId);
+                    card.style.display = hasFuelType ? '' : 'none';
+                });
+            });
+
+            // Force Leaflet to recalculate map size (fixes grey/blank map in certain layouts)
+            setTimeout(function () { map.invalidateSize(); }, 250);
         });
-        
-        addStationMarkers(filtered);
-        
-        // Hide/show station cards
-        document.querySelectorAll('.station-card').forEach(function(card) {
-            var stationId = parseInt(card.getAttribute('data-station-id'));
-            var hasFuelType = filtered.some(s => s.Id === stationId);
-            card.style.display = hasFuelType ? '' : 'none';
-        });
-    });
-</script>
+    </script>
+}
 
 <style>
-    .custom-marker {
-        background: transparent;
-        border: none;
-    }
-    .leaflet-routing-container {
-        background-color: white;
-        border-radius: 0.375rem;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    }
+    .custom-marker { background: transparent; border: none; }
+    .leaflet-popup-content a { text-decoration: none; }
 </style>
-

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
@@ -13,18 +14,22 @@ namespace FuelManagementSoftware.Controllers;
 [Authorize]
 public class FuelAvailabilityController : Controller
 {
-    private readonly FilteredFuelManagementSoftwareDbContext _context;
+    private const string OsrmBase = "https://router.project-osrm.org";
+    private readonly FuelManagementSoftwareDbContext _context;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<FuelAvailabilityController> _logger;
 
     public FuelAvailabilityController(
-        FilteredFuelManagementSoftwareDbContext context,
+        FuelManagementSoftwareDbContext context,
+        IHttpClientFactory httpClientFactory,
         ILogger<FuelAvailabilityController> logger)
     {
         _context = context;
+        _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
 
-    // GET: FuelAvailability
+    // GET: FuelAvailability (uses unfiltered context so Customers see all stations)
     public async Task<IActionResult> Index(int? fuelTypeId, decimal? latitude, decimal? longitude)
     {
         IQueryable<FuelStation> query = _context.FuelStations
@@ -113,6 +118,26 @@ public class FuelAvailabilityController : Controller
         }
 
         return View(station);
+    }
+
+    // GET: FuelAvailability/OsrmProxy/route/v1/{**path} — proxy for OSRM to avoid CORS
+    [HttpGet("OsrmProxy/route/v1/{**path}")]
+    public async Task<IActionResult> OsrmProxy(string path)
+    {
+        var query = Request.QueryString.HasValue ? Request.QueryString.Value : "";
+        var url = $"{OsrmBase}/route/v1/{path}{query}";
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync(url);
+            var json = await response.Content.ReadAsStringAsync();
+            return Content(json, "application/json");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "OSRM proxy failed for {Url}", url);
+            return StatusCode(502, "Routing service temporarily unavailable.");
+        }
     }
 
     // API: GET: FuelAvailability/GetAvailability

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FuelManagementSoftware.Constants;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
 using FuelManagementSoftware.Services;
@@ -11,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FuelManagementSoftware.Controllers;
 
-[Authorize]
+[Authorize(Roles = AppRoles.OrganisationRoles)]
 public class BlockchainTransactionController : Controller
 {
     private readonly FilteredFuelManagementSoftwareDbContext _context;

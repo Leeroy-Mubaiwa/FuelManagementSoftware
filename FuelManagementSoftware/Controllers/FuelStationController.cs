@@ -2,8 +2,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using FuelManagementSoftware.Areas.Identity.Data;
+using FuelManagementSoftware.Constants;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
+using FuelManagementSoftware.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,20 +13,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FuelManagementSoftware.Controllers;
 
-[Authorize]
+[Authorize(Roles = AppRoles.OrganisationRoles)]
 public class FuelStationController : Controller
 {
     private readonly FilteredFuelManagementSoftwareDbContext _context;
     private readonly UserManager<FuelManagementSoftwareUser> _userManager;
+    private readonly IOrganisationContextService _organisationContext;
     private readonly ILogger<FuelStationController> _logger;
 
     public FuelStationController(
         FilteredFuelManagementSoftwareDbContext context,
         UserManager<FuelManagementSoftwareUser> userManager,
+        IOrganisationContextService organisationContext,
         ILogger<FuelStationController> logger)
     {
         _context = context;
         _userManager = userManager;
+        _organisationContext = organisationContext;
         _logger = logger;
     }
 
@@ -78,7 +83,7 @@ public class FuelStationController : Controller
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var organisationId = await GetCurrentOrganisationIdAsync();
+            var organisationId = await _organisationContext.GetCurrentOrganisationIdAsync();
             if (!organisationId.HasValue) return BadRequest("Organization not found");
 
             station.OrganisationId = organisationId.Value;
@@ -122,8 +127,23 @@ public class FuelStationController : Controller
         {
             try
             {
-                station.UpdatedAt = DateTime.UtcNow;
-                _context.Update(station);
+                var existing = await _context.FuelStations.FindAsync(id);
+                if (existing == null) return NotFound();
+
+                existing.Name = station.Name;
+                existing.Code = station.Code;
+                existing.Address = station.Address;
+                existing.City = station.City;
+                existing.Latitude = station.Latitude;
+                existing.Longitude = station.Longitude;
+                existing.Phone = station.Phone;
+                existing.Email = station.Email;
+                existing.IsActive = station.IsActive;
+                existing.IsOpen = station.IsOpen;
+                existing.IsTankerOffloading = station.IsTankerOffloading;
+                existing.OrganisationId = station.OrganisationId;
+                existing.UpdatedAt = DateTime.UtcNow;
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -162,17 +182,5 @@ public class FuelStationController : Controller
         return await _context.FuelStations.AnyAsync(e => e.Id == id);
     }
 
-    private async Task<int?> GetCurrentOrganisationIdAsync()
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return null;
-
-        var card = await _context.PetroCards
-            .Where(c => c.UserId == user.Id && c.IsActive)
-            .OrderByDescending(c => c.LastUsedAt ?? c.CreatedAt)
-            .FirstOrDefaultAsync();
-
-        return card?.OrganisationId;
-    }
 }
 

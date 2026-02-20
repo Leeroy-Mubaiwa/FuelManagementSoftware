@@ -24,14 +24,6 @@
             </div>
             
             <div class="mb-3">
-                <label asp-for="UserId" class="form-label"></label>
-                <select asp-for="UserId" asp-items="ViewBag.UserId" class="form-select form-select-sm">
-                    <option value="">-- Select User --</option>
-                </select>
-                <span asp-validation-for="UserId" class="text-danger"></span>
-            </div>
-            
-            <div class="mb-3">
                 <label asp-for="Balance" class="form-label"></label>
                 <input asp-for="Balance" class="form-control form-control-sm" type="number" step="0.01" />
                 <span asp-validation-for="Balance" class="text-danger"></span>

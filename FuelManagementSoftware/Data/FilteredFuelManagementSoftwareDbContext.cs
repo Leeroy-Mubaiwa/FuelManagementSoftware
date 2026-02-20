@@ -10,10 +10,14 @@ namespace FuelManagementSoftware.Data;
 /// <summary>
 /// Filtered DbContext that automatically applies organisation_id filtering to all queries.
 /// This ensures multi-tenancy by filtering all data by the current organisation.
+/// Uses a property for the filter value so the cached model never evaluates .Value on null.
 /// </summary>
 public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbContext
 {
     private readonly int? _organisationId;
+
+    /// <summary>Value used in query filters. When organisation is null, use -1 so no rows match (avoids Nullable.Value exception with cached model).</summary>
+    private int _organisationIdForFilter => _organisationId ?? -1;
 
     public FilteredFuelManagementSoftwareDbContext(DbContextOptions<FuelManagementSoftwareDbContext> options, int? organisationId = null)
         : base(options)
@@ -25,25 +29,20 @@ public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbC
     {
         base.OnModelCreating(modelBuilder);
 
-        // Apply global query filters for organisation_id on all entities that have it
-        // This ensures all queries are automatically filtered by organisation
-        
-        if (_organisationId.HasValue)
-        {
-            modelBuilder.Entity<AuditLog>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<BlockchainTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<CardTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<FuelPump>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<FuelStation>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<FuelStock>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<FuelTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<FuelType>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<PetroCard>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<QueueInformation>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<StationStatusHistory>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<StockMovement>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-            modelBuilder.Entity<SystemConfiguration>().HasQueryFilter(e => e.OrganisationId == _organisationId.Value);
-        }
+        // Apply global query filters using a property so we never use .Value on null (model is cached per context type).
+        modelBuilder.Entity<AuditLog>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<BlockchainTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<CardTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<FuelPump>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<FuelStation>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<FuelStock>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<FuelTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<FuelType>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<PetroCard>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<QueueInformation>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<StationStatusHistory>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<StockMovement>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
+        modelBuilder.Entity<SystemConfiguration>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
     }
 
     /// <summary>

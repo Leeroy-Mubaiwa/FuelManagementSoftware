@@ -12,6 +12,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Transaction Details</h5>
                     <p><strong>Status:</strong> <span id="transactionStatus" class="badge">@Model.TransactionStatus</span></p>
+                    <p><strong>Payment:</strong> @(Model.PaymentMethod ?? "PetroCard")</p>
                     <p><strong>Pump:</strong> @Model.FuelPump?.PumpNumber</p>
                     <p><strong>Fuel Type:</strong> @Model.FuelType?.Name</p>
                     <p><strong>Quantity:</strong> <span id="quantity">@Model.Quantity.ToString("F2")</span> Litres</p>

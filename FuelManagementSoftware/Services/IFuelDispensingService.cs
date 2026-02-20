@@ -65,9 +65,11 @@ public class DispensingRequest
     public int FuelStationId { get; set; }
     public int FuelPumpId { get; set; }
     public int FuelTypeId { get; set; }
-    public string NfcTag { get; set; } = null!;
+    /// <summary>Payment method: "PetroCard" or "Cash". When Cash, NfcTag and Pin are not required.</summary>
+    public string PaymentMethod { get; set; } = "PetroCard";
+    public string? NfcTag { get; set; }
     public string? Pin { get; set; }
-    public decimal? RequestedQuantity { get; set; } // Optional: if null, customer can dispense until they stop or balance/stock runs out
+    public decimal? RequestedQuantity { get; set; }
     public string CreatorId { get; set; } = null!;
 }
 

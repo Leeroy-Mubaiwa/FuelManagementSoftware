@@ -43,124 +43,101 @@ public class FuelDispensingService : IFuelDispensingService
 
     public async Task<FuelTransaction> InitiateDispensingAsync(DispensingRequest request, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Initiating fuel dispensing: Station {StationId}, Pump {PumpId}, FuelType {FuelTypeId}", 
-            request.FuelStationId, request.FuelPumpId, request.FuelTypeId);
+        var isCash = string.Equals(request.PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase);
+        _logger.LogInformation("Initiating fuel dispensing: Station {StationId}, Pump {PumpId}, FuelType {FuelTypeId}, Payment: {PaymentMethod}",
+            request.FuelStationId, request.FuelPumpId, request.FuelTypeId, request.PaymentMethod ?? "PetroCard");
 
-        // Validate NFC tag format
-        if (!_nfcReaderService.ValidateNfcTag(request.NfcTag))
+        PetroCard? card = null;
+        if (!isCash)
         {
-            throw new InvalidOperationException("Invalid NFC tag format");
-        }
-
-        // Get and validate card
-        var card = await _petroCardService.GetCardByNfcTagAsync(request.NfcTag, cancellationToken);
-        if (card == null)
-        {
-            throw new InvalidOperationException("PetroCard not found for the provided NFC tag");
-        }
-
-        // Verify PIN if provided
-        if (!string.IsNullOrWhiteSpace(request.Pin))
-        {
-            if (!_petroCardService.VerifyPin(card, request.Pin))
-            {
+            if (string.IsNullOrWhiteSpace(request.NfcTag))
+                throw new InvalidOperationException("Card ID is required for PetroCard payment.");
+            if (!_nfcReaderService.ValidateNfcTag(request.NfcTag!))
+                throw new InvalidOperationException("Invalid NFC tag format");
+            card = await _petroCardService.GetCardByNfcTagAsync(request.NfcTag!, cancellationToken);
+            if (card == null)
+                throw new InvalidOperationException("PetroCard not found for the provided NFC tag");
+            if (!string.IsNullOrWhiteSpace(request.Pin) && !_petroCardService.VerifyPin(card, request.Pin))
                 throw new UnauthorizedAccessException("Invalid PIN");
-            }
         }
 
-        // Get pump and station information
         var pump = await _context.FuelPumps
             .Include(p => p.FuelStation)
             .Include(p => p.FuelType)
             .FirstOrDefaultAsync(p => p.Id == request.FuelPumpId && p.FuelStationId == request.FuelStationId, cancellationToken);
 
         if (pump == null)
-        {
             throw new InvalidOperationException($"Fuel pump {request.FuelPumpId} not found at station {request.FuelStationId}");
-        }
-
-        // Validate pump is operational
         if (!pump.IsOperational || !pump.IsActive)
-        {
             throw new InvalidOperationException($"Fuel pump {request.FuelPumpId} is not operational");
-        }
-
-        // Validate station is open
         if (!pump.FuelStation.IsOpen || !pump.FuelStation.IsActive)
-        {
             throw new InvalidOperationException($"Fuel station {request.FuelStationId} is not open");
-        }
-
-        // Check if station is offloading
         if (pump.FuelStation.IsTankerOffloading)
-        {
             throw new InvalidOperationException($"Fuel station {request.FuelStationId} is currently offloading and closed");
-        }
 
-        // Get fuel type and pricing
         var fuelType = await _context.FuelTypes
             .FirstOrDefaultAsync(ft => ft.Id == request.FuelTypeId, cancellationToken);
-
         if (fuelType == null || !fuelType.IsActive)
-        {
             throw new InvalidOperationException($"Fuel type {request.FuelTypeId} not found or inactive");
-        }
 
-        // Calculate maximum dispenseable quantity based on balance and stock
-        var maxByBalance = card.Balance / fuelType.UnitPrice;
-        var maxByStock = await _fuelStockService.GetMaxDispenseableQuantityAsync(request.FuelStationId, request.FuelTypeId, cancellationToken);
-        var maxQuantity = Math.Min(maxByBalance, maxByStock);
+        decimal maxQuantity;
+        int organisationId;
+        string currency;
+
+        if (isCash)
+        {
+            maxQuantity = await _fuelStockService.GetMaxDispenseableQuantityAsync(request.FuelStationId, request.FuelTypeId, cancellationToken);
+            organisationId = pump.FuelStation.OrganisationId;
+            currency = "USD";
+        }
+        else
+        {
+            var maxByBalance = card!.Balance / fuelType.UnitPrice;
+            var maxByStock = await _fuelStockService.GetMaxDispenseableQuantityAsync(request.FuelStationId, request.FuelTypeId, cancellationToken);
+            maxQuantity = Math.Min(maxByBalance, maxByStock);
+            organisationId = card.OrganisationId;
+            currency = card.Currency;
+        }
 
         if (maxQuantity <= 0)
-        {
-            throw new InvalidOperationException("Insufficient balance or stock for dispensing");
-        }
+            throw new InvalidOperationException(isCash ? "Insufficient fuel stock for dispensing" : "Insufficient balance or stock for dispensing");
 
-        // If requested quantity is specified, validate it doesn't exceed maximum
         decimal finalQuantity = request.RequestedQuantity ?? maxQuantity;
         if (request.RequestedQuantity.HasValue && request.RequestedQuantity.Value > maxQuantity)
         {
             finalQuantity = maxQuantity;
-            _logger.LogWarning("Requested quantity {Requested} exceeds maximum {Max}, using maximum", 
-                request.RequestedQuantity, maxQuantity);
+            _logger.LogWarning("Requested quantity {Requested} exceeds maximum {Max}, using maximum", request.RequestedQuantity, maxQuantity);
         }
 
-        // Calculate amounts
         var unitPrice = fuelType.UnitPrice;
         var totalAmount = finalQuantity * unitPrice;
 
-        // Validate card has sufficient balance
-        var cardValidation = await _petroCardService.ValidateCardAsync(card, totalAmount, cancellationToken);
-        if (!cardValidation.IsValid)
+        if (!isCash)
         {
-            throw new InvalidOperationException(cardValidation.ErrorMessage ?? "Card validation failed");
+            var cardValidation = await _petroCardService.ValidateCardAsync(card!, totalAmount, cancellationToken);
+            if (!cardValidation.IsValid)
+                throw new InvalidOperationException(cardValidation.ErrorMessage ?? "Card validation failed");
         }
 
-        // Check stock availability
         var hasStock = await _fuelStockService.HasSufficientStockAsync(request.FuelStationId, request.FuelTypeId, finalQuantity, cancellationToken);
         if (!hasStock)
-        {
             throw new InvalidOperationException("Insufficient fuel stock available");
-        }
 
-        // Generate unique transaction number
         var transactionNumber = GenerateTransactionNumber();
-
-        // Create fuel transaction
         var transaction = new FuelTransaction
         {
-            OrganisationId = card.OrganisationId,
+            OrganisationId = organisationId,
             TransactionNumber = transactionNumber,
             FuelStationId = request.FuelStationId,
             FuelPumpId = request.FuelPumpId,
             FuelTypeId = request.FuelTypeId,
-            PetroCardId = card.Id,
-            UserId = card.UserId,
+            PetroCardId = isCash ? null : card!.Id,
+            UserId = isCash ? null : card!.UserId,
             Quantity = finalQuantity,
             UnitPrice = unitPrice,
             TotalAmount = totalAmount,
-            Currency = card.Currency,
-            PaymentMethod = "PetroCard",
+            Currency = currency,
+            PaymentMethod = isCash ? "Cash" : "PetroCard",
             TransactionStatus = "Authorized",
             TransactionDate = DateTime.UtcNow,
             StartedAt = null,
@@ -171,11 +148,11 @@ public class FuelDispensingService : IFuelDispensingService
         _context.FuelTransactions.Add(transaction);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Update card last used
-        await _petroCardService.UpdateLastUsedAsync(card.Id, cancellationToken);
+        if (!isCash)
+            await _petroCardService.UpdateLastUsedAsync(card!.Id, cancellationToken);
 
-        _logger.LogInformation("Fuel dispensing transaction {TransactionNumber} authorized. Quantity: {Quantity}, Amount: {Amount}", 
-            transactionNumber, finalQuantity, totalAmount);
+        _logger.LogInformation("Fuel dispensing transaction {TransactionNumber} authorized. Quantity: {Quantity}, Amount: {Amount}, Payment: {PaymentMethod}",
+            transactionNumber, finalQuantity, totalAmount, transaction.PaymentMethod);
 
         return transaction;
     }
@@ -274,14 +251,17 @@ public class FuelDispensingService : IFuelDispensingService
         // Stop the pump hardware
         await _pumpControlService.StopPumpAsync(transaction.FuelPumpId, cancellationToken);
 
-        // Deduct from card balance
-        await _petroCardService.DeductBalanceAsync(
-            transaction.PetroCardId!.Value,
-            transaction.TotalAmount,
-            "FuelPurchase",
-            transaction.TransactionNumber,
-            transaction.CreatorId,
-            cancellationToken);
+        // Deduct from card balance only when paid by PetroCard
+        if (transaction.PetroCardId.HasValue)
+        {
+            await _petroCardService.DeductBalanceAsync(
+                transaction.PetroCardId.Value,
+                transaction.TotalAmount,
+                "FuelPurchase",
+                transaction.TransactionNumber,
+                transaction.CreatorId,
+                cancellationToken);
+        }
 
         // Deduct from stock
         await _fuelStockService.DeductStockAsync(

@@ -22,12 +22,13 @@ builder.Services.AddScoped<FilteredFuelManagementSoftwareDbContext>(serviceProvi
     return new FilteredFuelManagementSoftwareDbContext(options, organisationId);
 });
 
-builder.Services.AddDefaultIdentity<FuelManagementSoftwareUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<FuelManagementSoftwareUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<FuelManagementSoftwareIdentityContext>();
 
 // Add HTTP context accessor for organisation context service
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 
 // Register blockchain configuration
 builder.Services.Configure<BlockchainSettings>(builder.Configuration.GetSection("Blockchain"));

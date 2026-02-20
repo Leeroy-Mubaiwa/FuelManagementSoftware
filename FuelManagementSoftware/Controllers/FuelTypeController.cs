@@ -2,8 +2,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using FuelManagementSoftware.Areas.Identity.Data;
+using FuelManagementSoftware.Constants;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
+using FuelManagementSoftware.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,20 +13,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FuelManagementSoftware.Controllers;
 
-[Authorize]
+[Authorize(Roles = AppRoles.OrganisationRoles)]
 public class FuelTypeController : Controller
 {
     private readonly FilteredFuelManagementSoftwareDbContext _context;
     private readonly UserManager<FuelManagementSoftwareUser> _userManager;
+    private readonly IOrganisationContextService _organisationContext;
     private readonly ILogger<FuelTypeController> _logger;
 
     public FuelTypeController(
         FilteredFuelManagementSoftwareDbContext context,
         UserManager<FuelManagementSoftwareUser> userManager,
+        IOrganisationContextService organisationContext,
         ILogger<FuelTypeController> logger)
     {
         _context = context;
         _userManager = userManager;
+        _organisationContext = organisationContext;
         _logger = logger;
     }
 
@@ -74,7 +79,7 @@ public class FuelTypeController : Controller
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var organisationId = await GetCurrentOrganisationIdAsync();
+            var organisationId = await _organisationContext.GetCurrentOrganisationIdAsync();
             if (!organisationId.HasValue) return BadRequest("Organization not found");
 
             fuelType.OrganisationId = organisationId.Value;
@@ -138,19 +143,6 @@ public class FuelTypeController : Controller
     private async Task<bool> FuelTypeExistsAsync(int id)
     {
         return await _context.FuelTypes.AnyAsync(e => e.Id == id);
-    }
-
-    private async Task<int?> GetCurrentOrganisationIdAsync()
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null) return null;
-
-        var card = await _context.PetroCards
-            .Where(c => c.UserId == user.Id && c.IsActive)
-            .OrderByDescending(c => c.LastUsedAt ?? c.CreatedAt)
-            .FirstOrDefaultAsync();
-
-        return card?.OrganisationId;
     }
 }
 

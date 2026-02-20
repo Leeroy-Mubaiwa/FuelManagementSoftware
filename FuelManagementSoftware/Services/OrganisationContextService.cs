@@ -2,6 +2,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FuelManagementSoftware.Areas.Identity.Data;
+using FuelManagementSoftware.Constants;
 using FuelManagementSoftware.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -82,6 +83,28 @@ public class OrganisationContextService : IOrganisationContextService
         {
             _logger.LogDebug("Organisation ID found from user's created organization: {OrganisationId}", userOrg.Id);
             return userOrg.Id;
+        }
+
+        // 4. Fallback for admin roles: use first active organisation (e.g. seeded org or single-tenant)
+        var fuelUser = await _userManager.GetUserAsync(user);
+        if (fuelUser != null)
+        {
+            var isAdmin = await _userManager.IsInRoleAsync(fuelUser, AppRoles.SuperAdmin)
+                || await _userManager.IsInRoleAsync(fuelUser, AppRoles.SystemAdmin)
+                || await _userManager.IsInRoleAsync(fuelUser, AppRoles.OrganizationAdmin);
+            if (isAdmin)
+            {
+                var firstOrg = await _context.Organizations
+                    .Where(o => o.IsActive)
+                    .OrderBy(o => o.Id)
+                    .Select(o => o.Id)
+                    .FirstOrDefaultAsync();
+                if (firstOrg != 0)
+                {
+                    _logger.LogDebug("Organisation ID fallback for admin: {OrganisationId}", firstOrg);
+                    return firstOrg;
+                }
+            }
         }
 
         _logger.LogWarning("No organisation ID found for user {UserId} - global filtering will be disabled", userId);
