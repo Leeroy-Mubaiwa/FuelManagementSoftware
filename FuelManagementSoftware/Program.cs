@@ -4,6 +4,9 @@ using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Areas.Identity.Data;
 using FuelManagementSoftware.Services;
 using FuelManagementSoftware.Hubs;
+using FuelManagementSoftware.Jobs;
+using Quartz;
+using Quartz.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = $"Data Source={Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "fuelmanagement.db")}";
@@ -52,6 +55,14 @@ builder.Services.AddScoped<IFuelDispensingService, FuelDispensingService>();
 
 // Register SignalR
 builder.Services.AddSignalR();
+
+// Register Quartz
+builder.Services.AddQuartz(q => {
+    q.UseMicrosoftDependencyInjectionJobFactory();
+});
+builder.Services.AddQuartzServer(options => {
+    options.WaitForJobsToComplete = true;
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using FuelManagementSoftware.Services;
 using FuelManagementSoftware.Models;
 using Microsoft.AspNetCore.Authorization;
+using FuelManagementSoftware.Data;
+using Quartz;
+using FuelManagementSoftware.Jobs;
 
 namespace FuelManagementSoftware.Controllers;
 
@@ -11,11 +14,22 @@ namespace FuelManagementSoftware.Controllers;
 public class PetroCardApiController : ControllerBase
 {
     private readonly IPetroCardService _petroCardService;
+    private readonly IBlockchainService _blockchainService;
+    private readonly FuelManagementSoftwareDbContext _context;
+    private readonly ISchedulerFactory _schedulerFactory;
     private readonly ILogger<PetroCardApiController> _logger;
 
-    public PetroCardApiController(IPetroCardService petroCardService, ILogger<PetroCardApiController> logger)
+    public PetroCardApiController(
+        IPetroCardService petroCardService, 
+        IBlockchainService blockchainService,
+        FuelManagementSoftwareDbContext context,
+        ISchedulerFactory schedulerFactory,
+        ILogger<PetroCardApiController> logger)
     {
         _petroCardService = petroCardService;
+        _blockchainService = blockchainService;
+        _context = context;
+        _schedulerFactory = schedulerFactory;
         _logger = logger;
     }
 
@@ -73,10 +87,63 @@ public class PetroCardApiController : ControllerBase
                 request.Amount, 
                 "NFC-Mobile", 
                 request.Reference, 
-                "MobileAppAttendant" // Ideally from logged in user
+                "MobileAppAttendant"
             );
 
-            return Ok(new { message = "Success", newBalance = updatedCard.Balance });
+            // Create a FuelTransaction record for blockchain anchoring
+            var transactionNumber = $"TXN-NFC-{DateTime.Now:yyyyMMddHHmmss}-{new Random().Next(1000, 9999)}";
+            var fuelTransaction = new FuelTransaction
+            {
+                OrganisationId = card.OrganisationId,
+                TransactionNumber = transactionNumber,
+                FuelStationId = 1, // Default or lookup if possible
+                FuelPumpId = 1,    // Default or lookup
+                FuelTypeId = 1,    // Default or lookup
+                PetroCardId = card.Id,
+                UserId = card.UserId,
+                Quantity = request.Amount / 1.5m, // Estimated quantity (price placeholder)
+                UnitPrice = 1.5m,
+                TotalAmount = request.Amount,
+                Currency = card.Currency,
+                PaymentMethod = "PetroCard",
+                TransactionStatus = "Completed",
+                TransactionDate = DateTime.Now,
+                StartedAt = DateTime.Now,
+                CompletedAt = DateTime.Now,
+                CreatorId =card.CreatorId,
+                Notes = $"NFC Mobile Transaction - Ref: {request.Reference}"
+            };
+
+            _context.FuelTransactions.Add(fuelTransaction);
+            await _context.SaveChangesAsync(); 
+
+            // Schedule Blockchain Anchoring in Background
+            try
+            {
+                var scheduler = await _schedulerFactory.GetScheduler();
+                var job = JobBuilder.Create<BlockchainAnchorJob>()
+                    .WithIdentity($"BlockchainAnchor-{fuelTransaction.Id}", "Blockchain")
+                    .UsingJobData("FuelTransactionId", fuelTransaction.Id)
+                    .Build();
+
+                var trigger = TriggerBuilder.Create()
+                    .WithIdentity($"BlockchainAnchorTrigger-{fuelTransaction.Id}", "Blockchain")
+                    .StartNow()
+                    .Build();
+
+                await scheduler.ScheduleJob(job, trigger);
+                _logger.LogInformation("Scheduled background blockchain anchoring for transaction {Id}", fuelTransaction.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to schedule background blockchain anchoring. Transaction saved locally.");
+            }
+
+            return Ok(new { 
+                message = "Success", 
+                newBalance = updatedCard.Balance,
+                transactionId = transactionNumber
+            });
         }
         catch (Exception ex)
         {

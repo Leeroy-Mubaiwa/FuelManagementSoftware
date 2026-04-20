@@ -14,10 +14,10 @@ namespace FuelManagementSoftware.Services;
 /// </summary>
 public class PetroCardService : IPetroCardService
 {
-    private readonly FilteredFuelManagementSoftwareDbContext _context;
+    private readonly FuelManagementSoftwareDbContext _context;
     private readonly ILogger<PetroCardService> _logger;
 
-    public PetroCardService(FilteredFuelManagementSoftwareDbContext context, ILogger<PetroCardService> logger)
+    public PetroCardService(FuelManagementSoftwareDbContext context, ILogger<PetroCardService> logger)
     {
         _context = context;
         _logger = logger;
@@ -35,7 +35,7 @@ public class PetroCardService : IPetroCardService
         var card = await _context.PetroCards
             .Include(c => c.User)
             .Include(c => c.Organisation)
-            .FirstOrDefaultAsync(c => c.Rfidtag == nfcTag && c.IsActive, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Rfidtag == nfcTag && c.IsActive);
 
         if (card == null)
         {
@@ -171,7 +171,7 @@ public class PetroCardService : IPetroCardService
             ReferenceNumber = referenceNumber,
             Description = $"Balance deduction for {transactionType}",
             TransactionDate = DateTime.Now,
-            CreatorId = creatorId
+            CreatorId = card.CreatorId
         };
 
         _context.CardTransactions.Add(cardTransaction);
