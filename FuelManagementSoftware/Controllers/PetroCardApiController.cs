@@ -138,7 +138,7 @@ public class PetroCardApiController : ControllerBase
                 }
             }
 
-            var creatorId = "MobileAppAttendant";
+            var creatorId = card.CreatorId;
             var fuelStationId = request.FuelStationId ?? 1;
             var fuelPumpId = request.FuelPumpId ?? 1;
             var fuelTypeId = request.FuelTypeId ?? 1;

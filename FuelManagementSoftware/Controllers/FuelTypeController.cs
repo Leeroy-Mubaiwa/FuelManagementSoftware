@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using FuelManagementSoftware.Constants;
@@ -37,6 +38,44 @@ public class FuelTypeController : Controller
         if (fuelType == null) return NotFound();
 
         return View(fuelType);
+    }
+
+    // GET: FuelType/Edit/5
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var fuelType = await _context.FuelTypes.FindAsync(id);
+        if (fuelType == null) return NotFound();
+
+        return View(fuelType);
+    }
+
+    // POST: FuelType/Edit/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Code,Description,UnitPrice,Unit,IsActive")] FuelType fuelType)
+    {
+        if (id != fuelType.Id) return NotFound();
+
+        if (!ModelState.IsValid)
+        {
+            return View(fuelType);
+        }
+
+        var existing = await _context.FuelTypes.FindAsync(id);
+        if (existing == null) return NotFound();
+
+        existing.Name = fuelType.Name;
+        existing.Code = fuelType.Code;
+        existing.Description = fuelType.Description;
+        existing.UnitPrice = fuelType.UnitPrice;
+        existing.Unit = fuelType.Unit;
+        existing.IsActive = fuelType.IsActive;
+        existing.UpdatedAt = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
     }
 }
 
