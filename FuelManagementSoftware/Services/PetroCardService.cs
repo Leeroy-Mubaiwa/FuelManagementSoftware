@@ -76,7 +76,7 @@ public class PetroCardService : IPetroCardService
         // Check if card has sufficient balance
         if (card.Balance < requiredAmount)
         {
-            _logger.LogWarning("Card {CardId} ({CardNumber}) has insufficient balance. Required: {Required}, Available: {Balance}", 
+            _logger.LogWarning("Card {CardId} ({CardNumber}) has insufficient balance. Required: {Required}, Available: {Balance}",
                 card.Id, card.CardNumber, requiredAmount, card.Balance);
             return CardValidationResult.Failure($"Insufficient balance. Required: {requiredAmount:F2} {card.Currency}, Available: {card.Balance:F2} {card.Currency}");
         }
@@ -103,7 +103,7 @@ public class PetroCardService : IPetroCardService
         try
         {
             var isValid = BCrypt.Net.BCrypt.Verify(pin, card.PinHash);
-            
+
             if (!isValid)
             {
                 _logger.LogWarning("Invalid PIN provided for card {CardId}", card.Id);
@@ -134,7 +134,7 @@ public class PetroCardService : IPetroCardService
 
     public async Task<PetroCard> DeductBalanceAsync(int cardId, decimal amount, string transactionType, string? referenceNumber, string creatorId, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Deducting {Amount} from card {CardId} for transaction type {TransactionType}", 
+        _logger.LogInformation("Deducting {Amount} from card {CardId} for transaction type {TransactionType}",
             amount, cardId, transactionType);
 
         var card = await _context.PetroCards
@@ -177,7 +177,7 @@ public class PetroCardService : IPetroCardService
         _context.CardTransactions.Add(cardTransaction);
         await _context.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Successfully deducted {Amount} from card {CardId}. Balance: {BalanceBefore} -> {BalanceAfter}", 
+        _logger.LogInformation("Successfully deducted {Amount} from card {CardId}. Balance: {BalanceBefore} -> {BalanceAfter}",
             amount, cardId, balanceBefore, balanceAfter);
 
         return card;
@@ -192,7 +192,7 @@ public class PetroCardService : IPetroCardService
         {
             card.LastUsedAt = DateTime.Now;
             await _context.SaveChangesAsync(cancellationToken);
-            
+
             _logger.LogDebug("Updated LastUsedAt for card {CardId}", cardId);
         }
     }

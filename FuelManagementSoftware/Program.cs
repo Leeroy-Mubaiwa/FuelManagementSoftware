@@ -57,10 +57,12 @@ builder.Services.AddScoped<IFuelDispensingService, FuelDispensingService>();
 builder.Services.AddSignalR();
 
 // Register Quartz
-builder.Services.AddQuartz(q => {
+builder.Services.AddQuartz(q =>
+{
     q.UseMicrosoftDependencyInjectionJobFactory();
 });
-builder.Services.AddQuartzServer(options => {
+builder.Services.AddQuartzServer(options =>
+{
     options.WaitForJobsToComplete = true;
 });
 

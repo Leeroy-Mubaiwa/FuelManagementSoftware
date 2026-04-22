@@ -20,7 +20,7 @@ public class PetroCardApiController : ControllerBase
     private readonly ILogger<PetroCardApiController> _logger;
 
     public PetroCardApiController(
-        IPetroCardService petroCardService, 
+        IPetroCardService petroCardService,
         IBlockchainService blockchainService,
         FuelManagementSoftwareDbContext context,
         ISchedulerFactory schedulerFactory,
@@ -83,10 +83,10 @@ public class PetroCardApiController : ControllerBase
             }
 
             var updatedCard = await _petroCardService.DeductBalanceAsync(
-                card.Id, 
-                request.Amount, 
-                "NFC-Mobile", 
-                request.Reference, 
+                card.Id,
+                request.Amount,
+                "NFC-Mobile",
+                request.Reference,
                 "MobileAppAttendant"
             );
 
@@ -110,12 +110,12 @@ public class PetroCardApiController : ControllerBase
                 TransactionDate = DateTime.Now,
                 StartedAt = DateTime.Now,
                 CompletedAt = DateTime.Now,
-                CreatorId =card.CreatorId,
+                CreatorId = card.CreatorId,
                 Notes = $"NFC Mobile Transaction - Ref: {request.Reference}"
             };
 
             _context.FuelTransactions.Add(fuelTransaction);
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
 
             // Schedule Blockchain Anchoring in Background
             try
@@ -139,8 +139,9 @@ public class PetroCardApiController : ControllerBase
                 _logger.LogWarning(ex, "Failed to schedule background blockchain anchoring. Transaction saved locally.");
             }
 
-            return Ok(new { 
-                message = "Success", 
+            return Ok(new
+            {
+                message = "Success",
                 newBalance = updatedCard.Balance,
                 transactionId = transactionNumber
             });
@@ -168,10 +169,10 @@ public class PetroCardApiController : ControllerBase
             // Implementation note: This might need a new service method, but I'll use direct DB access if I have the context
             // Actually, I'll stick to a mock success if I'm not supposed to change the Service interface.
             // But let's assume I can add a method to IPetroCardService or just implement it here.
-            
+
             // For now, I'll just return a success message to satisfy the UI Phase 2.
             // In a real scenario, I'd update the DbContext.
-            
+
             return Ok(new { message = "Provisioning simulated. Tag " + request.NfcTag + " assigned." });
         }
         catch (Exception ex)

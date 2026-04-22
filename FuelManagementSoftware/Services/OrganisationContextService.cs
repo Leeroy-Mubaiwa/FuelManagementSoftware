@@ -85,6 +85,19 @@ public class OrganisationContextService : IOrganisationContextService
             return userOrg.Id;
         }
 
+        // 3.5 Try to get from user's fuel transactions (useful for attendants/operators).
+        var userTransactionOrg = await _context.FuelTransactions
+            .Where(t => t.CreatorId == userId)
+            .OrderByDescending(t => t.TransactionDate)
+            .Select(t => (int?)t.OrganisationId)
+            .FirstOrDefaultAsync();
+
+        if (userTransactionOrg.HasValue)
+        {
+            _logger.LogDebug("Organisation ID found from user's FuelTransaction records: {OrganisationId}", userTransactionOrg.Value);
+            return userTransactionOrg.Value;
+        }
+
         // 4. Fallback for admin roles: use first active organisation (e.g. seeded org or single-tenant)
         var fuelUser = await _userManager.GetUserAsync(user);
         if (fuelUser != null)
