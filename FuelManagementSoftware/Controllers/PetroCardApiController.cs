@@ -3,6 +3,7 @@ using FuelManagementSoftware.Services;
 using FuelManagementSoftware.Models;
 using Microsoft.AspNetCore.Authorization;
 using FuelManagementSoftware.Data;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 using FuelManagementSoftware.Jobs;
 
@@ -31,6 +32,61 @@ public class PetroCardApiController : ControllerBase
         _context = context;
         _schedulerFactory = schedulerFactory;
         _logger = logger;
+    }
+
+    [HttpGet("stations")]
+    public async Task<IActionResult> GetStations()
+    {
+        var stations = await _context.FuelStations
+            .Where(s => s.IsActive)
+            .OrderBy(s => s.Name)
+            .Select(s => new
+            {
+                s.Id,
+                s.Name,
+                s.Code,
+                s.City
+            })
+            .ToListAsync();
+
+        return Ok(stations);
+    }
+
+    [HttpGet("pumps/{stationId:int}")]
+    public async Task<IActionResult> GetPumpsByStation(int stationId)
+    {
+        var pumps = await _context.FuelPumps
+            .Where(p => p.IsActive && p.IsOperational && p.FuelStationId == stationId)
+            .OrderBy(p => p.PumpNumber)
+            .Select(p => new
+            {
+                p.Id,
+                p.PumpNumber,
+                p.FuelTypeId
+            })
+            .ToListAsync();
+
+        return Ok(pumps);
+    }
+
+    [HttpGet("fueltypes/{stationId:int}")]
+    public async Task<IActionResult> GetFuelTypesByStation(int stationId)
+    {
+        var fuelTypes = await _context.FuelStocks
+            .Where(s => s.FuelStationId == stationId && s.FuelStation.IsActive && s.FuelType.IsActive)
+            .OrderBy(s => s.FuelType.Name)
+            .Select(s => new
+            {
+                s.FuelTypeId,
+                Name = s.FuelType.Name,
+                s.FuelType.UnitPrice,
+                s.Unit,
+                s.CurrentQuantity
+            })
+            .Distinct()
+            .ToListAsync();
+
+        return Ok(fuelTypes);
     }
 
     // Phase 1: Get Card Info by NFC Tag
@@ -82,12 +138,56 @@ public class PetroCardApiController : ControllerBase
                 }
             }
 
+            var creatorId = "MobileAppAttendant";
+            var fuelStationId = request.FuelStationId ?? 1;
+            var fuelPumpId = request.FuelPumpId ?? 1;
+            var fuelTypeId = request.FuelTypeId ?? 1;
+
+            var fuelType = await _context.FuelTypes.FirstOrDefaultAsync(ft => ft.Id == fuelTypeId && ft.IsActive);
+            if (fuelType == null)
+            {
+                return BadRequest(new { message = $"Fuel type {fuelTypeId} not found or inactive" });
+            }
+
+            var unitPrice = request.UnitPrice.HasValue && request.UnitPrice.Value > 0
+                ? request.UnitPrice.Value
+                : fuelType.UnitPrice;
+            if (unitPrice <= 0)
+            {
+                return BadRequest(new { message = "Invalid unit price configured for selected fuel type" });
+            }
+
+            var quantity = request.Quantity.HasValue && request.Quantity.Value > 0
+                ? request.Quantity.Value
+                : decimal.Round(request.Amount / unitPrice, 3, MidpointRounding.AwayFromZero);
+
+            if (quantity <= 0)
+            {
+                return BadRequest(new { message = "Quantity must be greater than zero" });
+            }
+
+            await using var dbTx = await _context.Database.BeginTransactionAsync();
+
+            var stock = await _context.FuelStocks
+                .FirstOrDefaultAsync(s => s.FuelStationId == fuelStationId && s.FuelTypeId == fuelTypeId);
+            if (stock == null)
+            {
+                return BadRequest(new { message = $"Fuel stock not found for station {fuelStationId}, fuel type {fuelTypeId}" });
+            }
+            if (stock.CurrentQuantity < quantity)
+            {
+                return BadRequest(new
+                {
+                    message = $"Insufficient stock. Requested {quantity} {stock.Unit}, available {stock.CurrentQuantity} {stock.Unit}"
+                });
+            }
+
             var updatedCard = await _petroCardService.DeductBalanceAsync(
                 card.Id,
                 request.Amount,
                 "NFC-Mobile",
                 request.Reference,
-                "MobileAppAttendant"
+                creatorId
             );
 
             // Create a FuelTransaction record for blockchain anchoring
@@ -96,13 +196,13 @@ public class PetroCardApiController : ControllerBase
             {
                 OrganisationId = card.OrganisationId,
                 TransactionNumber = transactionNumber,
-                FuelStationId = 1, // Default or lookup if possible
-                FuelPumpId = 1,    // Default or lookup
-                FuelTypeId = 1,    // Default or lookup
+                FuelStationId = fuelStationId,
+                FuelPumpId = fuelPumpId,
+                FuelTypeId = fuelTypeId,
                 PetroCardId = card.Id,
                 UserId = card.UserId,
-                Quantity = request.Amount / 1.5m, // Estimated quantity (price placeholder)
-                UnitPrice = 1.5m,
+                Quantity = quantity,
+                UnitPrice = unitPrice,
                 TotalAmount = request.Amount,
                 Currency = card.Currency,
                 PaymentMethod = "PetroCard",
@@ -110,12 +210,35 @@ public class PetroCardApiController : ControllerBase
                 TransactionDate = DateTime.Now,
                 StartedAt = DateTime.Now,
                 CompletedAt = DateTime.Now,
-                CreatorId = card.CreatorId,
+                CreatorId = creatorId,
                 Notes = $"NFC Mobile Transaction - Ref: {request.Reference}"
             };
 
             _context.FuelTransactions.Add(fuelTransaction);
+
+            var stockBefore = stock.CurrentQuantity;
+            stock.CurrentQuantity -= quantity;
+            stock.LastUpdated = DateTime.Now;
+            stock.IsLowStock = stock.LowStockThreshold.HasValue && stock.CurrentQuantity <= stock.LowStockThreshold.Value;
+
+            var stockMovement = new StockMovement
+            {
+                OrganisationId = stock.OrganisationId,
+                FuelStationId = fuelStationId,
+                FuelTypeId = fuelTypeId,
+                MovementType = "Dispense",
+                Quantity = quantity,
+                Unit = stock.Unit,
+                StockBefore = stockBefore,
+                StockAfter = stock.CurrentQuantity,
+                ReferenceNumber = transactionNumber,
+                MovementDate = DateTime.Now,
+                CreatorId = creatorId
+            };
+            _context.StockMovements.Add(stockMovement);
+
             await _context.SaveChangesAsync();
+            await dbTx.CommitAsync();
 
             // Try immediate blockchain anchoring first so hosted environments do not rely solely on background scheduling.
             if (_blockchainService.IsConfigured())
@@ -186,7 +309,9 @@ public class PetroCardApiController : ControllerBase
             {
                 message = "Success",
                 newBalance = updatedCard.Balance,
-                transactionId = transactionNumber
+                transactionId = transactionNumber,
+                quantity,
+                unitPrice
             });
         }
         catch (Exception ex)
@@ -229,6 +354,11 @@ public class DeductRequest
 {
     public string NfcTag { get; set; } = null!;
     public decimal Amount { get; set; }
+    public decimal? Quantity { get; set; }
+    public decimal? UnitPrice { get; set; }
+    public int? FuelStationId { get; set; }
+    public int? FuelPumpId { get; set; }
+    public int? FuelTypeId { get; set; }
     public string? Pin { get; set; }
     public string? Reference { get; set; }
 }
