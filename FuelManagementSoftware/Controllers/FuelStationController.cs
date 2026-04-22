@@ -5,7 +5,6 @@ using FuelManagementSoftware.Areas.Identity.Data;
 using FuelManagementSoftware.Constants;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
-using FuelManagementSoftware.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,18 +17,15 @@ public class FuelStationController : Controller
 {
     private readonly FilteredFuelManagementSoftwareDbContext _context;
     private readonly UserManager<FuelManagementSoftwareUser> _userManager;
-    private readonly IOrganisationContextService _organisationContext;
     private readonly ILogger<FuelStationController> _logger;
 
     public FuelStationController(
         FilteredFuelManagementSoftwareDbContext context,
         UserManager<FuelManagementSoftwareUser> userManager,
-        IOrganisationContextService organisationContext,
         ILogger<FuelStationController> logger)
     {
         _context = context;
         _userManager = userManager;
-        _organisationContext = organisationContext;
         _logger = logger;
     }
 
@@ -85,10 +81,6 @@ public class FuelStationController : Controller
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var organisationId = await _organisationContext.GetCurrentOrganisationIdAsync();
-            if (!organisationId.HasValue) return BadRequest("Organization not found");
-
-            station.OrganisationId = organisationId.Value;
             station.CreatorId = user.Id;
             station.CreatedAt = DateTime.Now;
 
@@ -118,7 +110,7 @@ public class FuelStationController : Controller
     // POST: FuelStation/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,OrganisationId,Name,Code,Address,City,Latitude,Longitude,Phone,Email,IsActive,IsOpen,IsTankerOffloading")] FuelStation station)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Code,Address,City,Latitude,Longitude,Phone,Email,IsActive,IsOpen,IsTankerOffloading")] FuelStation station)
     {
         if (id != station.Id)
         {
@@ -143,7 +135,6 @@ public class FuelStationController : Controller
                 existing.IsActive = station.IsActive;
                 existing.IsOpen = station.IsOpen;
                 existing.IsTankerOffloading = station.IsTankerOffloading;
-                existing.OrganisationId = station.OrganisationId;
                 existing.UpdatedAt = DateTime.Now;
 
                 await _context.SaveChangesAsync();

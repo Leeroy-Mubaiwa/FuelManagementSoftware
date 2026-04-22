@@ -5,7 +5,6 @@ using FuelManagementSoftware.Areas.Identity.Data;
 using FuelManagementSoftware.Constants;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
-using FuelManagementSoftware.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,18 +18,15 @@ public class FuelPumpController : Controller
 {
     private readonly FilteredFuelManagementSoftwareDbContext _context;
     private readonly UserManager<FuelManagementSoftwareUser> _userManager;
-    private readonly IOrganisationContextService _organisationContext;
     private readonly ILogger<FuelPumpController> _logger;
 
     public FuelPumpController(
         FilteredFuelManagementSoftwareDbContext context,
         UserManager<FuelManagementSoftwareUser> userManager,
-        IOrganisationContextService organisationContext,
         ILogger<FuelPumpController> logger)
     {
         _context = context;
         _userManager = userManager;
-        _organisationContext = organisationContext;
         _logger = logger;
     }
 
@@ -116,10 +112,6 @@ public class FuelPumpController : Controller
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var organisationId = await _organisationContext.GetCurrentOrganisationIdAsync();
-            if (!organisationId.HasValue) return BadRequest("Organization not found");
-
-            pump.OrganisationId = organisationId.Value;
             pump.CreatorId = user.Id;
             pump.CreatedAt = DateTime.Now;
 
@@ -178,7 +170,7 @@ public class FuelPumpController : Controller
     // POST: FuelPump/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,OrganisationId,FuelStationId,PumpNumber,FuelTypeId,IsActive,IsOperational,LastMaintenanceDate")] FuelPump pump)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,FuelStationId,PumpNumber,FuelTypeId,IsActive,IsOperational,LastMaintenanceDate")] FuelPump pump)
     {
         if (id != pump.Id)
         {
@@ -194,7 +186,6 @@ public class FuelPumpController : Controller
                 {
                     return NotFound();
                 }
-                existing.OrganisationId = pump.OrganisationId;
                 existing.FuelStationId = pump.FuelStationId;
                 existing.PumpNumber = pump.PumpNumber;
                 existing.FuelTypeId = pump.FuelTypeId;
