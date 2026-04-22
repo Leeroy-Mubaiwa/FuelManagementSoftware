@@ -8,46 +8,29 @@ using Microsoft.EntityFrameworkCore;
 namespace FuelManagementSoftware.Data;
 
 /// <summary>
-/// Filtered DbContext that automatically applies organisation_id filtering to all queries.
-/// This ensures multi-tenancy by filtering all data by the current organisation.
-/// Uses a property for the filter value so the cached model never evaluates .Value on null.
+/// Application DbContext used by MVC controllers/services.
+/// Organisation query filtering has been removed for single-organisation mode.
 /// </summary>
 public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbContext
 {
-    private readonly int? _organisationId;
     private readonly string? _creatorId;
+    private int? _defaultOrganisationId;
 
-    /// <summary>Value used in query filters. When organisation is null, use -1 so no rows match (avoids Nullable.Value exception with cached model).</summary>
-    private int _organisationIdForFilter => _organisationId ?? -1;
-
-    public FilteredFuelManagementSoftwareDbContext(DbContextOptions<FuelManagementSoftwareDbContext> options, int? organisationId = null, string? creatorId = null)
+    public FilteredFuelManagementSoftwareDbContext(
+        DbContextOptions<FuelManagementSoftwareDbContext> options,
+        string? creatorId = null)
         : base(options)
     {
-        _organisationId = organisationId;
         _creatorId = creatorId;
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        // Apply global query filters using a property so we never use .Value on null (model is cached per context type).
-        modelBuilder.Entity<AuditLog>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<BlockchainTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<CardTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<FuelPump>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<FuelStation>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<FuelStock>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<FuelTransaction>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<PetroCard>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<QueueInformation>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<StationStatusHistory>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<StockMovement>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
-        modelBuilder.Entity<SystemConfiguration>().HasQueryFilter(e => e.OrganisationId == _organisationIdForFilter);
     }
 
     /// <summary>
-    /// Override SaveChanges to ensure organisation_id and creator_id are set where needed.
+    /// Override SaveChanges to ensure required metadata values are set where needed.
     /// </summary>
     public override int SaveChanges()
     {
@@ -57,7 +40,7 @@ public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbC
     }
 
     /// <summary>
-    /// Override SaveChangesAsync to ensure organisation_id and creator_id are set where needed.
+    /// Override SaveChangesAsync to ensure required metadata values are set where needed.
     /// </summary>
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -68,10 +51,14 @@ public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbC
 
     private void EnsureOrganisationId()
     {
-        if (!_organisationId.HasValue) return;
-
         var entries = ChangeTracker.Entries()
             .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+        var defaultOrganisationId = ResolveDefaultOrganisationId();
+        if (!defaultOrganisationId.HasValue)
+        {
+            return;
+        }
 
         foreach (var entry in entries)
         {
@@ -81,12 +68,27 @@ public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbC
             if (organisationIdProperty != null && organisationIdProperty.PropertyType == typeof(int))
             {
                 var currentValue = (int)organisationIdProperty.GetValue(entry.Entity)!;
-                if (currentValue == 0 || entry.State == EntityState.Added)
+                if (currentValue == 0)
                 {
-                    organisationIdProperty.SetValue(entry.Entity, _organisationId.Value);
+                    organisationIdProperty.SetValue(entry.Entity, defaultOrganisationId.Value);
                 }
             }
         }
+    }
+
+    private int? ResolveDefaultOrganisationId()
+    {
+        if (_defaultOrganisationId.HasValue)
+        {
+            return _defaultOrganisationId;
+        }
+
+        _defaultOrganisationId = Organizations
+            .OrderBy(o => o.Id)
+            .Select(o => (int?)o.Id)
+            .FirstOrDefault();
+
+        return _defaultOrganisationId;
     }
 
     private void EnsureCreatorId()
