@@ -20,20 +20,17 @@ public class PetroCardController : Controller
     private readonly FilteredFuelManagementSoftwareDbContext _context;
     private readonly UserManager<FuelManagementSoftwareUser> _userManager;
     private readonly IPetroCardService _petroCardService;
-    private readonly IOrganisationContextService _organisationContext;
     private readonly ILogger<PetroCardController> _logger;
 
     public PetroCardController(
         FilteredFuelManagementSoftwareDbContext context,
         UserManager<FuelManagementSoftwareUser> userManager,
         IPetroCardService petroCardService,
-        IOrganisationContextService organisationContext,
         ILogger<PetroCardController> logger)
     {
         _context = context;
         _userManager = userManager;
         _petroCardService = petroCardService;
-        _organisationContext = organisationContext;
         _logger = logger;
     }
 
@@ -87,12 +84,8 @@ public class PetroCardController : Controller
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var organisationId = await _organisationContext.GetCurrentOrganisationIdAsync();
-            if (!organisationId.HasValue) return BadRequest("Organization not found");
-
             var card = new PetroCard
             {
-                OrganisationId = organisationId.Value,
                 CardNumber = model.CardNumber,
                 Rfidtag = model.Rfidtag,
                 UserId = user.Id,

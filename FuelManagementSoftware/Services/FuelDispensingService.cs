@@ -290,7 +290,7 @@ public class FuelDispensingService : IFuelDispensingService
                 if (blockchainResult.Success)
                 {
                     var previousHash = await _context.BlockchainTransactions
-                        .Where(bt => bt.OrganisationId == transaction.OrganisationId && bt.Status == "Confirmed")
+                        .Where(bt => bt.Status == "Confirmed")
                         .OrderByDescending(bt => bt.CreatedAt)
                         .Select(bt => bt.BlockchainHash)
                         .FirstOrDefaultAsync(cancellationToken);

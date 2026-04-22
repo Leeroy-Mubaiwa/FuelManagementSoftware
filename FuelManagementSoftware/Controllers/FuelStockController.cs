@@ -6,7 +6,6 @@ using FuelManagementSoftware.Areas.Identity.Data;
 using FuelManagementSoftware.Constants;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
-using FuelManagementSoftware.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,18 +19,15 @@ public class FuelStockController : Controller
 {
     private readonly FilteredFuelManagementSoftwareDbContext _context;
     private readonly UserManager<FuelManagementSoftwareUser> _userManager;
-    private readonly IOrganisationContextService _organisationContext;
     private readonly ILogger<FuelStockController> _logger;
 
     public FuelStockController(
         FilteredFuelManagementSoftwareDbContext context,
         UserManager<FuelManagementSoftwareUser> userManager,
-        IOrganisationContextService organisationContext,
         ILogger<FuelStockController> logger)
     {
         _context = context;
         _userManager = userManager;
-        _organisationContext = organisationContext;
         _logger = logger;
     }
 
@@ -117,10 +113,6 @@ public class FuelStockController : Controller
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var organisationId = await _organisationContext.GetCurrentOrganisationIdAsync();
-            if (!organisationId.HasValue) return BadRequest("Organization not found");
-
-            stock.OrganisationId = organisationId.Value;
             stock.CreatorId = user.Id;
             stock.CreatedAt = DateTime.Now;
             stock.LastUpdated = DateTime.Now;
@@ -181,7 +173,7 @@ public class FuelStockController : Controller
     // POST: FuelStock/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,OrganisationId,FuelStationId,FuelTypeId,CurrentQuantity,Capacity,Unit,LowStockThreshold")] FuelStock stock)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,FuelStationId,FuelTypeId,CurrentQuantity,Capacity,Unit,LowStockThreshold")] FuelStock stock)
     {
         if (id != stock.Id)
         {
