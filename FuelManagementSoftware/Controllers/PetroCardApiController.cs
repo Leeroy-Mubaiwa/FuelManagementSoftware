@@ -117,7 +117,50 @@ public class PetroCardApiController : ControllerBase
             _context.FuelTransactions.Add(fuelTransaction);
             await _context.SaveChangesAsync();
 
-            // Schedule Blockchain Anchoring in Background
+            // Try immediate blockchain anchoring first so hosted environments do not rely solely on background scheduling.
+            if (_blockchainService.IsConfigured())
+            {
+                try
+                {
+                    fuelTransaction.PetroCard = card;
+                    var blockchainResult = await _blockchainService.RecordTransactionAsync(fuelTransaction);
+                    if (blockchainResult.Success)
+                    {
+                        var blockchainTx = new BlockchainTransaction
+                        {
+                            OrganisationId = fuelTransaction.OrganisationId,
+                            FuelTransactionId = fuelTransaction.Id,
+                            BlockchainHash = blockchainResult.TransactionHash!,
+                            BlockchainNetwork = "Sepolia",
+                            SmartContractAddress = blockchainResult.ContractAddress,
+                            GasUsed = blockchainResult.GasUsed,
+                            Status = "Confirmed",
+                            CreatedAt = DateTime.Now,
+                            ConfirmedAt = DateTime.Now,
+                            CreatorId = fuelTransaction.CreatorId
+                        };
+
+                        _context.BlockchainTransactions.Add(blockchainTx);
+                        await _context.SaveChangesAsync();
+                        _logger.LogInformation("Immediate blockchain anchoring successful for transaction {Id}", fuelTransaction.Id);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Immediate blockchain anchoring failed for transaction {Id}: {Error}",
+                            fuelTransaction.Id, blockchainResult.ErrorMessage);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Immediate blockchain anchoring threw an exception for transaction {Id}", fuelTransaction.Id);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Blockchain service is not configured; immediate anchoring skipped for transaction {Id}", fuelTransaction.Id);
+            }
+
+            // Schedule Blockchain Anchoring in Background as fallback/retry.
             try
             {
                 var scheduler = await _schedulerFactory.GetScheduler();

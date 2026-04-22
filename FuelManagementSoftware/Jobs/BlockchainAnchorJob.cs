@@ -45,6 +45,14 @@ public class BlockchainAnchorJob : IJob
                 return;
             }
 
+            var alreadyAnchored = await _dbContext.BlockchainTransactions
+                .AnyAsync(bt => bt.FuelTransactionId == transactionId && bt.Status == "Confirmed");
+            if (alreadyAnchored)
+            {
+                _logger.LogInformation("Transaction {Id} already anchored. Skipping background anchoring.", transactionId);
+                return;
+            }
+
             var blockchainResult = await _blockchainService.RecordTransactionAsync(fuelTransaction);
 
             if (blockchainResult.Success)
