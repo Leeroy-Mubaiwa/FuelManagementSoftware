@@ -20,8 +20,6 @@ builder.Services.AddDbContext<FuelManagementSoftwareDbContext>(options => option
 builder.Services.AddScoped<FilteredFuelManagementSoftwareDbContext>(serviceProvider =>
 {
     var options = serviceProvider.GetRequiredService<DbContextOptions<FuelManagementSoftwareDbContext>>();
-    var organisationContextService = serviceProvider.GetRequiredService<IOrganisationContextService>();
-    var organisationId = organisationContextService.GetCurrentOrganisationIdAsync().GetAwaiter().GetResult();
     string? creatorId = null;
     var httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext;
     if (httpContext?.User != null)
@@ -30,14 +28,14 @@ builder.Services.AddScoped<FilteredFuelManagementSoftwareDbContext>(serviceProvi
         var user = userManager.GetUserAsync(httpContext.User).GetAwaiter().GetResult();
         creatorId = user?.Id;
     }
-    return new FilteredFuelManagementSoftwareDbContext(options, organisationId, creatorId);
+    return new FilteredFuelManagementSoftwareDbContext(options, creatorId);
 });
 
 builder.Services.AddDefaultIdentity<FuelManagementSoftwareUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<FuelManagementSoftwareIdentityContext>();
 
-// Add HTTP context accessor for organisation context service
+// Add HTTP context accessor for request-scoped metadata
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 
@@ -46,7 +44,6 @@ builder.Services.Configure<BlockchainSettings>(builder.Configuration.GetSection(
 builder.Services.AddSingleton<IBlockchainService, BlockchainService>();
 
 // Register application services
-builder.Services.AddScoped<IOrganisationContextService, OrganisationContextService>();
 builder.Services.AddScoped<INfcReaderService, NfcReaderService>();
 builder.Services.AddScoped<IPetroCardService, PetroCardService>();
 builder.Services.AddScoped<IFuelStockService, FuelStockService>();
