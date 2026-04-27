@@ -322,8 +322,8 @@
                     <p class="mb-0 small">Automated Fuel Management System</p>
                 </div>
                 <div class="col-md-6 text-md-end small">
-                    <button type="button" class="btn btn-link btn-sm text-muted p-0" data-bs-toggle="modal" data-bs-target="#assessmentGuideModal" title="How to test objectives">
-                        <i class="bi bi-clipboard-check me-1"></i>How to test objectives
+                    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#assessmentGuideModal">
+                        <i class="bi bi-info-circle me-1"></i>System Audit Guide
                     </button>
                     <span class="text-muted">&middot;</span>
                     <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-muted">Privacy</a>
@@ -339,7 +339,7 @@
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="assessmentGuideModalLabel"><i class="bi bi-clipboard-check me-2"></i>Assessment guide – How to test each objective</h5>
+                    <h5 class="modal-title" id="assessmentModalLabel">System Audit Guide</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -348,41 +348,45 @@
                     <div class="card border mb-4">
                         <div class="card-header bg-light fw-semibold">Objective 1: Automated fuel dispensing with prepaid smart card</div>
                         <div class="card-body">
-                            <p class="small mb-2">The system automates fuel dispensing and supports prepaid PetroCards (and cash).</p>
+                            <p class="small mb-2">The system streamlines fuel dispensing management across a single-tenant (Petrotrade) network.</p>
                             <ol class="small mb-0">
-                                <li class="mb-2"><strong>Register:</strong> Use <a asp-area="Identity" asp-page="/Account/Register">Register</a> – choose <em>Customer</em> or <em>Organization</em>. Log in after registration (email is auto-confirmed).</li>
-                                <li class="mb-2"><strong>PetroCards (Organisation):</strong> Log in as Organisation → <em>Management → PetroCards</em>. Create a new PetroCard and assign it to a user. Ensure the card has a positive balance (top up if your app supports it, or use seed data).</li>
-                                <li class="mb-2"><strong>PetroCards (Customer):</strong> As Customer, go to <em>My Cards</em> to see cards assigned to you.</li>
-                                <li class="mb-2"><strong>Stations &amp; stock (Organisation):</strong> Under <em>Management → Stations</em>, ensure at least one station exists and has coordinates. Under <em>Management → Fuel Stock</em>, add or confirm fuel stock for that station so pumps have fuel.</li>
-                                <li class="mb-2"><strong>Start dispensing:</strong> Go to <em>Dispensing</em> → select a station and pump → <em>Start Dispensing</em>. Choose <em>PetroCard</em> and tap/enter card ID, or choose <em>Cash</em>. Enter quantity, then complete the dispensing flow. Confirm that a fuel transaction is created and appears under <em>Transactions</em> or <em>My Transactions</em>.</li>
+                                <li class="mb-2"><strong>Quick Setup:</strong> The system automatically seeds the <em>Petrotrade</em> organisation and essential roles (Admin, Manager, Customer).</li>
+                                <li class="mb-2"><strong>Registration:</strong> New users registering through the public portal are automatically assigned the <em>Customer</em> role.</li>
+                                <li class="mb-2"><strong>Role Verification:</strong> 
+                                    <ul class="mt-1">
+                                        <li><strong>Petrotrade Admin:</strong> Use an admin account to manage station registrations, global fuel prices, and view audit reports.</li>
+                                        <li><strong>Station Manager:</strong> Use a manager account to update stock levels at specific branches and activate/deactivate pumps.</li>
+                                        <li><strong>Customer:</strong> Register/Login as a customer to manage PetroCards, check fuel availability, and view nearby stations on the map.</li>
+                                    </ul>
+                                </li>
+                                <li class="mb-2"><strong>Fuel Dispensing:</strong> Go to <em>Dispensing</em>. Customers can pay via PetroCard or Cash. Real-time stock levels are updated upon completion.</li>
                             </ol>
                         </div>
                     </div>
 
                     <div class="card border mb-4">
-                        <div class="card-header bg-light fw-semibold">Objective 2: Blockchain integration in fuel transactions</div>
+                        <div class="card-header bg-light fw-semibold">Objective 2: Blockchain-Enabled Security</div>
                         <div class="card-body">
-                            <p class="small mb-2">Completed fuel transactions are recorded on the blockchain; records can be viewed and verified.</p>
+                            <p class="small mb-2">Transactions are hashed and stored on a blockchain ledger for tamper-proof auditing.</p>
                             <ol class="small mb-0">
-                                <li class="mb-2"><strong>Complete a dispensing:</strong> Finish at least one fuel dispensing (PetroCard or cash) so that a transaction is completed. Blockchain recording runs on completion when the service is configured.</li>
-                                <li class="mb-2"><strong>Secured Records:</strong> Log in as Organisation (or admin) → <em>Management → Secured Records</em>. You should see blockchain records linked to fuel transactions (transaction number, hash, block number). This shows blockchain integration for fuel transactions.</li>
-                                <li class="mb-2"><strong>Verify on blockchain:</strong> Go to <em>Management → Verify</em>. Enter a transaction number from a completed dispensing. The system verifies that the transaction exists on the blockchain and shows the result (and explorer link if configured). This demonstrates transparent, tamper-proof verification.</li>
+                                <li class="mb-2"><strong>Audit Trail:</strong> In the <em>Secured Records</em> section (Admin/Manager), view the immutable trail of fuel transactions linked to blockchain hashes.</li>
+                                <li class="mb-2"><strong>Verification:</strong> Use the <em>Verify</em> tool to confirm any transaction ID against the blockchain record, demonstrating system transparency.</li>
                             </ol>
                         </div>
                     </div>
 
                     <div class="card border mb-4">
-                        <div class="card-header bg-light fw-semibold">Objective 3: Real-time fuel availability and routing</div>
+                        <div class="card-header bg-light fw-semibold">Objective 3: Smart Availability & Mapping</div>
                         <div class="card-body">
-                            <p class="small mb-2">The system provides real-time fuel availability and routing to stations.</p>
+                            <p class="small mb-2">Real-time status updates and destination-aware routing.</p>
                             <ol class="small mb-0">
-                                <li class="mb-2"><strong>Availability list:</strong> Go to <em>Availability → List</em>. Confirm that stations are listed with open/closed status, fuel types, and current stock levels. This is the real-time fuel availability feature.</li>
-                                <li class="mb-2"><strong>Map and routing:</strong> Go to <em>Availability → Map</em>. Click <em>Use My Location</em> (allow browser location). The map shows your position and the nearest station; a route from your location to the station is drawn automatically. You can also use <em>Get Directions</em> on any station card. This demonstrates the routing feature.</li>
+                                <li class="mb-2"><strong>Live Availability:</strong> The <em>Fuel Availability</em> dashboard provides live stock and operational status.</li>
+                                <li class="mb-2"><strong>Routing:</strong> The integrated map uses browser geolocation to find the nearest station and plot the most efficient route automatically.</li>
                             </ol>
                         </div>
                     </div>
 
-                    <p class="small text-muted mb-0"><strong>Note:</strong> Organisation/admin users see <em>Management</em> (Stations, Pumps, PetroCards, Fuel Stock, Fuel Types, Transactions, Secured Records, Verify). Customers see <em>My Cards</em> and <em>My Transactions</em> only. Use an Organisation account to test Objectives 1–2 fully; both roles can test Availability and Map (Objective 3).</p>
+                    <p class="small text-muted mb-0"><strong>Note:</strong> This single-tenant model ensures that all administrative accounts work within the shared context of Petrotrade, while customers maintain independent purchase histories.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

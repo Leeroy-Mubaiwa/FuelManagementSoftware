@@ -224,6 +224,23 @@ public class FuelPumpController : Controller
         return View(pump);
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleOperational(int id)
+    {
+        var pump = await _context.FuelPumps.FindAsync(id);
+        if (pump == null)
+        {
+            return NotFound();
+        }
+
+        pump.IsOperational = !pump.IsOperational;
+        pump.UpdatedAt = DateTime.Now;
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index), new { stationId = pump.FuelStationId });
+    }
+
     private async Task<bool> FuelPumpExistsAsync(int id)
     {
         return await _context.FuelPumps.AnyAsync(e => e.Id == id);

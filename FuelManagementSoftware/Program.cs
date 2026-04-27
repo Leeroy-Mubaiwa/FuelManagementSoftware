@@ -70,8 +70,9 @@ builder.Services.AddRazorPages();
 
 // Register role seeder
 builder.Services.AddScoped<RoleSeederService>();
-builder.Services.AddScoped<FuelTypeSeederService>();
 builder.Services.AddScoped<OrganizationSeederService>();
+builder.Services.AddScoped<DefaultUserSeederService>();
+builder.Services.AddScoped<FuelTypeSeederService>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
@@ -104,6 +105,9 @@ using (var scope = app.Services.CreateScope())
     var roleSeeder = scope.ServiceProvider.GetRequiredService<RoleSeederService>();
     await roleSeeder.SeedRolesAsync();
     
+    var userSeeder = scope.ServiceProvider.GetRequiredService<DefaultUserSeederService>();
+    await userSeeder.SeedUsersAsync();
+
     var fuelTypeSeeder = scope.ServiceProvider.GetRequiredService<FuelTypeSeederService>();
     await fuelTypeSeeder.SeedFuelTypesAsync();
 }

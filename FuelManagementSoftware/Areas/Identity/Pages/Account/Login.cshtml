@@ -7,11 +7,12 @@
 
 <div class="row justify-content-center">
     <div class="col-md-5 col-lg-4">
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
                 <div class="text-center mb-4">
                     <img src="~/images/petro-logo.png" alt="PetroChain Logo" class="mb-3" style="height: 60px; width: auto;" />
                     <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+                    <p class="text-muted small mt-1">Access your PetroChain account</p>
                 </div>
                 <form id="account" method="post">
                 <div asp-validation-summary="All" class="text-danger" role="alert"></div>
@@ -31,21 +32,42 @@
                         @Html.DisplayNameFor(m => m.Input.RememberMe)
                     </label>
                 </div>
-                <div>
+                <div class="mb-4">
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
                 </div>
-                <div>
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
+                <div class="text-center border-top pt-3">
+                    <p class="small mb-1">Don't have an account?</p>
+                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="fw-bold text-decoration-none">Register as a Customer</a>
                 </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-light">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Access Guide</h2>
+                <p class="small text-muted mb-4">Depending on your role, you will see different dashboard features:</p>
+                
+                <div class="mb-3">
+                    <div class="fw-bold small mb-1">Petrotrade Admin</div>
+                    <div class="small text-muted border-start ps-2 py-1">Full audit access, pricing control, and station management.</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="fw-bold small mb-1">Station Manager</div>
+                    <div class="small text-muted border-start ps-2 py-1">Pump control, stock management, and branch reports.</div>
+                </div>
+
+                <div>
+                    <div class="fw-bold small mb-1">Customer</div>
+                    <div class="small text-muted border-start ps-2 py-1">Petrocard usage, availability lookup, and transaction history.</div>
+                </div>
+
+                <div class="mt-4 p-3 bg-white rounded border small">
+                    <strong class="d-block mb-1 text-primary">Operational Verification:</strong>
+                    Check the <em>System Audit Guide</em> at the bottom of every page for specific steps to verify core features.
+                </div>
             </div>
         </div>
     </div>

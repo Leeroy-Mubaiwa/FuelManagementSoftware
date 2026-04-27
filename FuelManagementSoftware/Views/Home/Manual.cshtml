@@ -85,7 +85,7 @@
 
         <div class="alert alert-info border-0 mt-3">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>For your dissertation:</strong> PetroChain™ addresses three core objectives — (1) automated fuel dispensing with prepaid smart card functionality,
+            <strong>Technical Note:</strong> PetroChain™ addresses three core objectives — (1) automated fuel dispensing with prepaid smart card functionality,
             (2) secure, tamper-proof transaction management using <em>blockchain technology and smart contracts on the Ethereum Sepolia network</em>, and
             (3) real-time fuel availability with routing. Every completed fuel transaction is recorded on a <em>public blockchain</em> via a <em>Solidity smart contract</em>,
             making it independently verifiable by anyone.
@@ -254,7 +254,7 @@
 
         <div class="alert alert-info border-0 mt-3">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>For your dissertation:</strong> PetroCards use <em>NFC (Near Field Communication)</em> technology for contactless authentication at fuel pumps.
+            <strong>Technical Note:</strong> PetroCards use <em>NFC (Near Field Communication)</em> technology for contactless authentication at fuel pumps.
             The Web NFC API enables browser-based card reading on supported devices, with a server-side fallback for other environments.
             Card PINs are hashed using the <em>BCrypt</em> algorithm, ensuring they cannot be reverse-engineered even if the database is compromised.
         </div>
@@ -334,7 +334,7 @@
 
         <div class="alert alert-info border-0 mt-3">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>For your dissertation:</strong> The automated dispensing workflow orchestrates multiple services — <em>NFC card authentication</em>,
+            <strong>Security Note:</strong> The automated dispensing workflow orchestrates multiple services — <em>NFC card authentication</em>,
             <em>PIN verification (BCrypt)</em>, <em>fuel stock management</em>, and <em>pump control</em>. Upon completion, the transaction is submitted to the
             <em>Ethereum Sepolia blockchain</em> via a <em>Solidity smart contract</em> called <code>FuelTransactionLedger</code>. This contract stores the
             transaction number, station ID, pump ID, quantity, amount, and a hashed card identifier on-chain, making the record publicly verifiable and immutable.
@@ -401,7 +401,7 @@
 
         <div class="alert alert-info border-0 mt-3">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>For your dissertation:</strong> The map uses <em>Leaflet.js</em> with <em>OpenStreetMap</em> tiles and the <em>OSRM (Open Source Routing Machine)</em>
+            <strong>Technical Note:</strong> The map uses <em>Leaflet.js</em> with <em>OpenStreetMap</em> tiles and the <em>OSRM (Open Source Routing Machine)</em>
             for turn-by-turn directions. Fuel stock data is sourced from the <code>FuelStock</code> table, updated in real time as transactions are processed.
             Queue data is stored in the <code>QueueInformation</code> model. The system uses the browser's <em>Geolocation API</em> to determine the user's position
             and calculates distances to each station.
@@ -484,7 +484,7 @@
 
         <div class="alert alert-info border-0 mt-3">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>For your dissertation:</strong> Secured records are stored on the <em>Ethereum Sepolia blockchain</em> — a real, public, decentralised network.
+            <strong>Blockchain Protocol:</strong> Secured records are stored on the <em>Ethereum Sepolia blockchain</em> — a real, public, decentralised network.
             Each fuel transaction is recorded using a <em>Solidity smart contract</em> called <code>FuelTransactionLedger</code>, which stores data in an immutable
             on-chain array. The contract uses a <code>mapping(string => uint256)</code> to prevent duplicate transaction recording. The "Reference" shown
             in the UI is the <em>Ethereum transaction hash (TxHash)</em>, "Ledger Entry" is the <em>block number</em>, and "Processing Cost" is the <em>gas consumed</em>
@@ -547,7 +547,7 @@
 
         <div class="alert alert-info border-0 mt-3">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>For your dissertation:</strong> The verification process calls the smart contract's <code>verifyTransaction(string _txNumber)</code> function,
+            <strong>Trust Verification:</strong> The verification process calls the smart contract's <code>verifyTransaction(string _txNumber)</code> function,
             which checks the on-chain <code>transactionNumberToIndex</code> mapping and retrieves the stored <code>FuelRecord</code> struct. The system then
             compares the on-chain data with the local database record. "View Public Proof" links to <em>Etherscan</em> (<code>https://sepolia.etherscan.io</code>),
             a block explorer for the Ethereum network, where the raw transaction data can be independently verified by any third party.
@@ -637,11 +637,11 @@
 
         <div class="alert alert-info border-0 mt-3">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>For your dissertation:</strong> PetroChain™ is built as a <em>Progressive Web App (PWA)</em>.
+            <strong>PWA Architecture:</strong> PetroChain™ is built as a <em>Progressive Web App (PWA)</em>.
             This is implemented through a <code>manifest.json</code> file (defining app name, icons, colours, and display mode),
             a <code>sw.js</code> service worker (for caching static assets and providing offline fallback), and appropriate
             <code>&lt;meta&gt;</code> tags in the layout. The PWA approach was chosen over a native mobile app to avoid platform-specific
-            development while still providing an app-like experience. This satisfies the project objective of providing a mobile-accessible solution.
+            development while still providing an app-like experience. This satisfies the enterprise requirement for cross-platform accessibility.
         </div>
     </div>
 </div>
@@ -698,7 +698,7 @@
 
         <div class="alert alert-info border-0 mt-3">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>For your dissertation:</strong> This two-layer approach implements the <em>blockchain integration</em> objective.
+            <strong>Security Architecture:</strong> This two-layer approach implements the <em>blockchain integration</em> objective.
             The "public tamper-proof ledger" is the <em>Ethereum blockchain</em> — a decentralised, distributed network of thousands of nodes worldwide.
             Records are stored via a <em>Solidity smart contract</em> (<code>FuelTransactionLedger.sol</code>) deployed on the <em>Sepolia testnet</em>.
             The smart contract exposes functions: <code>recordTransaction()</code> to store records, <code>verifyTransaction()</code> to check existence,

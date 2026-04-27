@@ -280,98 +280,122 @@
 }
 else
 {
-    <div class="landing">
-        <div class="row align-items-center">
-            <div class="col-lg-6 mb-4 mb-lg-0">
-                <div class="d-flex align-items-center mb-4">
-                    <img src="~/images/petro-logo.png" alt="PetroChain" class="me-3" style="height: 56px; width: auto;" />
-                    <div>
-                        <h1 class="landing-title mb-0">PetroChain</h1>
-                        <p class="landing-subtitle text-muted mb-0">Blockchain-enabled fuel management</p>
-                    </div>
-                </div>
-                <p class="text-body mb-4">Automated dispensing, secure transactions, and real-time fuel availability. Built for efficiency and transparency.</p>
-                <div class="row g-3">
-                    <div class="col-sm-6">
-                        <a asp-area="Identity" asp-page="/Account/Register" class="card landing-cta-card text-decoration-none h-100">
-                            <div class="card-body text-center py-4">
-                                <i class="bi bi-person-plus d-block mb-2 text-primary" style="font-size: 2rem;"></i>
-                                <span class="fw-semibold text-dark">Get Started</span>
-                                <p class="small text-muted mb-0 mt-1">Create an account</p>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-sm-6">
-                        <a asp-area="Identity" asp-page="/Account/Login" class="card landing-cta-card text-decoration-none h-100">
-                            <div class="card-body text-center py-4">
-                                <i class="bi bi-box-arrow-in-right d-block mb-2 text-secondary" style="font-size: 2rem;"></i>
-                                <span class="fw-semibold text-dark">Sign In</span>
-                                <p class="small text-muted mb-0 mt-1">Existing account</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="card dashboard-card h-100">
-                            <div class="card-body">
-                                <i class="bi bi-credit-card text-primary mb-2" style="font-size: 1.5rem;"></i>
-                                <h6 class="fw-semibold mb-1">Smart Cards</h6>
-                                <p class="small text-muted mb-0">Prepaid PetroCards for secure, automated fuel purchases.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card dashboard-card h-100">
-                            <div class="card-body">
-                                <i class="bi bi-fuel-pump text-success mb-2" style="font-size: 1.5rem;"></i>
-                                <h6 class="fw-semibold mb-1">Real-Time Availability</h6>
-                                <p class="small text-muted mb-0">Check fuel and station status before you go.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card dashboard-card h-100">
-                            <div class="card-body">
-                                <i class="bi bi-shield-check text-info mb-2" style="font-size: 1.5rem;"></i>
-                                <h6 class="fw-semibold mb-1">Tamper-Proof Records</h6>
-                                <p class="small text-muted mb-0">Transactions recorded securely for transparency.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card dashboard-card h-100">
-                            <div class="card-body">
-                                <i class="bi bi-geo-alt text-warning mb-2" style="font-size: 1.5rem;"></i>
-                                <h6 class="fw-semibold mb-1">Smart Routing</h6>
-                                <p class="small text-muted mb-0">Directions to the nearest available station.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="landing py-3">
+        <div class="text-center mb-3">
+            <img src="~/images/petro-logo.png" alt="PetroChain" class="mb-2" style="height: 50px; width: auto;" />
+            <h1 class="h2 fw-bold mb-1">PetroChain™</h1>
+            <p class="small text-muted mb-0">Blockchain-Powered Fuel Management</p>
         </div>
 
-        <div class="row mt-5 pt-4 border-top">
-            <div class="col-12">
-                <h2 class="h5 fw-semibold mb-3 text-center">Benefits</h2>
-                <div class="row g-4 text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body p-3">
+                        <h2 class="h5 mb-3 text-center">System Access Guide</h2>
+                        
+                        <div class="row g-3">
+                            <!-- Petrotrade Admin -->
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded h-100 bg-light d-flex flex-column">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-shield-lock small"></i>
+                                        </div>
+                                        <h3 class="h6 mb-0 fw-bold">Admin</h3>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <ul class="list-unstyled mb-2" style="font-size: 0.75rem; display: grid; grid-template-columns: 1fr; gap: 2px;">
+                                            <li><i class="bi bi-check2 text-primary me-1"></i>Register all stations</li>
+                                            <li><i class="bi bi-check2 text-primary me-1"></i>View fuel availability</li>
+                                            <li><i class="bi bi-check2 text-primary me-1"></i>Audit transactions</li>
+                                            <li><i class="bi bi-check2 text-primary me-1"></i>Set fuel prices</li>
+                                            <li><i class="bi bi-check2 text-primary me-1"></i>View sales & stock updates</li>
+                                        </ul>
+                                    </div>
+                                    <div class="mt-2 mb-2 p-1 px-2 bg-white border rounded text-center" style="font-size: 0.7rem;">
+                                        <code class="d-block">admin@petrotrade.co.zw</code>
+                                        <code class="text-muted">Pass: Admin@123</code>
+                                    </div>
+                                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-sm w-100">Login as Admin</a>
+                                </div>
+                            </div>
+
+                            <!-- Branch Manager -->
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded h-100 bg-light d-flex flex-column">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-gear small"></i>
+                                        </div>
+                                        <h3 class="h6 mb-0 fw-bold">Manager</h3>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <ul class="list-unstyled mb-2" style="font-size: 0.75rem; display: grid; grid-template-columns: 1fr; gap: 2px;">
+                                            <li><i class="bi bi-check2 text-success me-1"></i>Activate fuel pumps</li>
+                                            <li><i class="bi bi-check2 text-success me-1"></i>Update stock levels</li>
+                                            <li><i class="bi bi-check2 text-success me-1"></i>Dispense fuel</li>
+                                            <li><i class="bi bi-check2 text-success me-1"></i>Sales & stock reports</li>
+                                        </ul>
+                                    </div>
+                                    <div class="mt-2 mb-2 p-1 px-2 bg-white border rounded text-center" style="font-size: 0.7rem;">
+                                        <code class="d-block">manager@petrotrade.co.zw</code>
+                                        <code class="text-muted">Pass: Manager@123</code>
+                                    </div>
+                                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success btn-sm w-100">Login as Manager</a>
+                                </div>
+                            </div>
+
+                            <!-- Customer -->
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded h-100 bg-light d-flex flex-column">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-person small"></i>
+                                        </div>
+                                        <h3 class="h6 mb-0 fw-bold">Customer</h3>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <ul class="list-unstyled mb-2" style="font-size: 0.75rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2px;">
+                                            <li><i class="bi bi-check2 text-info me-1"></i>Register</li>
+                                            <li><i class="bi bi-check2 text-info me-1"></i>Fuel Prices</li>
+                                            <li><i class="bi bi-check2 text-info me-1"></i>Availability</li>
+                                            <li><i class="bi bi-check2 text-info me-1"></i>Nearby Stations</li>
+                                            <li><i class="bi bi-check2 text-info me-1"></i>TopUp NFC</li>
+                                            <li><i class="bi bi-check2 text-info me-1"></i>History</li>
+                                        </ul>
+                                    </div>
+                                    <div class="mt-2 mb-2 p-1 px-2 bg-white border rounded text-center" style="font-size: 0.7rem;">
+                                        <code class="d-block">customer@gmail.com</code>
+                                        <code class="text-muted">Pass: Customer@123</code>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-info btn-sm text-white flex-grow-1">Login</a>
+                                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-info btn-sm flex-grow-1">Register</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row text-center g-3">
                     <div class="col-md-4">
-                        <i class="bi bi-shield-check text-primary d-block mb-2" style="font-size: 2rem;"></i>
-                        <h6 class="fw-semibold">Reduced Fraud</h6>
-                        <p class="small text-muted mb-0">Secure records and controlled access.</p>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-link-45deg text-primary me-2"></i>
+                            <span class="small fw-bold">Blockchain Secured</span>
+                        </div>
                     </div>
                     <div class="col-md-4">
-                        <i class="bi bi-speedometer2 text-success d-block mb-2" style="font-size: 2rem;"></i>
-                        <h6 class="fw-semibold">Operational Efficiency</h6>
-                        <p class="small text-muted mb-0">Automated dispensing, fewer errors.</p>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-geo-alt text-success me-2"></i>
+                            <span class="small fw-bold">Real-Time Mapping</span>
+                        </div>
                     </div>
                     <div class="col-md-4">
-                        <i class="bi bi-heart text-info d-block mb-2" style="font-size: 2rem;"></i>
-                        <h6 class="fw-semibold">Better Experience</h6>
-                        <p class="small text-muted mb-0">Real-time info, fewer wasted trips.</p>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-nfc text-info me-2"></i>
+                            <span class="small fw-bold">NFC Automation</span>
+                        </div>
                     </div>
                 </div>
             </div>

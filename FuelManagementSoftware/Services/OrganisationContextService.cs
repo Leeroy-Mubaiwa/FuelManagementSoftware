@@ -103,7 +103,8 @@ public class OrganisationContextService : IOrganisationContextService
         if (fuelUser != null)
         {
             var isAdmin = await _userManager.IsInRoleAsync(fuelUser, AppRoles.PetrotradeAdmin);
-            if (isAdmin)
+            var isManager = await _userManager.IsInRoleAsync(fuelUser, AppRoles.BranchStationManager);
+            if (isAdmin || isManager)
             {
                 var firstOrg = await _context.Organizations
                     .Where(o => o.IsActive)
