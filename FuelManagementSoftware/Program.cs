@@ -44,6 +44,7 @@ builder.Services.Configure<BlockchainSettings>(builder.Configuration.GetSection(
 builder.Services.AddSingleton<IBlockchainService, BlockchainService>();
 
 // Register application services
+builder.Services.AddScoped<IOrganisationContextService, OrganisationContextService>();
 builder.Services.AddScoped<INfcReaderService, NfcReaderService>();
 builder.Services.AddScoped<IPetroCardService, PetroCardService>();
 builder.Services.AddScoped<IFuelStockService, FuelStockService>();
@@ -70,9 +71,9 @@ builder.Services.AddRazorPages();
 // Register role seeder
 builder.Services.AddScoped<RoleSeederService>();
 builder.Services.AddScoped<FuelTypeSeederService>();
+builder.Services.AddScoped<OrganizationSeederService>();
 
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -91,14 +92,18 @@ app.UseAuthorization();
 
 // Map SignalR hub
 app.MapHub<PumpStatusHub>("/hubs/pumpstatus");
-
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FuelManagementSoftwareDbContext>();
     await ApplyMakeFuelTypeGlobalIfNeededAsync(db);
     await db.Database.MigrateAsync();
+    
+    var orgSeeder = scope.ServiceProvider.GetRequiredService<OrganizationSeederService>();
+    await orgSeeder.SeedOrganizationAsync();
+
     var roleSeeder = scope.ServiceProvider.GetRequiredService<RoleSeederService>();
     await roleSeeder.SeedRolesAsync();
+    
     var fuelTypeSeeder = scope.ServiceProvider.GetRequiredService<FuelTypeSeederService>();
     await fuelTypeSeeder.SeedFuelTypesAsync();
 }

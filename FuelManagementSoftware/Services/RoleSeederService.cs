@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using FuelManagementSoftware.Constants;
 
 namespace FuelManagementSoftware.Services;
 
@@ -29,39 +30,9 @@ public class RoleSeederService
     {
         var roles = new List<string>
         {
-            // System Administration
-            "SuperAdmin",           // Full system access
-            "SystemAdmin",          // System configuration and management
-            
-            // Organization Management
-            "OrganizationAdmin",    // Manage organization settings, users, stations
-            "OrganizationManager",  // Manage organization operations
-            
-            // Station Management
-            "StationManager",       // Manage a specific station
-            "StationOperator",      // Operate pumps and handle transactions
-            
-            // Fuel Management
-            "FuelManager",          // Manage fuel stock, pricing, types
-            "FuelOperator",         // Handle fuel dispensing operations
-            
-            // Card Management
-            "CardManager",          // Manage PetroCards (create, activate, deactivate)
-            "CardOperator",         // Handle card transactions and top-ups
-            
-            // Customer Service
-            "CustomerService",      // Handle customer inquiries and support
-            
-            // Reporting and Analytics
-            "ReportViewer",         // View reports and analytics
-            "Auditor",              // Audit transactions and system logs
-            
-            // Maintenance
-            "Maintenance",          // System maintenance and troubleshooting
-            
-            // Customer/User
-            "Customer",             // Regular customer with PetroCard
-            "User"                  // Basic user access
+            AppRoles.PetrotradeAdmin,
+            AppRoles.BranchStationManager,
+            AppRoles.Customer
         };
 
         foreach (var roleName in roles)

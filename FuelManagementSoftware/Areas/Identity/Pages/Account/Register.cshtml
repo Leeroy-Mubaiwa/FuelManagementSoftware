@@ -20,24 +20,7 @@
             <hr />
             <div asp-validation-summary="All" class="text-danger" role="alert"></div>
             
-            <!-- Registration Type Selection -->
-            <div class="mb-3">
-                <label class="form-label">I am registering as:</label>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" asp-for="Input.RegistrationType" value="Customer" id="customerType" checked onchange="toggleOrganizationFields()" />
-                    <label class="form-check-label" for="customerType">
-                        <strong>Customer</strong> - I want to use PetroCards for fuel purchases
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" asp-for="Input.RegistrationType" value="Organization" id="organizationType" onchange="toggleOrganizationFields()" />
-                    <label class="form-check-label" for="organizationType">
-                        <strong>Organization/Service Station</strong> - I own or manage a fuel station
-                    </label>
-                </div>
-            </div>
-
-            <hr />
+            <p class="mb-4 text-muted">Register as a customer to use PetroCards for fuel purchases and view fuel availability.</p>
 
             <!-- Common Fields -->
             <div class="form-floating mb-3">
@@ -56,31 +39,6 @@
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
 
-            <!-- Organization-Specific Fields -->
-            <div id="organizationFields" style="display: none;">
-                <h4 class="mt-4 mb-3">Organization Information</h4>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.OrganizationName" class="form-control" placeholder="Organization Name" />
-                    <label asp-for="Input.OrganizationName">Organization Name <span class="text-danger">*</span></label>
-                    <span asp-validation-for="Input.OrganizationName" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.OrganizationCode" class="form-control" placeholder="Organization Code" />
-                    <label asp-for="Input.OrganizationCode">Organization Code</label>
-                    <span asp-validation-for="Input.OrganizationCode" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Address" class="form-control" placeholder="Address" />
-                    <label asp-for="Input.Address">Address</label>
-                    <span asp-validation-for="Input.Address" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Phone" class="form-control" placeholder="Phone" />
-                    <label asp-for="Input.Phone">Phone</label>
-                    <span asp-validation-for="Input.Phone" class="text-danger"></span>
-                </div>
-            </div>
-
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
     </div>
@@ -88,29 +46,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        function toggleOrganizationFields() {
-            const organizationType = document.getElementById('organizationType');
-            const organizationFields = document.getElementById('organizationFields');
-            const organizationNameInput = document.querySelector('input[name="Input.OrganizationName"]');
-            
-            if (organizationType.checked) {
-                organizationFields.style.display = 'block';
-                organizationNameInput.setAttribute('required', 'required');
-            } else {
-                organizationFields.style.display = 'none';
-                organizationNameInput.removeAttribute('required');
-                // Clear organization fields
-                document.querySelector('input[name="Input.OrganizationName"]').value = '';
-                document.querySelector('input[name="Input.OrganizationCode"]').value = '';
-                document.querySelector('input[name="Input.Address"]').value = '';
-                document.querySelector('input[name="Input.Phone"]').value = '';
-            }
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            toggleOrganizationFields();
-        });
-    </script>
 }

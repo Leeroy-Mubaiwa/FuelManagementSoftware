@@ -73,10 +73,6 @@ namespace FuelManagementSoftware.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
-            [Display(Name = "Registration Type")]
-            public string RegistrationType { get; set; } = "Customer"; // "Customer" or "Organization"
-
-            [Required]
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
@@ -91,24 +87,6 @@ namespace FuelManagementSoftware.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
-
-            // Organization-specific fields
-            [Display(Name = "Organization Name")]
-            [StringLength(255)]
-            public string OrganizationName { get; set; }
-
-            [Display(Name = "Organization Code")]
-            [StringLength(50)]
-            public string OrganizationCode { get; set; }
-
-            [Display(Name = "Address")]
-            [StringLength(500)]
-            public string Address { get; set; }
-
-            [Display(Name = "Phone")]
-            [StringLength(50)]
-            [Phone]
-            public string Phone { get; set; }
         }
 
 
@@ -122,15 +100,6 @@ namespace FuelManagementSoftware.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            
-            // Validate organization fields if registration type is Organization
-            if (Input.RegistrationType == "Organization")
-            {
-                if (string.IsNullOrWhiteSpace(Input.OrganizationName))
-                {
-                    ModelState.AddModelError(nameof(Input.OrganizationName), "Organization Name is required.");
-                }
-            }
             
             if (ModelState.IsValid)
             {
@@ -149,12 +118,7 @@ namespace FuelManagementSoftware.Areas.Identity.Pages.Account
 
                     var userId = await _userManager.GetUserIdAsync(user);
 
-                    await AssignRoleAsync(user, Input.RegistrationType);
-
-                    if (Input.RegistrationType == "Organization" && !string.IsNullOrWhiteSpace(Input.OrganizationName))
-                    {
-                        await CreateOrganizationAsync(userId, Input);
-                    }
+                    await AssignRoleAsync(user, AppRoles.Customer);
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return LocalRedirect(returnUrl);
@@ -193,21 +157,10 @@ namespace FuelManagementSoftware.Areas.Identity.Pages.Account
         }
 
         /// <summary>
-        /// Assigns appropriate role to the user based on registration type.
+        /// Assigns the specified role to the user.
         /// </summary>
-        private async Task AssignRoleAsync(FuelManagementSoftwareUser user, string registrationType)
+        private async Task AssignRoleAsync(FuelManagementSoftwareUser user, string roleName)
         {
-            string roleName;
-            
-            if (registrationType == "Organization")
-            {
-                roleName = AppRoles.OrganizationAdmin;
-            }
-            else
-            {
-                roleName = AppRoles.Customer;
-            }
-
             // Check if role exists
             if (!await _roleManager.RoleExistsAsync(roleName))
             {
@@ -229,44 +182,6 @@ namespace FuelManagementSoftware.Areas.Identity.Pages.Account
             {
                 _logger.LogError("Failed to assign role {RoleName} to user {UserId}: {Errors}", 
                     roleName, user.Id, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
-            }
-        }
-
-        /// <summary>
-        /// Creates an Organization record for organization registrations.
-        /// </summary>
-        private async Task CreateOrganizationAsync(string userId, InputModel input)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(input.OrganizationName))
-                {
-                    _logger.LogWarning("Cannot create organization: OrganizationName is empty for user {UserId}", userId);
-                    return;
-                }
-
-                var organization = new Models.Organization
-                {
-                    Name = input.OrganizationName,
-                    Code = string.IsNullOrWhiteSpace(input.OrganizationCode) ? null : input.OrganizationCode,
-                    Address = string.IsNullOrWhiteSpace(input.Address) ? null : input.Address,
-                    Phone = string.IsNullOrWhiteSpace(input.Phone) ? null : input.Phone,
-                    Email = input.Email,
-                    IsActive = true,
-                    CreatedAt = DateTime.Now,
-                    CreatorId = userId
-                };
-
-                _context.Organizations.Add(organization);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("Organization '{OrganizationName}' created for user {UserId}", 
-                    input.OrganizationName, userId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating organization for user {UserId}", userId);
-                // Don't throw - user is already created, organization can be created later
             }
         }
     }

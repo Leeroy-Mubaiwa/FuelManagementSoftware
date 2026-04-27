@@ -24,22 +24,10 @@
     @inject UserManager<FuelManagementSoftwareUser> UserManager
     @{
         var roleLabel = "User";
-        if (User.IsInRole(AppRoles.SuperAdmin)) { roleLabel = "Super Admin"; }
-        else if (User.IsInRole(AppRoles.SystemAdmin)) { roleLabel = "System Admin"; }
-        else if (User.IsInRole(AppRoles.OrganizationAdmin)) { roleLabel = "Org Admin"; }
-        else if (User.IsInRole(AppRoles.OrganizationManager)) { roleLabel = "Org Manager"; }
-        else if (User.IsInRole(AppRoles.StationManager)) { roleLabel = "Station Manager"; }
-        else if (User.IsInRole(AppRoles.StationOperator)) { roleLabel = "Station Operator"; }
-        else if (User.IsInRole(AppRoles.FuelManager)) { roleLabel = "Fuel Manager"; }
-        else if (User.IsInRole(AppRoles.FuelOperator)) { roleLabel = "Fuel Operator"; }
-        else if (User.IsInRole(AppRoles.CardManager)) { roleLabel = "Card Manager"; }
-        else if (User.IsInRole(AppRoles.CardOperator)) { roleLabel = "Card Operator"; }
-        else if (User.IsInRole(AppRoles.CustomerService)) { roleLabel = "Customer Service"; }
-        else if (User.IsInRole(AppRoles.ReportViewer)) { roleLabel = "Report Viewer"; }
-        else if (User.IsInRole(AppRoles.Auditor)) { roleLabel = "Auditor"; }
-        else if (User.IsInRole(AppRoles.Maintenance)) { roleLabel = "Maintenance"; }
+        if (User.IsInRole(AppRoles.PetrotradeAdmin)) { roleLabel = "Petrotrade Admin"; }
+        else if (User.IsInRole(AppRoles.BranchStationManager)) { roleLabel = "Branch Manager"; }
         else if (User.IsInRole(AppRoles.Customer)) { roleLabel = "Customer"; }
-        var isOrgStaff = !User.IsInRole(AppRoles.Customer);
+        var isOrgStaff = User.IsInRole(AppRoles.PetrotradeAdmin) || User.IsInRole(AppRoles.BranchStationManager);
     }
     <header class="app-header">
         <nav class="navbar navbar-dark navbar-expand-lg">
@@ -97,7 +85,7 @@
                             <li class="nav-item">
                                 <a class="nav-link text-white px-2" asp-area="" asp-controller="Home" asp-action="Manual"><i class="bi bi-book me-1"></i>Manual</a>
                             </li>
-                            @if (User.IsInRole(AppRoles.SuperAdmin) || User.IsInRole(AppRoles.SystemAdmin) || User.IsInRole(AppRoles.OrganizationAdmin))
+                            @if (User.IsInRole(AppRoles.PetrotradeAdmin))
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link text-white dropdown-toggle px-2" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-shield-lock me-1"></i>Admin</a>
@@ -257,7 +245,7 @@
                     </a>
                     }
 
-                    @if (User.IsInRole(AppRoles.SuperAdmin) || User.IsInRole(AppRoles.SystemAdmin) || User.IsInRole(AppRoles.OrganizationAdmin))
+                    @if (User.IsInRole(AppRoles.PetrotradeAdmin))
                     {
                         <!-- Administration (SuperAdmin, SystemAdmin, OrganizationAdmin only) -->
                         <div class="border-bottom">
