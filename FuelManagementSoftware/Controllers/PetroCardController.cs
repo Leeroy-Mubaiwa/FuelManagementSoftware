@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Webdev.Payments; 
 
 namespace FuelManagementSoftware.Controllers;
 
@@ -21,17 +22,20 @@ public class PetroCardController : Controller
     private readonly UserManager<FuelManagementSoftwareUser> _userManager;
     private readonly IPetroCardService _petroCardService;
     private readonly ILogger<PetroCardController> _logger;
+    private readonly IConfiguration _configuration;
 
     public PetroCardController(
         FilteredFuelManagementSoftwareDbContext context,
         UserManager<FuelManagementSoftwareUser> userManager,
         IPetroCardService petroCardService,
-        ILogger<PetroCardController> logger)
+        ILogger<PetroCardController> logger,
+        IConfiguration configuration)
     {
         _context = context;
         _userManager = userManager;
         _petroCardService = petroCardService;
         _logger = logger;
+        _configuration = configuration;
     }
 
     // GET: PetroCard
@@ -223,7 +227,7 @@ public class PetroCardController : Controller
     // POST: PetroCard/TopUp/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> TopUp(int id, [Bind("CardId,Amount,PaymentMethod,ReferenceNumber")] TopUpViewModel model)
+    public async Task<IActionResult> TopUp(int id, [Bind("CardId,Amount,PaymentMethod,EcocashPhoneNumber,ReferenceNumber")] TopUpViewModel model)
     {
         if (id != model.CardId)
         {
@@ -237,15 +241,146 @@ public class PetroCardController : Controller
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null) return Unauthorized();
 
-                await _petroCardService.DeductBalanceAsync(id, -model.Amount, "TopUp", model.ReferenceNumber, user.Id);
-                return RedirectToAction(nameof(Details), new { id });
+                // Initialise Paynow
+                var integrationId = _configuration["Paynow:IntegrationId"];
+                var integrationKey = _configuration["Paynow:IntegrationKey"];
+                var resultUrl = _configuration["Paynow:ResultUrl"];
+                var returnUrl = _configuration["Paynow:ReturnUrl"];
+
+                if (string.IsNullOrEmpty(integrationId) || string.IsNullOrEmpty(integrationKey))
+                {
+                    ModelState.AddModelError("", "Payment gateway is not configured. Please contact support.");
+                    return await ReloadTopUpView(id, model);
+                }
+
+                var paynow = new Paynow(integrationId, integrationKey);
+                if (!string.IsNullOrEmpty(resultUrl))
+                    paynow.ResultUrl = resultUrl;
+                if (!string.IsNullOrEmpty(returnUrl))
+                    paynow.ReturnUrl = returnUrl;
+
+                // Build reference
+                var internalRef = $"TOPUP-{model.CardId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+
+                // Create mobile payment for Ecocash
+                var payment = paynow.CreatePayment(internalRef, user.Email ?? user.UserName ?? "customer@petrochain.co.zw");
+                payment.Add($"PetroCard Top-Up ({model.Amount:F2} {model.Currency})", (decimal)model.Amount);
+
+                // Send via Ecocash mobile
+                var phone = model.EcocashPhoneNumber?.Trim() ?? "";
+                if (string.IsNullOrEmpty(phone))
+                {
+                    ModelState.AddModelError("EcocashPhoneNumber", "Ecocash phone number is required.");
+                    return await ReloadTopUpView(id, model);
+                }
+
+                var response = await paynow.SendMobileAsync(payment, phone,"ecocash");
+
+                if (!response.Success())
+                {
+                    var errorMsg = "Ecocash payment initiation failed. Please check your phone number and try again.";
+                    try { errorMsg = response.Errors(); } catch { }
+                    ModelState.AddModelError("", errorMsg);
+                    return await ReloadTopUpView(id, model);
+                }
+
+                // Payment sent – store poll URL so we can check status
+                var pollUrl = response.PollUrl();
+                string? instructions = null;
+                try { 
+                    instructions = response.ToString(); 
+                } catch { }
+
+                // Redirect to status page where the user waits for approval
+                TempData["PollUrl"] = pollUrl;
+                TempData["TopUpAmount"] = model.Amount.ToString("F2");
+                TempData["TopUpCardId"] = model.CardId.ToString();
+                TempData["TopUpRef"] = internalRef;
+                TempData["TopUpInstructions"] = instructions ?? "Approve the payment on your Ecocash phone to complete the top-up.";
+
+                return RedirectToAction(nameof(TopUpStatus), new { id = model.CardId });
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
+                _logger.LogError(ex, "Error initiating Ecocash top-up for card {CardId}", model.CardId);
+                ModelState.AddModelError("", "An error occurred while processing your payment. Please try again.");
             }
         }
 
+        return await ReloadTopUpView(id, model);
+    }
+
+    // GET: PetroCard/TopUpStatus/5
+    public IActionResult TopUpStatus(int id)
+    {
+        var pollUrl = TempData["PollUrl"]?.ToString();
+        var amount = TempData["TopUpAmount"]?.ToString();
+        var cardId = TempData["TopUpCardId"]?.ToString();
+        var reference = TempData["TopUpRef"]?.ToString();
+        var instructions = TempData["TopUpInstructions"]?.ToString();
+
+        if (string.IsNullOrEmpty(pollUrl))
+        {
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        ViewBag.PollUrl = pollUrl;
+        ViewBag.Amount = amount;
+        ViewBag.CardId = cardId;
+        ViewBag.Reference = reference;
+        ViewBag.Instructions = instructions;
+        return View();
+    }
+
+    // POST: PetroCard/CheckPaymentStatus (AJAX)
+    [HttpPost]
+    public async Task<IActionResult> CheckPaymentStatus([FromBody] CheckPaymentRequest request)
+    {
+        if (request == null || string.IsNullOrEmpty(request.PollUrl))
+        {
+            return Json(new { success = false, message = "Invalid request" });
+        }
+
+        try
+        {
+            var integrationId = _configuration["Paynow:IntegrationId"];
+            var integrationKey = _configuration["Paynow:IntegrationKey"];
+            var paynow = new Paynow(integrationId!, integrationKey!);
+
+            var status = paynow.PollTransaction(request.PollUrl);
+
+            if (status.Paid())
+            {
+                // Credit the card
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return Json(new { success = false, message = "Unauthorized" });
+
+                var amount = decimal.Parse(request.Amount ?? "0");
+                var cardId = int.Parse(request.CardId ?? "0");
+
+                if (amount > 0 && cardId > 0)
+                {
+                    await _petroCardService.DeductBalanceAsync(
+                        cardId, -amount, "TopUp",
+                        request.Reference ?? "Ecocash",
+                        user.Id);
+                }
+
+                return Json(new { success = true, paid = true, message = "Payment confirmed! Your card has been topped up." });
+            }
+
+            // Not yet paid
+            return Json(new { success = true, paid = false, message = "Awaiting payment confirmation..." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking Ecocash payment status");
+            return Json(new { success = false, message = "Error checking payment status." });
+        }
+    }
+
+    private async Task<IActionResult> ReloadTopUpView(int id, TopUpViewModel model)
+    {
         var card = await _context.PetroCards
             .Include(c => c.User)
             .FirstOrDefaultAsync(c => c.Id == id);
@@ -257,7 +392,15 @@ public class PetroCardController : Controller
             model.Currency = card.Currency;
         }
 
-        return View(model);
+        return View("TopUp", model);
+    }
+
+    public class CheckPaymentRequest
+    {
+        public string? PollUrl { get; set; }
+        public string? Amount { get; set; }
+        public string? CardId { get; set; }
+        public string? Reference { get; set; }
     }
 
     private async Task<bool> PetroCardExistsAsync(int id)
@@ -312,11 +455,16 @@ public class TopUpViewModel
     
     [Required]
     [Display(Name = "Top-Up Amount")]
-    [Range(0.01, double.MaxValue)]
+    [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than zero.")]
     public decimal Amount { get; set; }
     
     [Display(Name = "Payment Method")]
     public string? PaymentMethod { get; set; }
+
+    [Required(ErrorMessage = "Ecocash phone number is required.")]
+    [Display(Name = "Ecocash Phone Number")]
+    [RegularExpression(@"^(077|078)\d{7}$", ErrorMessage = "Enter a valid Ecocash number (e.g. 0771234567).")]
+    public string? EcocashPhoneNumber { get; set; }
     
     [Display(Name = "Reference Number")]
     public string? ReferenceNumber { get; set; }

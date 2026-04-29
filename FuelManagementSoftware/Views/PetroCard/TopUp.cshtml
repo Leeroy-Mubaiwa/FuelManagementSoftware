@@ -1,57 +1,90 @@
 @model FuelManagementSoftware.Controllers.TopUpViewModel
 @{
-    ViewData["Title"] = "Top Up PetroCard";
+    ViewData["Title"] = "Top Up PetroCard via Ecocash";
 }
 
-<h5 class="mb-3">Top Up PetroCard</h5>
+<h5 class="mb-3"><i class="bi bi-phone me-2"></i>Top Up PetroCard via Ecocash</h5>
 
 <div class="row">
     <div class="col-md-6">
-        <div class="card mb-3">
+        <div class="card mb-3 border-success">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-credit-card me-1"></i> Card Details
+            </div>
             <div class="card-body">
                 <dl class="row mb-0">
                     <dt class="col-sm-4">Card Number:</dt>
-                    <dd class="col-sm-8">@Model.CardNumber</dd>
+                    <dd class="col-sm-8"><code>@Model.CardNumber</code></dd>
                     <dt class="col-sm-4">Current Balance:</dt>
-                    <dd class="col-sm-8"><strong>@Model.CurrentBalance.ToString("F2") @Model.Currency</strong></dd>
+                    <dd class="col-sm-8"><strong class="text-success fs-5">@Model.CurrentBalance.ToString("F2") @Model.Currency</strong></dd>
                 </dl>
             </div>
         </div>
         
-        <form asp-action="TopUp">
-            <div asp-validation-summary="All" class="text-danger mb-3"></div>
-            <input type="hidden" asp-for="CardId" />
-            
-            <div class="mb-3">
-                <label asp-for="Amount" class="form-label"></label>
-                <input asp-for="Amount" class="form-control form-control-sm" type="number" step="0.01" min="0.01" />
-                <span asp-validation-for="Amount" class="text-danger"></span>
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <i class="bi bi-phone me-1"></i> Ecocash Top-Up
             </div>
-            
-            <div class="mb-3">
-                <label asp-for="PaymentMethod" class="form-label"></label>
-                <select asp-for="PaymentMethod" class="form-select form-select-sm">
-                    <option value="">-- Select --</option>
-                    <option value="Ecocash">Ecocash</option>
-                </select>
-                <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+            <div class="card-body">
+                <form asp-action="TopUp">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="CardId" />
+                    <input type="hidden" asp-for="PaymentMethod" value="Ecocash" />
+                    
+                    <div class="mb-3">
+                        <label asp-for="Amount" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">@Model.Currency</span>
+                            <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.50" placeholder="e.g. 10.00" />
+                        </div>
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                        <small class="text-muted">Minimum top-up: 0.50 @Model.Currency</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="EcocashPhoneNumber" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                            <input asp-for="EcocashPhoneNumber" class="form-control" type="tel" placeholder="e.g. 0771234567" maxlength="10" />
+                        </div>
+                        <span asp-validation-for="EcocashPhoneNumber" class="text-danger"></span>
+                        <small class="text-muted">Enter your Econet number starting with 077 or 078</small>
+                    </div>
+                    
+                    <div class="alert alert-info small py-2 mb-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        After submitting, you will receive an Ecocash prompt on your phone. Approve the payment to complete the top-up.
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-1"></i>Pay with Ecocash
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.CardId" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
             </div>
-            
-            <div class="mb-3">
-                <label asp-for="ReferenceNumber" class="form-label"></label>
-                <input asp-for="ReferenceNumber" class="form-control form-control-sm" />
-                <span asp-validation-for="ReferenceNumber" class="text-danger"></span>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card border-light">
+            <div class="card-header bg-light">
+                <i class="bi bi-question-circle me-1"></i> How It Works
             </div>
-            
-            <div class="mb-3">
-                <button type="submit" class="btn btn-sm btn-primary">Top Up</button>
-                <a asp-action="Details" asp-route-id="@Model.CardId" class="btn btn-sm btn-secondary">Cancel</a>
+            <div class="card-body">
+                <ol class="mb-0 small">
+                    <li class="mb-2">Enter the amount you wish to top up and your Ecocash phone number.</li>
+                    <li class="mb-2">Click <strong>"Pay with Ecocash"</strong>.</li>
+                    <li class="mb-2">You will receive an Ecocash payment prompt on your phone.</li>
+                    <li class="mb-2">Enter your Ecocash PIN on your phone to approve the payment.</li>
+                    <li class="mb-0">Once confirmed, your PetroCard balance will be updated automatically.</li>
+                </ol>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
-

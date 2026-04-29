@@ -1,0 +1,118 @@
+@{
+    ViewData["Title"] = "Ecocash Payment Status";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white text-center">
+                <i class="bi bi-phone me-1"></i> Ecocash Payment
+            </div>
+            <div class="card-body text-center py-4">
+                <div id="statusSpinner" class="mb-3">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                <div id="statusIcon" class="mb-3" style="display:none;">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                </div>
+                
+                <h5 id="statusMessage" class="mb-2">Waiting for Ecocash approval...</h5>
+                <p class="text-muted small mb-3">@ViewBag.Instructions</p>
+                
+                <div class="card bg-light mb-3">
+                    <div class="card-body py-2">
+                        <div class="row small">
+                            <div class="col-6 text-start"><strong>Amount:</strong></div>
+                            <div class="col-6 text-end">@ViewBag.Amount USD</div>
+                            <div class="col-6 text-start"><strong>Reference:</strong></div>
+                            <div class="col-6 text-end"><code class="small">@ViewBag.Reference</code></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="statusAlert" class="alert alert-info small py-2" role="alert">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Check your phone for the Ecocash prompt and enter your PIN to approve the payment.
+                </div>
+                
+                <div id="successActions" style="display:none;">
+                    <a asp-action="Details" asp-route-id="@ViewBag.CardId" class="btn btn-success">
+                        <i class="bi bi-credit-card me-1"></i>View Card
+                    </a>
+                </div>
+                
+                <div id="waitingActions">
+                    <a asp-action="Details" asp-route-id="@ViewBag.CardId" class="btn btn-sm btn-outline-secondary mt-2">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Card
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    (function() {
+        var pollUrl = '@Html.Raw(ViewBag.PollUrl)';
+        var amount = '@ViewBag.Amount';
+        var cardId = '@ViewBag.CardId';
+        var reference = '@ViewBag.Reference';
+        var maxAttempts = 60; // poll for up to 5 minutes (every 5s)
+        var attempts = 0;
+        var paid = false;
+
+        function checkStatus() {
+            if (paid || attempts >= maxAttempts) {
+                if (!paid) {
+                    document.getElementById('statusMessage').textContent = 'Payment timed out. Please try again.';
+                    document.getElementById('statusSpinner').style.display = 'none';
+                    document.getElementById('statusAlert').className = 'alert alert-warning small py-2';
+                    document.getElementById('statusAlert').innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Payment was not confirmed within the time limit.';
+                }
+                return;
+            }
+
+            attempts++;
+
+            fetch('@Url.Action("CheckPaymentStatus", "PetroCard")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pollUrl: pollUrl,
+                    amount: amount,
+                    cardId: cardId,
+                    reference: reference
+                })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.paid) {
+                    paid = true;
+                    document.getElementById('statusSpinner').style.display = 'none';
+                    document.getElementById('statusIcon').style.display = 'block';
+                    document.getElementById('statusMessage').textContent = 'Payment Confirmed!';
+                    document.getElementById('statusMessage').className = 'mb-2 text-success';
+                    document.getElementById('statusAlert').className = 'alert alert-success small py-2';
+                    document.getElementById('statusAlert').innerHTML = '<i class="bi bi-check-circle me-1"></i>' + data.message;
+                    document.getElementById('successActions').style.display = 'block';
+                    document.getElementById('waitingActions').style.display = 'none';
+                } else {
+                    // Still waiting, poll again
+                    setTimeout(checkStatus, 5000);
+                }
+            })
+            .catch(function(err) {
+                console.error('Poll error:', err);
+                setTimeout(checkStatus, 5000);
+            });
+        }
+
+        // Start polling after 3 seconds (give time for Ecocash prompt)
+        setTimeout(checkStatus, 3000);
+    })();
+</script>
+}
