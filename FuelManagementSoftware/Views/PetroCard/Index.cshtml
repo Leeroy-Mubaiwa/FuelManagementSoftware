@@ -1,11 +1,16 @@
 @model IEnumerable<FuelManagementSoftware.Models.PetroCard>
+@using FuelManagementSoftware.Constants
 @{
-    ViewData["Title"] = "PetroCards";
+    var isOrg = !User.IsInRole(AppRoles.Customer);
+    ViewData["Title"] = isOrg ? "PetroCard Management" : "My PetroCards";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">PetroCards</h4>
-    <a asp-action="Create" class="btn btn-sm btn-primary">Create New</a>
+    <h4 class="mb-0">@(isOrg ? "PetroCard Management" : "My PetroCards")</h4>
+    @if (isOrg)
+    {
+        <a asp-action="Create" class="btn btn-sm btn-primary">Create New</a>
+    }
 </div>
 
 <div class="table-responsive">
@@ -51,7 +56,10 @@
                     <td class="text-end">
                         <div class="btn-group btn-group-sm">
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
+                            @if (isOrg)
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
+                            }
                             <a asp-action="TopUp" asp-route-id="@item.Id" class="btn btn-outline-success">Top Up</a>
                         </div>
                     </td>

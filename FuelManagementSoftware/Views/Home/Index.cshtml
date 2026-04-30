@@ -8,7 +8,7 @@
 {
     var isOrg = !User.IsInRole(AppRoles.Customer);
     var isManager = User.IsInRole(AppRoles.BranchStationManager);
-    var canDispense = isManager || User.IsInRole(AppRoles.Customer);
+    var canDispense = isManager;
     <div class="dashboard">
         <div class="dashboard-header mb-3">
             <h1 class="dashboard-title">Dashboard</h1>

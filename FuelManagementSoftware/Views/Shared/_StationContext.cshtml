@@ -4,7 +4,10 @@
     if (!stationId.HasValue || string.IsNullOrEmpty(stationName)) { return; }
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var isOrgStaff = User.IsInRole(FuelManagementSoftware.Constants.AppRoles.PetrotradeAdmin) || User.IsInRole(FuelManagementSoftware.Constants.AppRoles.BranchStationManager);
 }
+@if (isOrgStaff)
+{
 <div class="card mb-3 bg-light border-0">
     <div class="card-body py-2">
         <nav aria-label="Station context">
@@ -25,10 +28,14 @@
                 <a asp-controller="FuelTransaction" asp-action="Index" asp-route-stationId="@stationId" class="btn btn-sm @(currentController == "FuelTransaction" ? "btn-primary" : "btn-outline-secondary")">
                     <i class="bi bi-receipt me-1"></i>Transactions
                 </a>
+                @if (User.IsInRole(FuelManagementSoftware.Constants.AppRoles.BranchStationManager))
+                {
                 <a asp-controller="FuelDispensing" asp-action="SelectPump" asp-route-stationId="@stationId" class="btn btn-sm btn-outline-success">
                     <i class="bi bi-fuel-pump me-1"></i>Start Dispensing
                 </a>
+                }
             </div>
         </nav>
     </div>
 </div>
+}

@@ -1,5 +1,7 @@
+@using FuelManagementSoftware.Constants
 @{
     ViewData["Title"] = "User Manual";
+    var isOrg = !User.IsInRole(AppRoles.Customer);
 }
 
 <div class="row mb-4">
@@ -29,11 +31,14 @@
                     <i class="bi bi-credit-card me-1"></i>PetroCards
                 </a>
             </div>
+            @if (isOrg)
+            {
             <div class="col-md-3 col-6">
                 <a href="#section-dispensing" class="btn btn-outline-primary btn-sm w-100">
                     <i class="bi bi-fuel-pump me-1"></i>Fuel Dispensing
                 </a>
             </div>
+            }
             <div class="col-md-3 col-6">
                 <a href="#section-availability" class="btn btn-outline-primary btn-sm w-100">
                     <i class="bi bi-geo-alt me-1"></i>Find Fuel
@@ -44,11 +49,14 @@
                     <i class="bi bi-receipt me-1"></i>Transactions
                 </a>
             </div>
+            @if (isOrg)
+            {
             <div class="col-md-3 col-6">
                 <a href="#section-secured-records" class="btn btn-outline-primary btn-sm w-100">
                     <i class="bi bi-shield-check me-1"></i>Secured Records
                 </a>
             </div>
+            }
             <div class="col-md-3 col-6">
                 <a href="#section-verify" class="btn btn-outline-primary btn-sm w-100">
                     <i class="bi bi-patch-check me-1"></i>Verify Records
@@ -135,10 +143,13 @@
                             <td><i class="bi bi-house-door me-1"></i>Home</td>
                             <td>Returns to the main dashboard</td>
                         </tr>
+                        @if (isOrg)
+                        {
                         <tr>
                             <td><i class="bi bi-fuel-pump me-1"></i>Fuel Dispensing</td>
-                            <td>Start a fuel purchase</td>
+                            <td>Start a fuel purchase (Admin/Manager)</td>
                         </tr>
+                        }
                         <tr>
                             <td><i class="bi bi-geo-alt me-1"></i>Fuel Availability</td>
                             <td>Check fuel stock at stations</td>
@@ -163,10 +174,13 @@
                             <td><i class="bi bi-receipt me-1"></i>Transactions</td>
                             <td>View fuel purchase history</td>
                         </tr>
+                        @if (isOrg)
+                        {
                         <tr>
                             <td><i class="bi bi-link-45deg me-1"></i>Secured Records</td>
                             <td>View permanently secured records</td>
                         </tr>
+                        }
                         <tr>
                             <td><i class="bi bi-shield-check me-1"></i>Verify Transaction</td>
                             <td>Check if a record is authentic</td>
@@ -228,7 +242,7 @@
         </div>
 
         <h5 class="fw-bold">Managing PetroCards</h5>
-        <p>Go to <strong>Menu → Management → PetroCards</strong> to:</p>
+        <p>Go to <strong>Menu → @(isOrg ? "Management" : "My Cards")</strong> to:</p>
         <ul>
             <li><strong>View all cards</strong> — see card number, balance, status, and expiry date</li>
             <li><strong>Create a new card</strong> — register a new PetroCard with a unique card number and NFC ID</li>
@@ -264,6 +278,8 @@
 <!-- ============================================================ -->
 <!-- SECTION 3: FUEL DISPENSING -->
 <!-- ============================================================ -->
+@if (isOrg)
+{
 <div id="section-dispensing" class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-primary text-white">
         <h4 class="mb-0"><i class="bi bi-fuel-pump me-2"></i>3. Fuel Dispensing</h4>
@@ -271,77 +287,50 @@
     <div class="card-body">
         <p>
             PetroChain™ automates the entire fuel dispensing process — from card tap to fuel delivery.
-            No cash handling, no paper coupons, no manual calculations.
+            For station staff, this interface allows manual oversight and initiation of dispensing.
         </p>
 
-        <h5 class="fw-bold">Step-by-Step: Buying Fuel</h5>
+        <h5 class="fw-bold">Step-by-Step: Station Staff Dispensing</h5>
         <div class="row g-3 mb-4">
             <div class="col-12">
                 <div class="d-flex align-items-start mb-3">
                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">1</div>
                     <div>
                         <h6 class="fw-bold mb-1">Select a Station</h6>
-                        <p class="text-muted mb-0">Go to <strong>Menu → Fuel Dispensing</strong>. Choose the fuel station where you are located from the list of available stations.</p>
+                        <p class="text-muted mb-0">Go to <strong>Menu → Fuel Dispensing</strong>. Choose the fuel station where you are located.</p>
                     </div>
                 </div>
                 <div class="d-flex align-items-start mb-3">
                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">2</div>
                     <div>
                         <h6 class="fw-bold mb-1">Select a Pump</h6>
-                        <p class="text-muted mb-0">Choose the pump number you are standing at. Only active pumps with fuel in stock are shown.</p>
+                        <p class="text-muted mb-0">Choose the pump number. Only active pumps are shown.</p>
                     </div>
                 </div>
                 <div class="d-flex align-items-start mb-3">
                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">3</div>
                     <div>
-                        <h6 class="fw-bold mb-1">Tap Your PetroCard</h6>
-                        <p class="text-muted mb-0">Tap your PetroCard on the device. The system reads your card and checks your identity and balance. If your device supports contactless reading, hold your card near the device. Otherwise, you can enter your Card ID manually.</p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-start mb-3">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">4</div>
-                    <div>
-                        <h6 class="fw-bold mb-1">Enter Your PIN</h6>
-                        <p class="text-muted mb-0">If your card has a PIN, enter it when prompted. This verifies that you are the rightful card owner.</p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-start mb-3">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">5</div>
-                    <div>
-                        <h6 class="fw-bold mb-1">Enter Fuel Amount</h6>
-                        <p class="text-muted mb-0">Enter how many litres you want, or the total dollar amount. The system checks that you have enough balance and that the station has enough stock.</p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-start mb-3">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">6</div>
-                    <div>
-                        <h6 class="fw-bold mb-1">Fuel is Dispensed</h6>
-                        <p class="text-muted mb-0">The pump activates and fuel is dispensed. You can monitor the progress in real time on the dispensing screen.</p>
+                        <h6 class="fw-bold mb-1">Authenticated Verification</h6>
+                        <p class="text-muted mb-0">Verify the customer's PetroCard on the pump's NFC reader.</p>
                     </div>
                 </div>
                 <div class="d-flex align-items-start">
-                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">7</div>
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 36px; height: 36px; font-weight: bold;">4</div>
                     <div>
-                        <h6 class="fw-bold mb-1">Transaction Complete</h6>
-                        <p class="text-muted mb-0">When dispensing finishes, your card balance is deducted and a transaction record is created. The record is then <strong>permanently secured</strong> so it can never be altered or deleted.</p>
+                        <h6 class="fw-bold mb-1">Dispense & Close</h6>
+                        <p class="text-muted mb-0">Monitor the live dispensing and wait for the transaction to hit the blockchain.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <h5 class="fw-bold">Cancelling a Transaction</h5>
-        <p>If you need to cancel during dispensing, click the <strong>Cancel</strong> button. Only the fuel already dispensed will be charged to your card.</p>
-
         <div class="alert alert-info border-0 mt-3">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>Security Note:</strong> The automated dispensing workflow orchestrates multiple services — <em>NFC card authentication</em>,
-            <em>PIN verification (BCrypt)</em>, <em>fuel stock management</em>, and <em>pump control</em>. Upon completion, the transaction is submitted to the
-            <em>Ethereum Sepolia blockchain</em> via a <em>Solidity smart contract</em> called <code>FuelTransactionLedger</code>. This contract stores the
-            transaction number, station ID, pump ID, quantity, amount, and a hashed card identifier on-chain, making the record publicly verifiable and immutable.
-            The pump status is broadcast in real time using <em>SignalR</em> WebSocket connections.
+            <strong>Note for Customers:</strong> If you are a customer, please use the <strong>PetroChain Mobile App</strong> to dispense fuel. Simply scan your card at the pump within the app to begin.
         </div>
     </div>
 </div>
+}
 
 <!-- ============================================================ -->
 <!-- SECTION 4: FUEL AVAILABILITY -->
@@ -423,7 +412,7 @@
         </p>
 
         <h5 class="fw-bold">Viewing Transactions</h5>
-        <p>Go to <strong>Menu → Management → Transactions</strong> to see a list of all fuel transactions. Each entry shows:</p>
+        <p>Go to <strong>Menu → @(isOrg ? "Management → Transactions" : "My Transactions")</strong> to see your purchase history. Each entry shows:</p>
         <ul>
             <li><strong>Transaction Number</strong> — a unique identifier for the purchase</li>
             <li><strong>Date & Time</strong> — when the transaction took place</li>
@@ -449,6 +438,8 @@
 <!-- ============================================================ -->
 <!-- SECTION 6: SECURED RECORDS -->
 <!-- ============================================================ -->
+@if (isOrg)
+{
 <div id="section-secured-records" class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-primary text-white">
         <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>6. Secured Records (Tamper-Proof Ledger)</h4>
@@ -494,6 +485,7 @@
         </div>
     </div>
 </div>
+}
 
 <!-- ============================================================ -->
 <!-- SECTION 7: VERIFY TRANSACTION -->
@@ -510,7 +502,7 @@
 
         <h5 class="fw-bold">How to Verify</h5>
         <ol>
-            <li>Go to <strong>Menu → Management → Verify Transaction</strong>.</li>
+            <li>Go to <strong>Menu → @(isOrg ? "Management → Verify Transaction" : "Verify Transaction")</strong>.</li>
             <li>Enter the <strong>Transaction Number</strong> of the fuel purchase you want to verify.</li>
             <li>Click <strong>Verify</strong>.</li>
             <li>The system will check the public ledger and show you the results:</li>
@@ -559,6 +551,8 @@
 <!-- ============================================================ -->
 <!-- SECTION 8: STATION & STOCK MANAGEMENT -->
 <!-- ============================================================ -->
+@if (isOrg)
+{
 <div id="section-management" class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-primary text-white">
         <h4 class="mb-0"><i class="bi bi-gear me-2"></i>8. Station & Stock Management</h4>
@@ -595,6 +589,7 @@
         <p>Stock levels are <strong>automatically deducted</strong> each time a fuel transaction is completed, keeping records accurate without manual intervention.</p>
     </div>
 </div>
+}
 
 <!-- ============================================================ -->
 <!-- SECTION 9: INSTALL AS APP -->

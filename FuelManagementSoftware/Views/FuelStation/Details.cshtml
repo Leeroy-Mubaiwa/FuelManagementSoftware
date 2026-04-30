@@ -5,7 +5,7 @@
     ViewBag.StationId = Model.Id;
     ViewBag.StationName = Model.Name;
     var isManager = User.IsInRole(AppRoles.BranchStationManager);
-    var canDispense = isManager || User.IsInRole(AppRoles.Customer);
+    var canDispense = isManager;
 }
 @await Html.PartialAsync("_StationContext")
 

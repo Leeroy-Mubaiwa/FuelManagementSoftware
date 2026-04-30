@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FuelManagementSoftware.Constants;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +28,7 @@ public class FuelTransactionController : Controller
     // GET: FuelTransaction
     public async Task<IActionResult> Index(int? stationId, string? status, DateTime? startDate, DateTime? endDate)
     {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
         IQueryable<FuelTransaction> query = _context.FuelTransactions
             .Include(t => t.FuelStation)
             .Include(t => t.FuelPump)
@@ -34,6 +36,11 @@ public class FuelTransactionController : Controller
             .Include(t => t.PetroCard)
             .Include(t => t.User)
             .AsQueryable();
+
+        if (User.IsInRole(AppRoles.Customer) && user != null)
+        {
+            query = query.Where(t => t.UserId == user.Id);
+        }
 
         if (stationId.HasValue)
         {
@@ -99,6 +106,12 @@ public class FuelTransactionController : Controller
         if (transaction == null)
         {
             return NotFound();
+        }
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+        if (User.IsInRole(AppRoles.Customer) && (user == null || transaction.UserId != user.Id))
+        {
+            return Forbid();
         }
 
         ViewBag.StationId = transaction.FuelStationId;

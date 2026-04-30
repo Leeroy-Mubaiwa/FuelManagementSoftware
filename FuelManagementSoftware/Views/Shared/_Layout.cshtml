@@ -29,7 +29,7 @@
         else if (User.IsInRole(AppRoles.Customer)) { roleLabel = "Customer"; }
         var isOrgStaff = User.IsInRole(AppRoles.PetrotradeAdmin) || User.IsInRole(AppRoles.BranchStationManager);
         var isManager = User.IsInRole(AppRoles.BranchStationManager);
-        var canDispense = isManager || User.IsInRole(AppRoles.Customer);
+        var canDispense = isManager;
     }
     <header class="app-header">
         <nav class="navbar navbar-dark navbar-expand-lg">
@@ -379,7 +379,7 @@
                                         <li><strong>Customer:</strong> Register/Login as a customer to manage PetroCards, check fuel availability, and view nearby stations on the map.</li>
                                     </ul>
                                 </li>
-                                <li class="mb-2"><strong>Fuel Dispensing:</strong> Go to <em>Dispensing</em>. Customers can pay via PetroCard or Cash. Real-time stock levels are updated upon completion.</li>
+                                <li class="mb-2"><strong>Fuel Dispensing:</strong> Go to <em>Dispensing</em>. Registered customers use the <strong>PetroChain Mobile App</strong> to scan their card and dispense fuel autonomously at the pump. Real-time stock levels are updated upon completion.</li>
                             </ol>
                         </div>
                     </div>

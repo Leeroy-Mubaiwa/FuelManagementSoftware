@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using FuelManagementSoftware.Areas.Identity.Data;
+using FuelManagementSoftware.Constants;
 using FuelManagementSoftware.Data;
 using FuelManagementSoftware.Models;
 using FuelManagementSoftware.Services;
@@ -41,9 +42,20 @@ public class PetroCardController : Controller
     // GET: PetroCard
     public async Task<IActionResult> Index()
     {
-        var cards = await _context.PetroCards
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
+        var query = _context.PetroCards
             .Include(c => c.User)
             .Include(c => c.Organisation)
+            .AsQueryable();
+
+        if (User.IsInRole(AppRoles.Customer))
+        {
+            query = query.Where(c => c.UserId == user.Id);
+        }
+
+        var cards = await query
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
         return View(cards);
@@ -57,6 +69,9 @@ public class PetroCardController : Controller
             return NotFound();
         }
 
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
         var card = await _context.PetroCards
             .Include(c => c.User)
             .Include(c => c.Organisation)
@@ -69,10 +84,17 @@ public class PetroCardController : Controller
             return NotFound();
         }
 
+        // Security check for customers
+        if (User.IsInRole(AppRoles.Customer) && card.UserId != user.Id)
+        {
+            return Forbid();
+        }
+
         return View(card);
     }
 
     // GET: PetroCard/Create
+    [Authorize(Roles = AppRoles.OrganisationRoles)]
     public IActionResult Create()
     {
         return View();
@@ -81,6 +103,7 @@ public class PetroCardController : Controller
     // POST: PetroCard/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.OrganisationRoles)]
     public async Task<IActionResult> Create([Bind("CardNumber,Rfidtag,Balance,Currency,IsActive,IsBlocked,ExpiryDate,Pin")] PetroCardViewModel model)
     {
         if (ModelState.IsValid)
@@ -112,6 +135,7 @@ public class PetroCardController : Controller
     }
 
     // GET: PetroCard/Edit/5
+    [Authorize(Roles = AppRoles.OrganisationRoles)]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -150,6 +174,7 @@ public class PetroCardController : Controller
     // POST: PetroCard/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.OrganisationRoles)]
     public async Task<IActionResult> Edit(int id, [Bind("Id,CardNumber,Rfidtag,UserId,Balance,Currency,IsActive,IsBlocked,ExpiryDate,Pin")] PetroCardViewModel model)
     {
         if (id != model.Id)
@@ -221,6 +246,15 @@ public class PetroCardController : Controller
             return NotFound();
         }
 
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
+        // Security check for customers
+        if (User.IsInRole(AppRoles.Customer) && card.UserId != user.Id)
+        {
+            return Forbid();
+        }
+
         return View(new TopUpViewModel { CardId = card.Id, CardNumber = card.CardNumber, CurrentBalance = card.Balance, Currency = card.Currency });
     }
 
@@ -240,6 +274,15 @@ public class PetroCardController : Controller
             {
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null) return Unauthorized();
+
+                var card = await _context.PetroCards.FindAsync(id);
+                if (card == null) return NotFound();
+
+                // Security check for customers
+                if (User.IsInRole(AppRoles.Customer) && card.UserId != user.Id)
+                {
+                    return Forbid();
+                }
 
                 // Initialise Paynow
                 var integrationId = _configuration["Paynow:IntegrationId"];

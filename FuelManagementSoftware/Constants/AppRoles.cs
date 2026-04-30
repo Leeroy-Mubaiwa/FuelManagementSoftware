@@ -20,7 +20,7 @@ public static class AppRoles
     /// Roles allowed to perform fuel dispensing (Manager at the pump + Customer).
     /// Admin is explicitly excluded – they should never dispense fuel.
     /// </summary>
-    public const string DispensingRoles = "BranchStationManager,Customer";
+    public const string DispensingRoles = "BranchStationManager";
 
     /// <summary>
     /// Roles that operate and manage physical pump hardware.
