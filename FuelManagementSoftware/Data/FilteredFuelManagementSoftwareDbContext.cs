@@ -30,18 +30,6 @@ public class FilteredFuelManagementSoftwareDbContext : FuelManagementSoftwareDbC
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        // Apply station-level filtering for managers
-        if (_managedStationId.HasValue)
-        {
-            modelBuilder.Entity<FuelStation>().HasQueryFilter(s => s.Id == _managedStationId.Value);
-            modelBuilder.Entity<FuelPump>().HasQueryFilter(p => p.FuelStationId == _managedStationId.Value);
-            modelBuilder.Entity<FuelStock>().HasQueryFilter(s => s.FuelStationId == _managedStationId.Value);
-            modelBuilder.Entity<FuelTransaction>().HasQueryFilter(t => t.FuelStationId == _managedStationId.Value);
-            modelBuilder.Entity<StockMovement>().HasQueryFilter(m => m.FuelStationId == _managedStationId.Value);
-            modelBuilder.Entity<StationStatusHistory>().HasQueryFilter(h => h.FuelStationId == _managedStationId.Value);
-            modelBuilder.Entity<QueueInformation>().HasQueryFilter(q => q.FuelStationId == _managedStationId.Value);
-        }
     }
 
     /// <summary>

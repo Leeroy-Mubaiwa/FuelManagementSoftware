@@ -66,8 +66,9 @@ public class FuelStationController : Controller
     }
 
     // GET: FuelStation/Create
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
+        await PopulateManagersSelectList();
         return View();
     }
 
@@ -86,6 +87,28 @@ public class FuelStationController : Controller
 
             _context.FuelStations.Add(station);
             await _context.SaveChangesAsync();
+
+            // Handle manager assignment (one primary manager per station via this UI)
+            var managerId = Request.Form["ManagerId"].ToString();
+            
+            // First, clear any other managers currently assigned to this station if we are setting a new one or clearing
+            var otherManagers = await _userManager.Users.Where(u => u.ManagedStationId == station.Id).ToListAsync();
+            foreach (var m in otherManagers)
+            {
+                m.ManagedStationId = null;
+                await _userManager.UpdateAsync(m);
+            }
+
+            if (!string.IsNullOrEmpty(managerId))
+            {
+                var manager = await _userManager.FindByIdAsync(managerId);
+                if (manager != null)
+                {
+                    manager.ManagedStationId = station.Id;
+                    await _userManager.UpdateAsync(manager);
+                }
+            }
+
             return RedirectToAction(nameof(Index));
         }
         return View(station);
@@ -104,6 +127,9 @@ public class FuelStationController : Controller
         {
             return NotFound();
         }
+
+        await PopulateManagersSelectList(id);
+        
         return View(station);
     }
 
@@ -138,6 +164,29 @@ public class FuelStationController : Controller
                 existing.UpdatedAt = DateTime.Now;
 
                 await _context.SaveChangesAsync();
+
+                // Handle manager assignment
+                var managerId = Request.Form["ManagerId"].ToString();
+                
+                // Clear any other managers currently assigned to this station to ensure 1-to-1 mapping via this UI
+                var otherManagers = await _userManager.Users.Where(u => u.ManagedStationId == id).ToListAsync();
+                foreach (var m in otherManagers)
+                {
+                    m.ManagedStationId = null;
+                    await _userManager.UpdateAsync(m);
+                }
+
+                if (!string.IsNullOrEmpty(managerId))
+                {
+                    var newManager = await _userManager.FindByIdAsync(managerId);
+                    if (newManager != null)
+                    {
+                        // Assign new manager
+                        newManager.ManagedStationId = id;
+                        await _userManager.UpdateAsync(newManager);
+                    }
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
@@ -168,6 +217,30 @@ public class FuelStationController : Controller
 
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Details), new { id });
+    }
+
+    private async Task PopulateManagersSelectList(int? activeStationId = null)
+    {
+        var managersInRole = await _userManager.GetUsersInRoleAsync(AppRoles.BranchStationManager);
+        var managerIds = managersInRole.Select(u => u.Id).ToList();
+
+        // Get full User details including ManagedStation from the business context
+        var managerDetails = await _context.Users
+            .Include(u => u.ManagedStation)
+            .Where(u => managerIds.Contains(u.Id))
+            .OrderBy(u => u.UserName)
+            .ToListAsync();
+
+        var selectList = managerDetails.Select(u => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+        {
+            Value = u.Id,
+            Text = u.ManagedStationId.HasValue && u.ManagedStationId != activeStationId
+                ? $"{u.UserName} (Already managing: {u.ManagedStation?.Name})"
+                : u.UserName,
+            Selected = u.ManagedStationId == activeStationId
+        }).ToList();
+
+        ViewBag.ManagerId = selectList;
     }
 
     private async Task<bool> FuelStationExistsAsync(int id)

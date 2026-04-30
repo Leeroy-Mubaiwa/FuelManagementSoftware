@@ -1,11 +1,17 @@
 @model IEnumerable<FuelManagementSoftware.Models.FuelPump>
+@using FuelManagementSoftware.Constants
 @{
     ViewData["Title"] = "Fuel Pumps";
+    var isManager = User.IsInRole(AppRoles.BranchStationManager);
 }
 @await Html.PartialAsync("_StationContext")
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Fuel Pumps@(ViewBag.StationName != null ? $" - {ViewBag.StationName}" : "")</h4>
+    @if (isManager)
+    {
+        <a asp-action="Create" asp-route-stationId="@ViewBag.StationId" class="btn btn-sm btn-primary">Create New</a>
+    }
 </div>
 
 <div class="table-responsive">
@@ -51,6 +57,14 @@
                                 </button>
                             </form>
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
+                            @if (isManager)
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this pump?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger">Delete</button>
+                                </form>
+                            }
                         </div>
                     </td>
                 </tr>

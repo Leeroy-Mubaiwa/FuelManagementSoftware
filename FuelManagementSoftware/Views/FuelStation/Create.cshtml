@@ -22,6 +22,14 @@
                     <span asp-validation-for="Code" class="text-danger"></span>
                 </div>
             </div>
+
+            <div class="mb-3">
+                <label class="form-label">Station Manager</label>
+                <select name="ManagerId" class="form-select form-select-sm" asp-items="ViewBag.ManagerId">
+                    <option value="">-- No Manager Assigned --</option>
+                </select>
+                <small class="text-muted">The assigned manager will have exclusive access to this station's operations.</small>
+            </div>
             
             <div class="mb-3">
                 <label asp-for="Address" class="form-label"></label>

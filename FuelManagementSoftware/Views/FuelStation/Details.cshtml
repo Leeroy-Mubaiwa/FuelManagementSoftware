@@ -99,7 +99,10 @@
                 <h6 class="mb-0">Fuel Pumps (@Model.FuelPumps.Count)</h6>
                 @if (isManager)
                 {
-                <a asp-controller="FuelPump" asp-action="Index" asp-route-stationId="@Model.Id" class="btn btn-sm btn-outline-primary">View all</a>
+                    <div class="btn-group btn-group-sm">
+                        <a asp-controller="FuelPump" asp-action="Create" asp-route-stationId="@Model.Id" class="btn btn-outline-primary">Create</a>
+                        <a asp-controller="FuelPump" asp-action="Index" asp-route-stationId="@Model.Id" class="btn btn-outline-primary">View all</a>
+                    </div>
                 }
             </div>
             <div class="card-body">

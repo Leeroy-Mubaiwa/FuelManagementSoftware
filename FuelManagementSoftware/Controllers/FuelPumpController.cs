@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FuelManagementSoftware.Controllers;
 
-[Authorize(Roles = AppRoles.PumpOperatorRoles)]
+[Authorize(Roles = AppRoles.OrganisationRoles)]
 public class FuelPumpController : Controller
 {
     private readonly FilteredFuelManagementSoftwareDbContext _context;
@@ -78,11 +78,96 @@ public class FuelPumpController : Controller
         return View(pump);
     }
 
-    // Managers can only toggle operational status (deactivate/activate).
-    // Create and Edit are not permitted — pump hardware config is read-only.
+    // GET: FuelPump/Create
+    [Authorize(Roles = AppRoles.BranchStationManager)]
+    public async Task<IActionResult> Create(int? stationId)
+    {
+        ViewBag.FuelStationId = new SelectList(await _context.FuelStations.OrderBy(s => s.Name).ToListAsync(), "Id", "Name", stationId);
+        ViewBag.FuelTypeId = new SelectList(await _context.FuelTypes.OrderBy(t => t.Name).ToListAsync(), "Id", "Name");
+        return View();
+    }
+
+    // POST: FuelPump/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.BranchStationManager)]
+    public async Task<IActionResult> Create([Bind("FuelStationId,PumpNumber,FuelTypeId,IsActive,IsOperational,LastMaintenanceDate")] FuelPump fuelPump)
+    {
+        if (ModelState.IsValid)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            fuelPump.CreatorId = user?.Id;
+            fuelPump.CreatedAt = DateTime.Now;
+            
+            _context.FuelPumps.Add(fuelPump);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index), new { stationId = fuelPump.FuelStationId });
+        }
+        ViewBag.FuelStationId = new SelectList(await _context.FuelStations.OrderBy(s => s.Name).ToListAsync(), "Id", "Name", fuelPump.FuelStationId);
+        ViewBag.FuelTypeId = new SelectList(await _context.FuelTypes.OrderBy(t => t.Name).ToListAsync(), "Id", "Name", fuelPump.FuelTypeId);
+        return View(fuelPump);
+    }
+
+    // GET: FuelPump/Edit/5
+    [Authorize(Roles = AppRoles.BranchStationManager)]
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var fuelPump = await _context.FuelPumps.FindAsync(id);
+        if (fuelPump == null) return NotFound();
+
+        ViewBag.FuelStationId = new SelectList(await _context.FuelStations.OrderBy(s => s.Name).ToListAsync(), "Id", "Name", fuelPump.FuelStationId);
+        ViewBag.FuelTypeId = new SelectList(await _context.FuelTypes.OrderBy(t => t.Name).ToListAsync(), "Id", "Name", fuelPump.FuelTypeId);
+        return View(fuelPump);
+    }
+
+    // POST: FuelPump/Edit/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.BranchStationManager)]
+    public async Task<IActionResult> Edit(int id, [Bind("Id,FuelStationId,PumpNumber,FuelTypeId,IsActive,IsOperational,LastMaintenanceDate,CreatedAt,CreatorId")] FuelPump fuelPump)
+    {
+        if (id != fuelPump.Id) return NotFound();
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                fuelPump.UpdatedAt = DateTime.Now;
+                _context.Update(fuelPump);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!await FuelPumpExistsAsync(fuelPump.Id)) return NotFound();
+                else throw;
+            }
+            return RedirectToAction(nameof(Index), new { stationId = fuelPump.FuelStationId });
+        }
+        ViewBag.FuelStationId = new SelectList(await _context.FuelStations.OrderBy(s => s.Name).ToListAsync(), "Id", "Name", fuelPump.FuelStationId);
+        ViewBag.FuelTypeId = new SelectList(await _context.FuelTypes.OrderBy(t => t.Name).ToListAsync(), "Id", "Name", fuelPump.FuelTypeId);
+        return View(fuelPump);
+    }
+
+    // POST: FuelPump/Delete/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.BranchStationManager)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var fuelPump = await _context.FuelPumps.FindAsync(id);
+        if (fuelPump == null) return NotFound();
+
+        var stationId = fuelPump.FuelStationId;
+        _context.FuelPumps.Remove(fuelPump);
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index), new { stationId });
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.BranchStationManager)]
     public async Task<IActionResult> ToggleOperational(int id)
     {
         var pump = await _context.FuelPumps.FindAsync(id);
