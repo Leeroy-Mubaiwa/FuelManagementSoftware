@@ -104,6 +104,12 @@ public partial class User
     [InverseProperty("User")]
     public virtual ICollection<UserToken> UserTokens { get; set; } = new List<UserToken>();
 
+    [Column("ManagedStationId")]
+    public int? ManagedStationId { get; set; }
+
+    [ForeignKey("ManagedStationId")]
+    public virtual FuelStation? ManagedStation { get; set; }
+
     [ForeignKey("UserId")]
     [InverseProperty("Users")]
     public virtual ICollection<Role> Roles { get; set; } = new List<Role>();

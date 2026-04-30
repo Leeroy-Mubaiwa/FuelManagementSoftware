@@ -21,14 +21,16 @@ builder.Services.AddScoped<FilteredFuelManagementSoftwareDbContext>(serviceProvi
 {
     var options = serviceProvider.GetRequiredService<DbContextOptions<FuelManagementSoftwareDbContext>>();
     string? creatorId = null;
+    int? managedStationId = null;
     var httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext;
     if (httpContext?.User != null)
     {
         var userManager = serviceProvider.GetRequiredService<UserManager<FuelManagementSoftwareUser>>();
         var user = userManager.GetUserAsync(httpContext.User).GetAwaiter().GetResult();
         creatorId = user?.Id;
+        managedStationId = user?.ManagedStationId;
     }
-    return new FilteredFuelManagementSoftwareDbContext(options, creatorId);
+    return new FilteredFuelManagementSoftwareDbContext(options, creatorId, managedStationId);
 });
 
 builder.Services.AddDefaultIdentity<FuelManagementSoftwareUser>(options => options.SignIn.RequireConfirmedAccount = false)

@@ -9,5 +9,6 @@ namespace FuelManagementSoftware.Areas.Identity.Data;
 // Add profile data for application users by adding properties to the FuelManagementSoftwareUser class
 public class FuelManagementSoftwareUser : IdentityUser
 {
+    public int? ManagedStationId { get; set; }
 }
 

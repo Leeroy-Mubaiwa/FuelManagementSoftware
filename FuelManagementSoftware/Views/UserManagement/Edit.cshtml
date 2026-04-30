@@ -1,0 +1,85 @@
+@using FuelManagementSoftware.Areas.Identity.Data
+@model FuelManagementSoftwareUser
+@{
+    ViewData["Title"] = "Edit User Assignment";
+    var allRoles = ViewBag.AllRoles as List<string>;
+    var userRoles = ViewBag.UserRoles as IList<string>;
+}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index">Users</a></li>
+                <li class="breadcrumb-item active">Edit Assignment</li>
+            </ol>
+        </nav>
+        <h4 class="mb-0">Edit User: @Model.UserName</h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Fuel Station Assignment</label>
+                        <p class="text-muted small mb-2">Assign this user to a specific station. If assigned, they will only see and manage data related to this station.</p>
+                        <select name="managedStationId" class="form-select" asp-items="ViewBag.Stations">
+                            <option value="">-- No Station (Global Access) --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">User Roles</label>
+                        <div class="row g-2">
+                            @if (allRoles != null)
+                            {
+                                foreach (var role in allRoles)
+                                {
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles" value="@role" id="role_@role" @(userRoles != null && userRoles.Contains(role) ? "checked" : "")>
+                                            <label class="form-check-label" for="role_@role">
+                                                @role
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card bg-light border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="fw-bold"><i class="bi bi-info-circle me-1"></i>About Assignments</h6>
+                <hr />
+                <p class="small">
+                    <strong>Station Managers:</strong> Should be assigned to exactly one fuel station. Once assigned, their dashboard, pump lists, and transactions will automatically be filtered to that station only.
+                </p>
+                <p class="small">
+                    <strong>Admins:</strong> Typically have no station assignment (Global Access). This allows them to monitor all stations across the organization.
+                </p>
+                <p class="small">
+                    <strong>Customers:</strong> Station assignment is not required for customers as they only see their own transactions and cards.
+                </p>
+                <div class="alert alert-warning small p-2 mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i> Changing assignments takes effect immediately for the user.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
