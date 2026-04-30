@@ -1,20 +1,26 @@
 @model FuelManagementSoftware.Models.FuelStation
+@using FuelManagementSoftware.Constants
 @{
     ViewData["Title"] = "Station Details";
     ViewBag.StationId = Model.Id;
     ViewBag.StationName = Model.Name;
+    var isManager = User.IsInRole(AppRoles.BranchStationManager);
+    var canDispense = isManager || User.IsInRole(AppRoles.Customer);
 }
 @await Html.PartialAsync("_StationContext")
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">@Model.Name</h4>
     <div>
+        @if (User.IsInRole(AppRoles.PetrotradeAdmin))
+        {
         <form asp-action="ToggleStatus" asp-route-id="@Model.Id" method="post" class="d-inline">
             <button type="submit" class="btn btn-sm @(Model.IsOpen ? "btn-warning" : "btn-success")">
                 @(Model.IsOpen ? "Close" : "Open") Station
             </button>
         </form>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">Edit</a>
+        }
         <a asp-action="Index" class="btn btn-sm btn-secondary">Back to List</a>
     </div>
 </div>
@@ -24,12 +30,20 @@
         <div class="card border-0 bg-light">
             <div class="card-body py-2">
                 <span class="small text-muted me-2">Quick actions:</span>
+                @if (isManager)
+                {
                 <a asp-controller="FuelPump" asp-action="Index" asp-route-stationId="@Model.Id" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-droplet me-1"></i>All Pumps</a>
-                <a asp-controller="FuelPump" asp-action="Create" asp-route-stationId="@Model.Id" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-plus me-1"></i>Add Pump</a>
+                }
                 <a asp-controller="FuelStock" asp-action="Index" asp-route-stationId="@Model.Id" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-box-seam me-1"></i>Stock</a>
+                @if (isManager)
+                {
                 <a asp-controller="FuelStock" asp-action="Create" asp-route-stationId="@Model.Id" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-plus me-1"></i>Add Stock</a>
+                }
                 <a asp-controller="FuelTransaction" asp-action="Index" asp-route-stationId="@Model.Id" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-receipt me-1"></i>Transactions</a>
+                @if (canDispense)
+                {
                 <a asp-controller="FuelDispensing" asp-action="SelectPump" asp-route-stationId="@Model.Id" class="btn btn-sm btn-success"><i class="bi bi-fuel-pump me-1"></i>Start Dispensing</a>
+                }
             </div>
         </div>
     </div>
@@ -83,7 +97,10 @@
         <div class="card mb-3">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">Fuel Pumps (@Model.FuelPumps.Count)</h6>
+                @if (isManager)
+                {
                 <a asp-controller="FuelPump" asp-action="Index" asp-route-stationId="@Model.Id" class="btn btn-sm btn-outline-primary">View all</a>
+                }
             </div>
             <div class="card-body">
                 @if (Model.FuelPumps.Any())
@@ -123,7 +140,7 @@
                 }
                 else
                 {
-                    <p class="text-muted mb-0"><small>No pumps configured.</small> <a asp-controller="FuelPump" asp-action="Create" asp-route-stationId="@Model.Id">Add pump</a></p>
+                    <p class="text-muted mb-0"><small>No pumps configured.</small></p>
                 }
             </div>
         </div>
@@ -170,7 +187,12 @@
                 }
                 else
                 {
-                    <p class="text-muted mb-0"><small>No stock information.</small> <a asp-controller="FuelStock" asp-action="Create" asp-route-stationId="@Model.Id">Add stock</a></p>
+                    <p class="text-muted mb-0"><small>No stock information.</small>
+                    @if (isManager)
+                    {
+                    <a asp-controller="FuelStock" asp-action="Create" asp-route-stationId="@Model.Id">Add stock</a>
+                    }
+                    </p>
                 }
             </div>
         </div>

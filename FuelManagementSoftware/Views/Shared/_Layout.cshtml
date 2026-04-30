@@ -28,6 +28,8 @@
         else if (User.IsInRole(AppRoles.BranchStationManager)) { roleLabel = "Branch Manager"; }
         else if (User.IsInRole(AppRoles.Customer)) { roleLabel = "Customer"; }
         var isOrgStaff = User.IsInRole(AppRoles.PetrotradeAdmin) || User.IsInRole(AppRoles.BranchStationManager);
+        var isManager = User.IsInRole(AppRoles.BranchStationManager);
+        var canDispense = isManager || User.IsInRole(AppRoles.Customer);
     }
     <header class="app-header">
         <nav class="navbar navbar-dark navbar-expand-lg">
@@ -46,9 +48,12 @@
                             <li class="nav-item">
                                 <a class="nav-link text-white px-2" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door me-1"></i>Dashboard</a>
                             </li>
+                            @if (canDispense)
+                            {
                             <li class="nav-item">
                                 <a class="nav-link text-white px-2" asp-controller="FuelDispensing" asp-action="Index"><i class="bi bi-fuel-pump me-1"></i>Dispensing</a>
                             </li>
+                            }
                             <li class="nav-item dropdown">
                                 <a class="nav-link text-white dropdown-toggle px-2" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-geo-alt me-1"></i>Availability</a>
                                 <ul class="dropdown-menu dropdown-menu-dark">
@@ -62,10 +67,16 @@
                                 <a class="nav-link text-white dropdown-toggle px-2" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-gear me-1"></i>Management</a>
                                 <ul class="dropdown-menu dropdown-menu-dark">
                                     <li><a class="dropdown-item" asp-controller="FuelStation" asp-action="Index"><i class="bi bi-building me-2"></i>Stations</a></li>
+                                    @if (isManager)
+                                    {
                                     <li><a class="dropdown-item" asp-controller="FuelPump" asp-action="Index"><i class="bi bi-droplet me-2"></i>Pumps</a></li>
+                                    }
                                     <li><a class="dropdown-item" asp-controller="PetroCard" asp-action="Index"><i class="bi bi-credit-card me-2"></i>PetroCards</a></li>
                                     <li><a class="dropdown-item" asp-controller="FuelStock" asp-action="Index"><i class="bi bi-box-seam me-2"></i>Fuel Stock</a></li>
+                                    @if (User.IsInRole(AppRoles.PetrotradeAdmin))
+                                    {
                                     <li><a class="dropdown-item" asp-controller="FuelType" asp-action="Index"><i class="bi bi-tag me-2"></i>Fuel Types</a></li>
+                                    }
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" asp-controller="FuelTransaction" asp-action="Index"><i class="bi bi-receipt me-2"></i>Transactions</a></li>
                                     <li><a class="dropdown-item" asp-controller="BlockchainTransaction" asp-action="Index"><i class="bi bi-link-45deg me-2"></i>Secured Records</a></li>
@@ -156,9 +167,12 @@
                     <a class="nav-link px-3 py-2 border-bottom" asp-area="" asp-controller="Home" asp-action="Index">
                         <i class="bi bi-house-door me-2"></i>Home
                     </a>
+                    @if (canDispense)
+                    {
                     <a class="nav-link px-3 py-2 border-bottom" asp-controller="FuelDispensing" asp-action="Index">
                         <i class="bi bi-fuel-pump me-2"></i>Fuel Dispensing
                     </a>
+                    }
                     
                     <!-- Fuel Availability -->
                     <div class="border-bottom">
@@ -188,18 +202,24 @@
                             <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelStation" asp-action="Index">
                                 <i class="bi bi-building me-2"></i>Stations
                             </a>
+                            @if (isManager)
+                            {
                             <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelPump" asp-action="Index">
                                 <i class="bi bi-droplet me-2"></i>Pumps
                             </a>
+                            }
                             <a class="nav-link px-3 py-2 ps-5" asp-controller="PetroCard" asp-action="Index">
                                 <i class="bi bi-credit-card me-2"></i>PetroCards
                             </a>
                             <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelStock" asp-action="Index">
                                 <i class="bi bi-box-seam me-2"></i>Fuel Stock
                             </a>
+                            @if (User.IsInRole(AppRoles.PetrotradeAdmin))
+                            {
                             <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelType" asp-action="Index">
                                 <i class="bi bi-tag me-2"></i>Fuel Types
                             </a>
+                            }
                             <hr class="my-1">
                             <a class="nav-link px-3 py-2 ps-5" asp-controller="FuelTransaction" asp-action="Index">
                                 <i class="bi bi-receipt me-2"></i>Transactions

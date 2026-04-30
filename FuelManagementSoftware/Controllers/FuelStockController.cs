@@ -80,6 +80,7 @@ public class FuelStockController : Controller
     }
 
     // GET: FuelStock/Create
+    [Authorize(Roles = AppRoles.StockManagementRoles)]
     public async Task<IActionResult> Create(int? stationId)
     {
         var stations = await _context.FuelStations
@@ -106,6 +107,7 @@ public class FuelStockController : Controller
     // POST: FuelStock/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.StockManagementRoles)]
     public async Task<IActionResult> Create([Bind("FuelStationId,FuelTypeId,CurrentQuantity,Capacity,Unit,LowStockThreshold")] FuelStock stock)
     {
         if (ModelState.IsValid)
@@ -139,6 +141,7 @@ public class FuelStockController : Controller
     }
 
     // GET: FuelStock/Edit/5
+    [Authorize(Roles = AppRoles.StockManagementRoles)]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -173,6 +176,7 @@ public class FuelStockController : Controller
     // POST: FuelStock/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.StockManagementRoles)]
     public async Task<IActionResult> Edit(int id, [Bind("Id,FuelStationId,FuelTypeId,CurrentQuantity,Capacity,Unit,LowStockThreshold")] FuelStock stock)
     {
         if (id != stock.Id)
@@ -216,6 +220,7 @@ public class FuelStockController : Controller
     }
 
     // GET: FuelStock/AddStock/5
+    [Authorize(Roles = AppRoles.StockManagementRoles)]
     public async Task<IActionResult> AddStock(int? id)
     {
         if (id == null)
@@ -248,6 +253,7 @@ public class FuelStockController : Controller
     // POST: FuelStock/AddStock/5
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.StockManagementRoles)]
     public async Task<IActionResult> AddStock(int id, [Bind("FuelStockId,Quantity,ReferenceNumber,DeliveryNoteNumber,TankerRegistration,DriverName,Notes")] StockMovementViewModel model)
     {
         if (id != model.FuelStockId)

@@ -6,7 +6,6 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Fuel Pumps@(ViewBag.StationName != null ? $" - {ViewBag.StationName}" : "")</h4>
-    <a asp-action="Create" asp-route-stationId="@Context.Request.Query["stationId"]" class="btn btn-sm btn-primary">Create New</a>
 </div>
 
 <div class="table-responsive">
@@ -52,7 +51,6 @@
                                 </button>
                             </form>
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary">Details</a>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Edit</a>
                         </div>
                     </td>
                 </tr>

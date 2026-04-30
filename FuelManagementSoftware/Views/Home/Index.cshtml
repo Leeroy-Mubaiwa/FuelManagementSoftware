@@ -7,6 +7,8 @@
 @if (User.Identity?.IsAuthenticated == true)
 {
     var isOrg = !User.IsInRole(AppRoles.Customer);
+    var isManager = User.IsInRole(AppRoles.BranchStationManager);
+    var canDispense = isManager || User.IsInRole(AppRoles.Customer);
     <div class="dashboard">
         <div class="dashboard-header mb-3">
             <h1 class="dashboard-title">Dashboard</h1>
@@ -16,7 +18,10 @@
         <div class="dashboard-quicklinks mb-4">
             <div class="d-flex flex-wrap gap-2 align-items-center">
                 <span class="text-muted small me-1">Quick access:</span>
+                @if (canDispense)
+                {
                 <a asp-controller="FuelDispensing" asp-action="Index" class="btn btn-outline-primary btn-sm"><i class="bi bi-fuel-pump me-1"></i>Dispensing</a>
+                }
                 <a asp-controller="FuelAvailability" asp-action="Index" class="btn btn-outline-success btn-sm"><i class="bi bi-list-ul me-1"></i>Availability</a>
                 <a asp-controller="FuelAvailability" asp-action="Map" class="btn btn-outline-success btn-sm"><i class="bi bi-map me-1"></i>Map</a>
                 <a asp-controller="PetroCard" asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-credit-card me-1"></i>@(isOrg ? "PetroCards" : "My Cards")</a>
@@ -24,7 +29,10 @@
                 @if (isOrg)
                 {
                     <a asp-controller="FuelStation" asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-building me-1"></i>Stations</a>
+                    @if (isManager)
+                    {
                     <a asp-controller="FuelPump" asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-droplet me-1"></i>Pumps</a>
+                    }
                     <a asp-controller="BlockchainTransaction" asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-shield-check me-1"></i>Secured Records</a>
                 }
                 <a asp-area="" asp-controller="Home" asp-action="Manual" class="btn btn-outline-secondary btn-sm"><i class="bi bi-book me-1"></i>Manual</a>
@@ -228,6 +236,8 @@
                     </div>
                 </div>
             </div>
+        @if (canDispense)
+        {
             <div class="col-sm-6 col-lg-4">
                 <div class="card dashboard-card h-100">
                     <div class="card-body">
@@ -237,13 +247,14 @@
                             </div>
                             <div class="flex-grow-1">
                                 <h5 class="card-title mb-1">Fuel Dispensing</h5>
-                                <p class="card-text text-muted small mb-3">Start dispensing with your PetroCard or cash.</p>
+                                <p class="card-text text-muted small mb-3">Start dispensing with your PetroCard.</p>
                                 <a asp-controller="FuelDispensing" asp-action="Index" class="btn btn-info btn-sm text-white">Start Dispensing</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        }
         </div>
 
         <div class="row g-3">

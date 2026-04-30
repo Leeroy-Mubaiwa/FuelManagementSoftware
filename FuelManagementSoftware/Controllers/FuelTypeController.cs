@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FuelManagementSoftware.Controllers;
 
-[Authorize(Roles = AppRoles.OrganisationRoles)]
+[Authorize(Roles = AppRoles.PetrotradeAdmin)]
 public class FuelTypeController : Controller
 {
     private readonly FuelManagementSoftwareDbContext _context;

@@ -43,23 +43,19 @@ public class FuelDispensingService : IFuelDispensingService
 
     public async Task<FuelTransaction> InitiateDispensingAsync(DispensingRequest request, CancellationToken cancellationToken = default)
     {
-        var isCash = string.Equals(request.PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase);
-        _logger.LogInformation("Initiating fuel dispensing: Station {StationId}, Pump {PumpId}, FuelType {FuelTypeId}, Payment: {PaymentMethod}",
-            request.FuelStationId, request.FuelPumpId, request.FuelTypeId, request.PaymentMethod ?? "PetroCard");
+        _logger.LogInformation("Initiating fuel dispensing: Station {StationId}, Pump {PumpId}, FuelType {FuelTypeId}, Payment: PetroCard",
+            request.FuelStationId, request.FuelPumpId, request.FuelTypeId);
 
-        PetroCard? card = null;
-        if (!isCash)
-        {
-            if (string.IsNullOrWhiteSpace(request.NfcTag))
-                throw new InvalidOperationException("Card ID is required for PetroCard payment.");
-            if (!_nfcReaderService.ValidateNfcTag(request.NfcTag!))
-                throw new InvalidOperationException("Invalid NFC tag format");
-            card = await _petroCardService.GetCardByNfcTagAsync(request.NfcTag!, cancellationToken);
-            if (card == null)
-                throw new InvalidOperationException("PetroCard not found for the provided NFC tag");
-            if (!string.IsNullOrWhiteSpace(request.Pin) && !_petroCardService.VerifyPin(card, request.Pin))
-                throw new UnauthorizedAccessException("Invalid PIN");
-        }
+        // PetroCard is the only payment method
+        if (string.IsNullOrWhiteSpace(request.NfcTag))
+            throw new InvalidOperationException("Card ID is required for PetroCard payment.");
+        if (!_nfcReaderService.ValidateNfcTag(request.NfcTag!))
+            throw new InvalidOperationException("Invalid NFC tag format");
+        var card = await _petroCardService.GetCardByNfcTagAsync(request.NfcTag!, cancellationToken);
+        if (card == null)
+            throw new InvalidOperationException("PetroCard not found for the provided NFC tag");
+        if (!string.IsNullOrWhiteSpace(request.Pin) && !_petroCardService.VerifyPin(card, request.Pin))
+            throw new UnauthorizedAccessException("Invalid PIN");
 
         var pump = await _context.FuelPumps
             .Include(p => p.FuelStation)
@@ -80,27 +76,15 @@ public class FuelDispensingService : IFuelDispensingService
         if (fuelType == null || !fuelType.IsActive)
             throw new InvalidOperationException($"Fuel type {request.FuelTypeId} not found or inactive");
 
-        decimal maxQuantity;
-        int organisationId;
-        string currency;
-
-        if (isCash)
-        {
-            maxQuantity = await _fuelStockService.GetMaxDispenseableQuantityAsync(request.FuelStationId, request.FuelTypeId, cancellationToken);
-            organisationId = pump.FuelStation.OrganisationId;
-            currency = "USD";
-        }
-        else
-        {
-            var maxByBalance = card!.Balance / fuelType.UnitPrice;
-            var maxByStock = await _fuelStockService.GetMaxDispenseableQuantityAsync(request.FuelStationId, request.FuelTypeId, cancellationToken);
-            maxQuantity = Math.Min(maxByBalance, maxByStock);
-            organisationId = card.OrganisationId;
-            currency = card.Currency;
-        }
+        // Calculate max quantity based on card balance and available stock
+        var maxByBalance = card.Balance / fuelType.UnitPrice;
+        var maxByStock = await _fuelStockService.GetMaxDispenseableQuantityAsync(request.FuelStationId, request.FuelTypeId, cancellationToken);
+        var maxQuantity = Math.Min(maxByBalance, maxByStock);
+        var organisationId = card.OrganisationId;
+        var currency = card.Currency;
 
         if (maxQuantity <= 0)
-            throw new InvalidOperationException(isCash ? "Insufficient fuel stock for dispensing" : "Insufficient balance or stock for dispensing");
+            throw new InvalidOperationException("Insufficient balance or stock for dispensing");
 
         decimal finalQuantity = request.RequestedQuantity ?? maxQuantity;
         if (request.RequestedQuantity.HasValue && request.RequestedQuantity.Value > maxQuantity)
@@ -112,12 +96,9 @@ public class FuelDispensingService : IFuelDispensingService
         var unitPrice = fuelType.UnitPrice;
         var totalAmount = finalQuantity * unitPrice;
 
-        if (!isCash)
-        {
-            var cardValidation = await _petroCardService.ValidateCardAsync(card!, totalAmount, cancellationToken);
-            if (!cardValidation.IsValid)
-                throw new InvalidOperationException(cardValidation.ErrorMessage ?? "Card validation failed");
-        }
+        var cardValidation = await _petroCardService.ValidateCardAsync(card, totalAmount, cancellationToken);
+        if (!cardValidation.IsValid)
+            throw new InvalidOperationException(cardValidation.ErrorMessage ?? "Card validation failed");
 
         var hasStock = await _fuelStockService.HasSufficientStockAsync(request.FuelStationId, request.FuelTypeId, finalQuantity, cancellationToken);
         if (!hasStock)
@@ -131,13 +112,13 @@ public class FuelDispensingService : IFuelDispensingService
             FuelStationId = request.FuelStationId,
             FuelPumpId = request.FuelPumpId,
             FuelTypeId = request.FuelTypeId,
-            PetroCardId = isCash ? null : card!.Id,
-            UserId = isCash ? null : card!.UserId,
+            PetroCardId = card.Id,
+            UserId = card.UserId,
             Quantity = finalQuantity,
             UnitPrice = unitPrice,
             TotalAmount = totalAmount,
             Currency = currency,
-            PaymentMethod = isCash ? "Cash" : "PetroCard",
+            PaymentMethod = "PetroCard",
             TransactionStatus = "Authorized",
             TransactionDate = DateTime.Now,
             StartedAt = null,
@@ -148,11 +129,10 @@ public class FuelDispensingService : IFuelDispensingService
         _context.FuelTransactions.Add(transaction);
         await _context.SaveChangesAsync(cancellationToken);
 
-        if (!isCash)
-            await _petroCardService.UpdateLastUsedAsync(card!.Id, cancellationToken);
+        await _petroCardService.UpdateLastUsedAsync(card.Id, cancellationToken);
 
-        _logger.LogInformation("Fuel dispensing transaction {TransactionNumber} authorized. Quantity: {Quantity}, Amount: {Amount}, Payment: {PaymentMethod}",
-            transactionNumber, finalQuantity, totalAmount, transaction.PaymentMethod);
+        _logger.LogInformation("Fuel dispensing transaction {TransactionNumber} authorized. Quantity: {Quantity}, Amount: {Amount}, Payment: PetroCard",
+            transactionNumber, finalQuantity, totalAmount);
 
         return transaction;
     }

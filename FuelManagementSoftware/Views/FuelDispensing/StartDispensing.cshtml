@@ -38,18 +38,12 @@
 
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">2. Payment method</h5>
-                        <div class="d-flex gap-3 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="PaymentMethodRadio" id="payPetroCard" value="PetroCard" checked>
-                                <label class="form-check-label" for="payPetroCard"><i class="bi bi-credit-card me-1"></i>PetroCard</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="PaymentMethodRadio" id="payCash" value="Cash">
-                                <label class="form-check-label" for="payCash"><i class="bi bi-cash me-1"></i>Cash</label>
-                            </div>
+                        <h5 class="card-title">2. Payment</h5>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-credit-card text-primary fs-5"></i>
+                            <span class="fw-semibold">PetroCard</span>
                         </div>
-                        <p id="instructionsText" class="small text-muted mb-0">Tap your card, then click Start Dispensing. Card balance and stock will be deducted when you complete.</p>
+                        <p id="instructionsText" class="small text-muted mb-0">Tap your PetroCard below. Balance will be deducted when dispensing completes.</p>
                     </div>
                 </div>
 
@@ -113,38 +107,15 @@
             }
         }
 
-        function isCash() {
-            return document.getElementById('payCash').checked;
-        }
-
-        function updatePaymentUI() {
-            const cash = isCash();
-            const cardSection = document.getElementById('cardPaymentSection');
-            const startBtn = document.getElementById('startBtn');
-            const instructionsText = document.getElementById('instructionsText');
+        function updateStartButton() {
             const nfcInput = document.getElementById('NfcTag');
-
-            document.getElementById('PaymentMethod').value = cash ? 'Cash' : 'PetroCard';
-            cardSection.style.display = cash ? 'none' : 'block';
-
-            if (cash) {
-                nfcInput.removeAttribute('required');
-                nfcInput.value = '';
-                startBtn.disabled = false;
-                instructionsText.innerHTML = 'Customer pays cash when dispensing is complete. Stock is deducted on completion.';
-            } else {
-                nfcInput.setAttribute('required', 'required');
-                instructionsText.innerHTML = 'Tap your PetroCard. Balance will be deducted when you complete dispensing.';
-                startBtn.disabled = !nfcInput.value.trim() || (requiresPin && document.getElementById('Pin').value.length < 4);
-            }
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = !nfcInput.value.trim() || (requiresPin && document.getElementById('Pin').value.length < 4);
         }
 
         document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('RequestedQuantity').addEventListener('input', updateTotal);
             updateTotal();
-
-            document.getElementById('payPetroCard').addEventListener('change', updatePaymentUI);
-            document.getElementById('payCash').addEventListener('change', updatePaymentUI);
 
             const nfcStatus = document.getElementById('nfcStatus');
             if (nfcSupported) {
@@ -155,7 +126,8 @@
                 nfcStatus.className = 'alert alert-warning small';
                 document.getElementById('NfcTag').removeAttribute('readonly');
             }
-            updatePaymentUI();
+            document.getElementById('NfcTag').setAttribute('required', 'required');
+            updateStartButton();
         });
 
         async function readNfcTag() {
@@ -225,20 +197,18 @@
         }
 
         function showCardInfo(data) {
-            if (isCash()) return;
             document.getElementById('cardNumber').textContent = data.cardNumber;
             document.getElementById('cardBalance').textContent = data.balance.toFixed(2);
             document.getElementById('cardCurrency').textContent = data.currency;
             document.getElementById('cardInfo').style.display = 'block';
             requiresPin = data.requiresPin;
-            const startBtn = document.getElementById('startBtn');
             if (!requiresPin) {
-                startBtn.disabled = false;
+                document.getElementById('startBtn').disabled = false;
             } else {
                 const pinInput = document.getElementById('Pin');
                 pinInput.required = true;
                 pinInput.addEventListener('input', function () {
-                    startBtn.disabled = pinInput.value.length < 4;
+                    updateStartButton();
                 });
             }
         }
